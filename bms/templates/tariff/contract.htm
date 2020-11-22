@@ -1,0 +1,1297 @@
+<?php $contract_list   = get_data("select * from contract order by contract_code, contract_name"); ?>
+<?php $contract_details_list   = get_data("select * from contract_details order by contract_code"); ?>
+<?php $customer_list   = get_data("select * from customer order by cus_code, cus_name"); ?>
+<?php $tariff_list 	   = get_data("select * from trf_transport order by trf_trs_code, trf_trs_name"); ?>
+<?php $stock_type_list = get_data("select * from stock_type order by stock_type_id, stock_type_code, stock_type_name"); ?>
+<?php $warehouse_list  = get_data("select * from warehouse order by warehouse_code, warehouse_name"); ?>
+
+<style type="text/css">
+	/* MODAL CSS */
+	/* The Modal (background) */
+	.modal {
+	    display: none; /* Hidden by default */
+	    position: fixed; /* Stay in place */
+	    z-index: 1; /* Sit on top */
+	    padding-top: 50px; /* Location of the box */
+	    left: 0;
+	    top: 0;
+	    width: 100%; /* Full width */
+	    height: 100%; /* Full height */
+	    overflow: auto; /* Enable scroll if needed */
+	    background-color: rgb(0, 0, 0); /* Fallback color */
+	    background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+	}
+
+	/* Modal Content */
+	.modal-content {
+	    background-color: #fefefe;
+	    margin: auto;
+	    border: 1px solid #888;
+	    width: 80%;
+	}
+
+	/* The Close Button */
+	.close {
+	    color: #aaaaaa;
+	    float: right;
+	    font-size: 28px;
+	    font-weight: bold;
+	}
+
+	.close:hover,
+	.close:focus {
+	    color: #000;
+	    text-decoration: none;
+	    cursor: pointer;
+	}
+</style>
+
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/contract.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Hợp đồng</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+
+<div style="margin: 10px;" id="div_contenttable">
+	<input hidden id="table_name" value="contract">
+	<input hidden id="warehouse_id">
+	<div id="form_contract"><div style="min-height: 20px; width: 100%; margin-bottom: 5px;">
+		<div style="width: 125px; min-width: 100px!important; float: left; padding-top: 3px;">Mẫu hợp đồng</div>
+		<div style="float: left;">
+			<select class="catbg" id="sample_contract_id" name="sample_contract_id" data-placeholder="Mẫu hợp đồng" class="select" style="width: 150px;">
+				<option value="" disable selected>Chọn mẫu hợp đồng</option> 		
+				<?php for($i=0; $i < count($contract_list); $i++){ ?>
+                    <option value="<?=$contract_list[$i]['contract_id']?>" code="<?=$contract_list[$i]['contract_code']?>"><?=$contract_list[$i]['contract_code']?></option>
+                <?php } ?>	    
+			</select>
+
+			<button id="refresh_contract" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 10vw; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-left: 10px;"><i class="la la-plus"></i><span style="margin-left: 5px; font-size: 12px;">Thêm hợp đồng mới</span></button>
+		</div>
+	</div>
+	<div style="min-height: 60px; border-bottom: dotted 1px #207b99; border-top: dotted 1px #207b99;">
+		<table border="0" width="100%" cellspacing="0" cellpadding="0" style="margin-top: 10px; margin-bottom: 10px;">
+		    <tr style="height: 25px;">
+				<td style="width: 125px;">Mã hợp đồng (*)</td>
+				<td>
+					<input style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="contract_code" type="text" placeholder="Mã hợp đồng" value=""/>
+				</td> 
+				<td style="width: 125px;">Tên hợp đồng (*)</td>
+				<td>
+					<input style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="contract_name" type="text" placeholder="Tên hợp đồng"/>   
+				</td> 
+				<td>Khách hàng (*)</td>
+				<td>
+					<input style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="cus_id" type="text" placeholder="Tên khách hàng" cus_id="" cus_code="" cus_type_id="" cus_type_code="" cus_type_name="xxx" nation_id="" nation_code="" nation_name="" city_id="" city_code="" city_name="" tax_no="" fax="" bank_acc="" bank_name="" readonly/>	
+					<button id="choose_customer" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 6vw; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-left: 10px;"><i class="la la-plus"></i><span style="margin-left: 5px; font-size: 12px;">Chọn KH</span></button>				
+				</td>	
+			</tr>	
+			<tr style="height: 25px;">
+				<td style="width: 125px;">Ngày ký (*)</td>
+				<td>
+					<input style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="start_time" type="text" placeholder="Ngày ký" value=""/>
+				</td> 
+				<td style="width: 125px;">Ngày hết hạn (*)</td>
+				<td>
+					<input style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="finish_time" type="text" placeholder="Ngày hết hạn" readonly/>   
+				</td> 
+			</tr>				        					
+		</table>
+	</div>
+	<div style="min-height: 30px; border-bottom: dotted 1px #207b99;">
+		<table border="0" width="100%" cellspacing="0" cellpadding="0" style="margin-top: 10px; margin-bottom: 10px;">
+		    <tr style="height: 25px;">
+				<td style="width: 125px;">Loại cước (*)</td>
+				<td>
+					<select class="catbg" id="tariff_type" name="tariff_type" data-placeholder="Loại cước" class="select" style="width: 150px;">
+						<option value="all" selected>Tất cả</option> 		
+						<option value="transport">Vận chuyển</option> 		
+						<option value="expense">Phụ phí</option> 								   
+					</select>
+				</td> 
+				<td style="width: 125px;">Kho gửi/ nhận (*)</td>
+				<td>
+					<select class="catbg" id="warehouse_id_dep" name="warehouse_id_dep" data-placeholder="Kho gửi" class="select" style="width: 150px;">
+					  	<option disabled selected>Chọn kho gửi</option>
+					  	<?php 
+                            for($i=0; $i < count($warehouse_list); $i++){ ?>
+                                <option value="<?=$warehouse_list[$i]['warehouse_id']?>" attrX="<?=$warehouse_list[$i]['warehouse_code']?>" attrY="<?=$warehouse_list[$i]['warehouse_name']?>"><?=$warehouse_list[$i]['warehouse_name']?></option>
+                        <?php } ?>						   
+					</select> /
+					<select class="catbg" id="warehouse_id_des" name="warehouse_id_des" data-placeholder="Kho nhận" class="select" style="width: 150px;">
+					  	<option disabled selected>Chọn kho nhận</option>
+						<?php 
+                            for($i=0; $i < count($warehouse_list); $i++){ ?>
+                                <option value="<?=$warehouse_list[$i]['warehouse_id']?>" attrX="<?=$warehouse_list[$i]['warehouse_code']?>" attrY="<?=$warehouse_list[$i]['warehouse_name']?>"><?=$warehouse_list[$i]['warehouse_name']?></option>
+                        <?php } ?>							   
+					</select>   
+				</td> 
+				<td style="width: 200px;"></td>
+			</tr>	
+		</table>
+	</div>
+	<div style="width: 978px; margin-top: 10px;">
+		<div id="contenttable_tab">
+			<table id="contenttable" class="table table-striped display nowrap" cellspacing="0" style="width: 99.5%">
+				<thead>
+					<tr>
+						<th class="editor-cancel" col-name="STT" width="10%">STT</th>
+						<th class="editor-cancel" col-name="contract_details_id">Mã chi tiết hợp đồng</th>
+						<th class="editor-cancel" col-name="trf_trs_id"></th>
+						<th class="editor-cancel" col-name="trf_trs_code">Mã biểu cước</th>
+						<th class="editor-cancel" col-name="trf_trs_name">Tên biểu cước</th>
+						<th class="editor-cancel" col-name="stock_type_id"></th>
+						<th class="editor-cancel" col-name="stock_type_code"></th>
+						<th class="editor-cancel" col-name="stock_type_name">Loại hàng</th>
+						<th class="editor-cancel" col-name="currency_id"></th>
+						<th class="editor-cancel" col-name="currency_code"></th>
+						<th class="editor-cancel" col-name="currency_name">Loại tiền</th>
+						<th class="editor-cancel" col-name="include_vat">Đã bao gồm VAT</th>
+						<th class="editor-cancel" col-name="vat">VAT</th>
+						<th col-name="air_freight_rates">Cước hàng không</th>
+						<th col-name="air_freight_rates_contract">Cước hàng không (HĐ)</th>
+						<th col-name="sea_freight_rates">Cước đường biển</th>
+						<th col-name="sea_freight_rates_contract">Cước đường biển (HĐ)</th>
+						<th col-name="road_freight_rates">Cước đường bộ</th>
+						<th col-name="road_freight_rates_contract">Cước đường bộ (HĐ)</th>
+						<th col-name="iron_freight_rates">Cước đường sắt</th>
+						<th col-name="iron_freight_rates_contract">Cước đường sắt (HĐ)</th>
+						<th col-name="expense">Phụ phí</th>
+						<th col-name="expense_contract">Phụ phí (HĐ)</th>
+						<th class="editor-cancel" col-name="warehouse_id_dep"></th>
+						<th class="editor-cancel" col-name="warehouse_code_dep"></th>
+						<th class="editor-cancel" col-name="warehouse_name_dep">Kho gửi</th>
+						<th class="editor-cancel" col-name="warehouse_id_des"></th>
+						<th class="editor-cancel" col-name="warehouse_code_des"></th>
+						<th class="editor-cancel" col-name="warehouse_name_des">Kho nhận</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+
+		<div id="TRFTransport_tab" hidden>
+			<table id="tblTRFTransport" class="table table-striped display nowrap" cellspacing="0" style="width: 99.5%">
+			<thead>
+				<tr>
+					<th class="editor-cancel" col-name="STT" width="10%">STT</th>
+					<th col-name="trf_trs_id"></th>
+					<th col-name="trf_trs_code">Mã biểu cước</th>
+					<th col-name="trf_trs_name">Tên biểu cước</th>
+					<th col-name="warehouse_id_dep"></th>
+					<th col-name="warehouse_code_dep"></th>
+					<th col-name="warehouse_name_dep">Kho đi</th>
+					<th col-name="warehouse_id_des"></th>
+					<th col-name="warehouse_code_des"></th>
+					<th col-name="warehouse_name_des">Kho đến</th>
+					<th col-name="currency_id"></th>
+					<th col-name="currency_code"></th>
+					<th col-name="currency_name">Loại tiền</th>
+					<th col-name="vat">VAT</th>
+					<th class="editor-cancel data-type-checkbox" col-name="include_vat">Bao gồm VAT</th>
+					<th col-name="air_freight_rates">Cước hàng không</th>
+					<th col-name="sea_freight_rates">Cước đường biển</th>
+					<th col-name="road_freight_rates">Cước đường bộ</th>
+					<th col-name="iron_freight_rates">Cước đường sắt</th>
+				</tr>
+			</thead>
+			<tbody></tbody>
+			</table>
+		</div>
+
+		<div id="stockType_tab" hidden>
+			<table id="tblStockType" class="table table-striped display nowrap" cellspacing="0" style="width: 99.5%">
+				<thead>
+					<tr>
+						<th class="editor-cancel" col-name="STT" width="10%">STT</th>
+						<th col-name="stock_type_id"></th>
+						<th col-name="stock_type_code">Mã loại hàng</th>
+						<th col-name="stock_type_name">Loại hàng</th>
+						<th col-name="warehouse_id"></th>
+						<th col-name="warehouse_code"></th>
+						<th col-name="warehouse_name">Thuộc kho</th>
+						<th col-name="expense_type">Loại phụ phí</th>
+						<th col-name="currency_id"></th>
+						<th col-name="currency_code"></th>
+						<th col-name="currency_name">Loại tiền</th>
+						<th col-name="expense">Phụ phí</th>
+						<th col-name="unit_id"></th>
+						<th col-name="unit_code"></th>
+						<th col-name="unit_name">Đơn vị tính</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+
+		<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="groups-modalLabel-1" aria-hidden="true" data-whatever="id">
+			<div class="modal-dialog">
+				<div class="modal-content" id="myModalContent" style="border-radius: 4px; width: 1024px;">
+					<div class="modal-header" style="background-color: #207b99; height: 30px;">
+						<label style="height: 30px; color: white; padding-left: 10px; padding-top: 7.5px; font-size: 16px; display: inline-block; font-weight: bold">CHỌN KHÁCH HÀNG</label>
+
+                        <button  data-dismiss="modal" class="btn btn-danger btn-icon-only btn-circle btn-sm close_modal" style="float: right; margin-right: 5px; margin-top: 7.5px; margin-bottom: auto; height: 18px; width: 18px;">
+                        	<i class="la la-close"></i>
+                        </button>
+					</div>
+					<div class="modal-body" align="center" style="margin: 10px;">
+						<table id="tblCustomer" class="table table-striped display nowrap" cellspacing="0" style="width: 99.5%;">
+				            <thead>
+				                <tr>
+				                    <th class="editor-cancel" col-name="STT" width="10%">STT</th>
+				                    <th col-name="cus_id"></th>
+				                    <th col-name="cus_type_name">Loại khách</th>
+				                    <th col-name="cus_type_id">Loại khách</th>
+				                    <th col-name="cus_type_code">Loại khách</th>
+				                    <th col-name="cus_code">Mã khách hàng</th>
+				                    <th col-name="cus_name">Tên khách hàng</th>
+				                    <th col-name="tel">Số điện thoại</th>
+				                    <th col-name="email">Email</th>
+				                    <th class="editor-cancel" col-name="nation_name">Quốc gia</th>
+				                    <th col-name="nation_id"></th>
+				                    <th col-name="nation_code"></th>
+				                    <th class="editor-cancel" col-name="city_name">Tỉnh/ Thành phố</th>
+				                    <th col-name="city_id"></th>
+				                    <th col-name="city_code"></th>
+				                    <th class="editor-cancel" col-name="district_name">Quận/ Huyện</th>
+				                    <th col-name="district_id"></th>
+				                    <th col-name="district_code"></th>
+				                    <th col-name="address"></th>
+				                    <th col-name="shipping_address"></th>
+				                    <th col-name="tax_no">Mã số thuế</th>
+				                    <th col-name="fax">Fax</th>
+				                    <th col-name="bank_acc">Số tài khoản</th>
+				                    <th col-name="bank_name">Ngân hàng</th>
+				                    <th col-name="representative">Người đại diện</th>
+				                    <th col-name="representative_position">Chức vụ đại diện</th>
+				                    <th col-name="representative_tel">SĐT người đại diện</th>
+				                    <th col-name="debt">Dư nợ đầu kỳ</th>
+				                    <th col-name="max_debt">Hạn mức nợ</th>
+				                    <th col-name="remark" style="min-width: 200px;">Ghi chú</th>
+				                </tr>
+				            </thead>
+				            <tbody>
+				                <?php $index = 1; 
+				                    for($i=0; $i < count($customer_list); $i++){?>   
+				                    <tr>
+				                       	<td align="center"><?=$index++;?></td>
+				                        <td align='center'><?=$customer_list[$i]['cus_id'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['cus_type_name'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['cus_type_id'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['cus_type_code'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['cus_code'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['cus_name'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['tel'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['email'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['nation_name'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['nation_id'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['nation_code'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['city_name'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['city_id'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['city_code'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['district_name'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['district_id'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['district_code'];?></td>
+				                        <td align="left"><?=$customer_list[$i]['address'];?></td>
+				                        <td align='left'><?=$customer_list[$i]['shipping_address'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['tax_no'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['fax'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['bank_acc'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['bank_name'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['representative'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['representative_position'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['representative_tel'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['debt'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['max_debt'];?></td>
+				                        <td align='center'><?=$customer_list[$i]['remark'];?></td>
+				                    </tr>
+				                <?php } ?>
+				            </tbody>
+				        </table>
+					</div>
+					<div class="modal-footer" style="border-top: solid 1px #eee; height: 40px;" align="center">
+						<div  style="margin: 0 auto!important;">
+							<button id="confirm_cus" style="font-family: Times New Roman; border-radius: 5px; height: 2rem; width: 5vw; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-left: 10px; margin-top: 5px;"><p style="margin-top: auto; margin-bottom: auto; font-size: 13px;">Xác nhận</p></button>
+							<button class="btn_cancel" style="font-family: Times New Roman; border-radius: 5px; height: 2rem; width: 5vw; background-color: rgb(255, 61, 0); border: rgb(255, 61, 0) solid 1px; color: white; margin-left: 10px; margin-top: 5px;"><p style="margin-top: auto; margin-bottom: auto; font-size: 13px;">Trở về</p></button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div></div>
+</div>
+
+<input id="editor-input" hidden="" type="text">
+
+<?php
+   include("bms/templates/add_row_popup.htm");
+?>	
+
+<script type="text/javascript">
+	/*
+	var dataSrc = <?php
+	$dtx=array();
+	$stt=0;
+		foreach($tariff_list as $item => $value){
+			foreach($stock_type_list as $item1 => $value1){
+				$stt++;
+				$ins=array($stt, '', $value['trf_trs_id'], $value['trf_trs_code'], $value['trf_trs_name'], $value1['stock_type_id'], $value1['stock_type_name'], $value1['stock_type_name'], $value['currency_id'], $value['currency_code'], $value['currency_name'], $value['include_vat'], $value['vat'], $value['air_freight_rates'], $value['sea_freight_rates'], $value['road_freight_rates'], $value['iron_freight_rates'], $value1['expense'], $value['warehouse_id_dep'], $value['warehouse_code_dep'], $value['warehouse_name_dep'], $value['warehouse_id_des'], $value['warehouse_code_des'], $value['warehouse_name_des']);
+				$dtx[]=$ins;
+			}
+		} 
+		echo(json_encode($dtx, false));
+	?>
+	*/
+
+	$(document).ready(function () {	
+		var tbl 				= $('#contenttable'),
+			tblCustomer     	= $('#tblCustomer'),
+            tblTRFTransport     = $('#tblTRFTransport'),
+            tblStockType 		= $('#tblStockType'),
+			_columns 			= ['STT', 'contract_details_id', 'trf_trs_id', 'trf_trs_code', 'trf_trs_name', 'stock_type_id', 'stock_type_code', 'stock_type_name', 'currency_id', 'currency_code', 'currency_name', 'include_vat', 'vat', 'air_freight_rates', 'air_freight_rates_contract', 'sea_freight_rates', 'sea_freight_rates_contract', 'road_freight_rates', 'road_freight_rates_contract', 'iron_freight_rates', 'iron_freight_rates_contract', 'expense', 'expense_contract', 'warehouse_id_dep', 'warehouse_code_dep', 'warehouse_name_dep', 'warehouse_id_des', 'warehouse_code_des', 'warehouse_name_des'],
+            _customerColumns 	= ['STT', 'cus_id', 'cus_type_name', 'cus_type_id', 'cus_type_code', 'cus_code', 'cus_name', 'tel', 'email', 'nation_name', 'nation_id', 'nation_code', 'city_name', 'city_id', 'city_code', 'district_name', 'district_id', 'district_code', 'address', 'shipping_address', 'tax_no', 'fax', 'bank_acc', 'bank_name', 'representative', 'representative_position', 'representative_tel', 'debt', 'max_debt', 'remark'],
+			_TRFTransportColumns= ['STT', 'trf_trs_id', 'trf_trs_code', 'trf_trs_name', 'warehouse_id_dep', 'warehouse_code_dep', 'warehouse_name_dep', 'warehouse_id_des', 'warehouse_code_des', 'warehouse_name_des', 'currency_id', 'currency_code', 'currency_name', 'vat', 'include_vat', 'air_freight_rates', 'sea_freight_rates', 'road_freight_rates', 'iron_freight_rates'],
+			_stockTypeColumns 	= ['STT', 'stock_type_id', 'stock_type_code', 'stock_type_name', 'warehouse_id', 'warehouse_code', 'warehouse_name', 'expense_type', 'currency_id', 'currency_code', 'currency_name', 'expense', 'unit_id', 'unit_code', 'unit_name']
+
+        tbl.newDataTable({
+			scrollY: '40vh',
+			columnDefs: [
+				{ type: "num", className: "text-center", targets: _columns.indexOf('STT') },
+				{ className: "text-center", targets: _columns.getIndexs(['include_vat', 'vat', 'air_freight_rates', 'sea_freight_rates', 'road_freight_rates', 'iron_freight_rates', 'air_freight_rates_contract', 'sea_freight_rates_contract', 'road_freight_rates_contract', 'iron_freight_rates_contract', 'expense', 'expense_contract', 'currency_name'])},
+				{ className: "hiden-input", targets: _columns.getIndexs(['trf_trs_id', 'stock_type_id', 'stock_type_code', 'currency_id', 'currency_code', 'warehouse_id_dep', 'warehouse_code_dep', 'warehouse_id_des', 'warehouse_code_des',  'contract_details_id'])},
+			],
+			order: [[ _columns.indexOf('STT'), 'asc' ]],
+			paging: false,
+			keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            paging: false,
+            info: false,
+            select: true,
+            buttons: [],
+            arrayColumns: _columns,
+            //data: dataSrc,
+		});
+		tbl.editableTableWidget();
+		tbl.initComplete({
+			SAVE: 'SAVE',
+			DELETE: 'DELETE',
+		});
+
+		tblCustomer.newDataTable({
+            scrollY: '40vh',
+            columnDefs: [
+                { type: "num", className: "text-center", targets: _customerColumns.indexOf('STT') },
+                { className: "text-center", targets: _customerColumns.getIndexs(['cus_type_name', 'cus_code', 'cus_name', 'tel', 'nation_name', 'city_name', 'district_name', 'tax_no', 'fax', 'bank_acc', 'bank_name', 'representative', 'representative_position', 'representative_tel', 'debt', 'max_debt', 'remark', 'email'])},
+                { className: "hiden-input", targets: _customerColumns.getIndexs(['cus_id', 'cus_type_id', 'cus_type_code', 'nation_id', 'nation_code', 'city_id', 'city_code', 'district_id', 'district_code', 'address', 'shipping_address'])},
+            ],
+            order: [[ _customerColumns.indexOf('STT'), 'asc' ]],
+            paging: false,
+            keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            info: false,
+            select: {
+            	style: 'single',
+            	info: false,
+            },
+            buttons: [],
+            arrayColumns: _customerColumns,
+        });
+
+		tblTRFTransport.newDataTable({
+			scrollY: '40vh',
+			columnDefs: [
+				{ type: "num", className: "text-center", targets: _TRFTransportColumns.indexOf('STT') },
+				{ className: "text-center", targets: _TRFTransportColumns.getIndexs(['trf_trs_code', 'trf_trs_name', 'warehouse_name_dep', 'warehouse_name_des', 'currency_name', 'vat', 'include_vat', 'air_freight_rates', 'sea_freight_rates', 'road_freight_rates', 'iron_freight_rates'])},
+				{ className: "hiden-input", targets: _TRFTransportColumns.getIndexs(['trf_trs_id', 'warehouse_id_dep', 'warehouse_code_dep', 'warehouse_id_des', 'warehouse_code_des', 'currency_id', 'currency_code', ])},
+			],
+			order: [[ _TRFTransportColumns.indexOf('STT'), 'asc' ]],
+			paging: false,
+			keys: true,
+            autoFill: {
+                focus: 'focus',
+            },
+            select: true,
+            rowReorder: false,
+            arrayColumns: _TRFTransportColumns,
+		});
+
+		tblStockType.newDataTable({
+			scrollY: '40vh',
+			columnDefs: [
+				{ type: "num", className: "text-center", targets: _stockTypeColumns.indexOf('STT') },
+				{ className: "text-center", targets: _stockTypeColumns.getIndexs(['stock_type_code', 'stock_type_name', 'warehouse_name', 'currency_name', 'expense', 'unit_name'])},
+				{ className: "hiden-input", targets: _stockTypeColumns.getIndexs(['stock_type_id', 'warehouse_id', 'warehouse_code', 'currency_id', 'currency_code', 'unit_id', 'unit_code'])},
+			],
+			order: [[ _stockTypeColumns.indexOf('STT'), 'asc' ]],
+			paging: false,
+			keys: true,
+            autoFill: {
+                focus: 'focus',
+            },
+            select: true,
+            rowReorder: false,
+            arrayColumns: _stockTypeColumns,
+		});
+
+        $('#sample_contract_id, #tariff_type, #warehouse_id_dep, #warehouse_id_des').select2();
+        $('#myModalContent, #stock_type_content').draggable();
+
+        $('#start_time, #finish_time').datetimepicker({
+            controlType: 'select',
+            oneLine: true,
+            dateFormat: 'dd/mm/yy',
+            timeFormat: 'HH:mm:00',
+            timeInput: true,
+            onSelect: function () {
+                /* Do nothing */
+            }   
+        });
+
+        var modal 		= document.getElementById("myModal"),
+			tariffModal = document.getElementById("tariff_modal");
+        $('#choose_customer').on('click', function(){
+        	modal.style.display = "block";
+
+        	$('#myModalContent').show();
+        	$('#tariff_modal_content').hide();
+        	$('#stock_type_content').hide();
+
+			$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        });
+
+        $('.close_modal, .btn_cancel').on('click', function(){
+		    modal.style.display = "none";
+		});
+
+		$('#confirm_cus').on('click', function(){
+			var data = tblCustomer.getSelectedRows().data();
+
+			if (data.length = 0){
+				toastr['error']('Vui lòng chọn khách hàng!');
+				return;
+			}
+
+			$('#cus_id').val(data[0][_customerColumns.indexOf('cus_name')]);
+			$('#cus_id').attr('cus_id'       , data[0][_customerColumns.indexOf('cus_id'       )]);
+			$('#cus_id').attr('cus_code'     , data[0][_customerColumns.indexOf('cus_code'     )]);
+			$('#cus_id').attr('cus_type_id'  , data[0][_customerColumns.indexOf('cus_type_id'  )]);
+			$('#cus_id').attr('cus_type_code', data[0][_customerColumns.indexOf('cus_type_code')]);
+			$('#cus_id').attr('cus_type_name', data[0][_customerColumns.indexOf('cus_type_name')]);
+			$('#cus_id').attr('nation_id'    , data[0][_customerColumns.indexOf('nation_id'    )]);
+			$('#cus_id').attr('nation_code'  , data[0][_customerColumns.indexOf('nation_code'  )]);
+			$('#cus_id').attr('nation_name'  , data[0][_customerColumns.indexOf('nation_name'  )]);
+			$('#cus_id').attr('city_id'      , data[0][_customerColumns.indexOf('city_id'      )]);
+			$('#cus_id').attr('city_code'    , data[0][_customerColumns.indexOf('city_code'    )]);
+			$('#cus_id').attr('city_name'    , data[0][_customerColumns.indexOf('city_name'    )]);
+			$('#cus_id').attr('tax_no'       , data[0][_customerColumns.indexOf('tax_no'       )]);
+			$('#cus_id').attr('fax'          , data[0][_customerColumns.indexOf('fax'          )]);
+			$('#cus_id').attr('bank_acc'     , data[0][_customerColumns.indexOf('bank_acc'     )]);
+			$('#cus_id').attr('bank_name'    , data[0][_customerColumns.indexOf('bank_name'    )]);
+
+        	modal.style.display = "none";
+		});
+
+		$('#tariff_type').on('change', function(){
+			if (!($('#warehouse_id_dep').val())){
+				toastr['error']('Vui lòng chọn kho gửi!');
+				$('#tariff_type').val('all');
+				$('#tariff_type').trigger('change');
+				return;
+			}
+
+			if (!($('#warehouse_id_des').val())){
+				toastr['error']('Vui lòng chọn kho nhận!');
+				$('#tariff_type').val('all');
+				$('#tariff_type').trigger('change');
+				return;
+			}
+
+			var tariff_type = $(this).val();
+				
+			$('#contenttable_tab').hide();
+			$('#TRFTransport_tab').hide();
+			$('#stockType_tab').hide();
+
+			if (tariff_type == 'all'){
+				$('#contenttable_tab').show();
+
+				var warehouse_id_dep = $('#warehouse_id_dep').val(),
+					warehouse_id_des = $('#warehouse_id_des').val(),
+					formData = {
+						'warehouse_id_dep': warehouse_id_dep,
+						'warehouse_id_des': warehouse_id_des,
+					};
+
+				$.ajax({
+				    url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('load_contract_data')?>",
+				    dataType: 'json',
+				    data: formData,
+				    type: 'POST',
+				    success: function (data) {
+				        if(data.deny) {
+				            toastr["error"](data.deny);
+				            return;
+				        }
+				        	
+				        tbl.dataTable().fnClearTable();
+						if(data.length > 0){
+							tbl.dataTable().fnAddData(data);
+						}
+						else{
+							toastr['error']('Không tồn tại dữ liệu!');
+						}
+				    },
+				    error: function(err){
+				        alert("Error!");
+				        console.log(err);
+				    }
+				});			
+			}
+			else if (tariff_type == 'transport'){
+				$('#TRFTransport_tab').show();
+
+				if ($('#warehouse_id_dep').val() && $('#warehouse_id_des').val()){
+					if ($('#warehouse_id_dep').val() == $('#warehouse_id_des').val()){
+						toastr['error']('Vui lòng chọn kho gửi khác kho nhận!');
+						$(this).val('');
+						$(this).trigger('change');
+						return;
+					}
+
+					var warehouse_id_dep = $('#warehouse_id_dep').val(),
+						warehouse_id_des = $('#warehouse_id_des').val(),
+						formData = {
+							'warehouse_id_dep': warehouse_id_dep,
+							'warehouse_id_des': warehouse_id_des,
+						};
+
+					$.ajax({
+				        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('load_tariff_data')?>",
+				        dataType: 'json',
+				        data: formData,
+				        type: 'POST',
+				        success: function (data) {
+				            if(data.deny) {
+				                toastr["error"](data.deny);
+				                return;
+				            }
+				            	
+				            tblTRFTransport.dataTable().fnClearTable();
+							if(data.length > 0){
+								tblTRFTransport.dataTable().fnAddData(data);
+							}
+							else{
+								toastr['error']('Không tồn tại dữ liệu!');
+							}
+				        },
+				        error: function(err){
+				            alert("Error!");
+				            console.log(err);
+				        }
+				    });
+				}
+			}
+			else{
+				$('#stockType_tab').show();
+
+				var warehouse_id_dep = $('#warehouse_id_dep').val(),
+					warehouse_id_des = $('#warehouse_id_des').val(),
+						formData = {
+							'warehouse_id_dep': warehouse_id_dep,
+							'warehouse_id_des': warehouse_id_des,
+						};
+
+				$.ajax({
+				    url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('load_stock_type_data')?>",
+				    dataType: 'json',
+				    data: formData,
+				    type: 'POST',
+				    success: function (data) {
+				        if(data.deny) {
+				            toastr["error"](data.deny);
+				            return;
+				        }
+				        	
+				        tblStockType.dataTable().fnClearTable();
+						if(data.length > 0){
+							tblStockType.dataTable().fnAddData(data);
+						}
+						else{
+							toastr['error']('Không tồn tại dữ liệu!');
+						}
+				    },
+				    error: function(err){
+				        alert("Error!");
+				        console.log(err);
+				    }
+				});
+			}
+			$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+		});
+
+		$('#warehouse_id_dep, #warehouse_id_des').on('change', function(){	
+			var tariff_type = $('#tariff_type').val();
+
+			if ($('#sample_contract_id').val() == ''){
+				if (tariff_type == 'all'){
+					if ($('#warehouse_id_dep').val() && $('#warehouse_id_des').val()){
+						if ($('#warehouse_id_dep').val() == $('#warehouse_id_des').val()){
+							toastr['error']('Vui lòng chọn kho gửi khác kho nhận!');
+							$(this).val('');
+							$(this).trigger('change');
+							return;
+						}
+
+						var warehouse_id_dep = $('#warehouse_id_dep').val(),
+							warehouse_id_des = $('#warehouse_id_des').val(),
+							formData = {
+								'warehouse_id_dep': warehouse_id_dep,
+								'warehouse_id_des': warehouse_id_des,
+							};
+
+						$.ajax({
+					        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('load_contract_data')?>",
+					        dataType: 'json',
+					        data: formData,
+					        type: 'POST',
+					        success: function (data) {
+					            if(data.deny) {
+					                toastr["error"](data.deny);
+					                return;
+					            }
+					            	
+					            tbl.dataTable().fnClearTable();
+								if(data.length > 0){
+									tbl.dataTable().fnAddData(data);
+								}
+								else{
+									toastr['error']('Không tồn tại dữ liệu!');
+								}
+					        },
+					        error: function(err){
+					            alert("Error!");
+					            console.log(err);
+					        }
+					    });
+					}
+				}
+				else{
+					if (tariff_type == 'transport'){
+						if ($('#warehouse_id_dep').val() && $('#warehouse_id_des').val()){
+							if ($('#warehouse_id_dep').val() == $('#warehouse_id_des').val()){
+								toastr['error']('Vui lòng chọn kho gửi khác kho nhận!');
+								$(this).val('');
+								$(this).trigger('change');
+								return;
+							}
+
+							var warehouse_id_dep = $('#warehouse_id_dep').val(),
+								warehouse_id_des = $('#warehouse_id_des').val(),
+								formData = {
+									'warehouse_id_dep': warehouse_id_dep,
+									'warehouse_id_des': warehouse_id_des,
+								};
+
+							$.ajax({
+						        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('load_tariff_data')?>",
+						        dataType: 'json',
+						        data: formData,
+						        type: 'POST',
+						        success: function (data) {
+						            if(data.deny) {
+						                toastr["error"](data.deny);
+						                return;
+						            }
+						            	
+						            tblTRFTransport.dataTable().fnClearTable();
+									if(data.length > 0){
+										tblTRFTransport.dataTable().fnAddData(data);
+									}
+									else{
+										toastr['error']('Không tồn tại dữ liệu!');
+									}
+						        },
+						        error: function(err){
+						            alert("Error!");
+						            console.log(err);
+						        }
+						    });
+						}	
+					}				
+					else {
+						if ($('#warehouse_id_dep').val() && $('#warehouse_id_des').val()){
+							if ($('#warehouse_id_dep').val() == $('#warehouse_id_des').val()){
+								toastr['error']('Vui lòng chọn kho gửi khác kho nhận!');
+								$(this).val('');
+								$(this).trigger('change');
+								return;
+							}
+
+							var warehouse_id_dep = $('#warehouse_id_dep').val(),
+								warehouse_id_des = $('#warehouse_id_des').val(),
+								formData = {
+									'warehouse_id_dep': warehouse_id_dep,
+									'warehouse_id_des': warehouse_id_des,
+								};
+
+							$.ajax({
+						        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('load_stock_type_data')?>",
+						        dataType: 'json',
+						        data: formData,
+						        type: 'POST',
+						        success: function (data) {
+						            if(data.deny) {
+						                toastr["error"](data.deny);
+						                return;
+						            }
+						            	
+						            tblStockType.dataTable().fnClearTable();
+									if(data.length > 0){
+										tblStockType.dataTable().fnAddData(data);
+									}
+									else{
+										toastr['error']('Không tồn tại dữ liệu!');
+									}
+						        },
+						        error: function(err){
+						            alert("Error!");
+						            console.log(err);
+						        }
+						    });
+						}						
+					}
+				}
+			}
+			else{
+				if (tariff_type == 'all'){
+					if ($('#warehouse_id_dep').val() && $('#warehouse_id_des').val()){
+						if ($('#warehouse_id_dep').val() == $('#warehouse_id_des').val()){
+							toastr['error']('Vui lòng chọn kho gửi khác kho nhận!');
+							$(this).val('');
+							$(this).trigger('change');
+							return;
+						}
+
+						var warehouse_id_dep = $('#warehouse_id_dep').val(),
+							warehouse_id_des = $('#warehouse_id_des').val(),
+							formData = {
+								'warehouse_id_dep': warehouse_id_dep,
+								'warehouse_id_des': warehouse_id_des,
+								'contract_code'   : $('#sample_contract_id option:selected').attr('code'),
+							};
+
+						$.ajax({
+					        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('load_sample_contract_data')?>",
+					        dataType: 'json',
+					        data: formData,
+					        type: 'POST',
+					        success: function (data) {
+					            if(data.deny) {
+					                toastr["error"](data.deny);
+					                return;
+					            }
+			console.log('ttt');
+					            tbl.dataTable().fnClearTable();
+								if(data.length > 0){
+									tbl.dataTable().fnAddData(data);
+								}
+								else{
+									toastr['error']('Không tồn tại dữ liệu!');
+								}
+					        },
+					        error: function(err){
+					            alert("Error!");
+					            console.log(err);
+					        }
+					    });
+					}
+				}
+				else{
+					if (tariff_type == 'transport'){
+						if ($('#warehouse_id_dep').val() && $('#warehouse_id_des').val()){
+							if ($('#warehouse_id_dep').val() == $('#warehouse_id_des').val()){
+								toastr['error']('Vui lòng chọn kho gửi khác kho nhận!');
+								$(this).val('');
+								$(this).trigger('change');
+								return;
+							}
+
+							var warehouse_id_dep = $('#warehouse_id_dep').val(),
+								warehouse_id_des = $('#warehouse_id_des').val(),
+								formData = {
+									'warehouse_id_dep': warehouse_id_dep,
+									'warehouse_id_des': warehouse_id_des,
+								};
+
+							$.ajax({
+						        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('load_sample_contract_data')?>",
+						        dataType: 'json',
+						        data: formData,
+						        type: 'POST',
+						        success: function (data) {
+						            if(data.deny) {
+						                toastr["error"](data.deny);
+						                return;
+						            }
+						            	
+						            tblTRFTransport.dataTable().fnClearTable();
+									if(data.length > 0){
+										tblTRFTransport.dataTable().fnAddData(data);
+									}
+									else{
+										toastr['error']('Không tồn tại dữ liệu!');
+									}
+						        },
+						        error: function(err){
+						            alert("Error!");
+						            console.log(err);
+						        }
+						    });
+						}	
+					}
+					else{
+						if ($('#warehouse_id_dep').val() && $('#warehouse_id_des').val()){
+							if ($('#warehouse_id_dep').val() == $('#warehouse_id_des').val()){
+								toastr['error']('Vui lòng chọn kho gửi khác kho nhận!');
+								$(this).val('');
+								$(this).trigger('change');
+								return;
+							}
+
+							var warehouse_id_dep = $('#warehouse_id_dep').val(),
+								warehouse_id_des = $('#warehouse_id_des').val(),
+								formData = {
+									'warehouse_id_dep': warehouse_id_dep,
+									'warehouse_id_des': warehouse_id_des,
+								};
+
+							$.ajax({
+						        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('load_stock_type_data')?>",
+						        dataType: 'json',
+						        data: formData,
+						        type: 'POST',
+						        success: function (data) {
+						            if(data.deny) {
+						                toastr["error"](data.deny);
+						                return;
+						            }
+						            	
+						            tblStockType.dataTable().fnClearTable();
+									if(data.length > 0){
+										tblStockType.dataTable().fnAddData(data);
+									}
+									else{
+										toastr['error']('Không tồn tại dữ liệu!');
+									}
+						        },
+						        error: function(err){
+						            alert("Error!");
+						            console.log(err);
+						        }
+						    });
+						}					
+					}
+				}
+			}
+		});	
+
+		$('#refresh_contract').on('click', function(e){
+			$('#sample_contract_id').val('');
+			$('#sample_contract_id').trigger('change');
+			$('#form_contract').find('input, select').each(function(){
+				$(this).val($(this).attr('value') || "");
+			});
+
+			$('#tariff_type').val('all');
+			$('#tariff_type').trigger('change');
+
+			tbl.fnClearTable();
+			e.preventDefault();
+		});
+
+		$('#sample_contract_id').on('change', function(){
+			var contract_id 	= $('#sample_contract_id').val(),
+				contract_code 	= $('#sample_contract_id option:selected').attr('code');
+
+			$('#warehouse_id_dep, #warehouse_id_des').val('');
+			$('#warehouse_id_dep, #warehouse_id_des').trigger('change');
+
+			<?php for($i = 0; $i < count($contract_list); $i++){ ?>
+				if (contract_id == <?="'".$contract_list[$i]['contract_id']."'";?>){
+					$('#contract_code').val(<?="'".$contract_list[$i]['contract_code']."'";?>)
+					$('#contract_name').val(<?="'".$contract_list[$i]['contract_name']."'";?>)
+
+					$('#cus_id').val(<?="'".$contract_list[$i]['cus_name']."'";?>);
+					$('#cus_id').attr('cus_id'       , <?="'".$contract_list[$i]['cus_id']."'";?>);
+					$('#cus_id').attr('cus_type_id'  , <?="'".$contract_list[$i]['cus_type_id']."'";?>);
+					$('#cus_id').attr('cus_type_code', <?="'".$contract_list[$i]['cus_type_code']."'";?>);
+					$('#cus_id').attr('cus_type_name', <?="'".$contract_list[$i]['cus_type_name']."'";?>);
+					$('#cus_id').attr('nation_id'    , <?="'".$contract_list[$i]['nation_id']."'";?>);
+					$('#cus_id').attr('nation_code'  , <?="'".$contract_list[$i]['nation_code']."'";?>);
+					$('#cus_id').attr('nation_name'  , <?="'".$contract_list[$i]['nation_name']."'";?>);
+					$('#cus_id').attr('city_id'      , <?="'".$contract_list[$i]['city_id']."'";?>);
+					$('#cus_id').attr('city_code'    , <?="'".$contract_list[$i]['city_code']."'";?>);
+					$('#cus_id').attr('city_name'    , <?="'".$contract_list[$i]['city_name']."'";?>);
+					$('#cus_id').attr('tax_no'       , <?="'".$contract_list[$i]['tax_no']."'";?>);
+					$('#cus_id').attr('fax'          , <?="'".$contract_list[$i]['fax']."'";?>);
+					$('#cus_id').attr('bank_acc'     , <?="'".$contract_list[$i]['bank_acc']."'";?>);
+					$('#cus_id').attr('bank_name'    , <?="'".$contract_list[$i]['bank_name']."'";?>);
+
+					$('#start_time').val(getDateTime(<?="'".$contract_list[$i]['start_time']."'";?>));
+					$('#finish_time').val(getDateTime(<?="'".$contract_list[$i]['finish_time']."'";?>));
+
+					<?php for($j = 0; $j < count($warehouse_list); $j++){ ?>
+						if (<?="'".$contract_list[$i]['nation_id']."'";?> == <?="'".$warehouse_list[$j]['nation_id']."'";?>
+							&& <?="'".$contract_list[$i]['city_id']."'";?> == <?="'".$warehouse_list[$j]['city_id']."'";?>){
+							$('#warehouse_id').val(<?="'".$warehouse_list[$j]['warehouse_id']."'";?>);
+							$('#warehouse_id').attr('code', <?="'".$warehouse_list[$j]['warehouse_code']."'";?>);
+							$('#warehouse_id').attr('name', <?="'".$warehouse_list[$j]['warehouse_name']."'";?>);
+						}
+					<?php } ?>
+				}
+			<?php } ?>
+
+			var index = 1, rows = [];
+			<?php for($i = 0; $i < count($contract_details_list); $i++){ ?>
+				if (contract_code == <?="'".$contract_details_list[$i]['contract_code']."'";?>){
+					var row = [];
+					row.push(index++);
+					row.push(<?="'".$contract_details_list[$i]['contract_details_id']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['trf_trs_id']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['trf_trs_code']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['trf_trs_name']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['stock_type_id']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['stock_type_code']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['stock_type_name']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['currency_id']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['currency_code']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['currency_name']."'";?>);
+					row.push('<label class="checkbox checkbox-success"><input type="checkbox" <?=$contract_details_list[$i]['include_vat'] == 1 ? 'checked' : '';?>><span class="input-span"></span></label>');
+					row.push(<?="'".$contract_details_list[$i]['vat']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['air_freight_rates']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['air_freight_rates_contract']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['sea_freight_rates']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['sea_freight_rates_contract']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['road_freight_rates']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['road_freight_rates_contract']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['iron_freight_rates']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['iron_freight_rates_contract']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['expense']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['expense_contract']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['warehouse_id_dep']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['warehouse_code_dep']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['warehouse_name_dep']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['warehouse_id_des']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['warehouse_code_des']."'";?>);
+					row.push(<?="'".$contract_details_list[$i]['warehouse_name_des']."'";?>);
+
+					rows.push(row);
+				}
+			<?php } ?>
+		    
+		    tbl.dataTable().fnClearTable();
+		    if(rows.length > 0){
+				tbl.dataTable().fnAddData(rows);
+			}
+		});	
+
+		$(document).on('click', '#btnDelete', function(){
+			if ($('#sample_contract_id').val() == ''){
+				tbl.DataTable().rows('.selected').remove().draw(false);
+		        tbl.updateSTT( _columns.indexOf("STT"));
+				return;
+			}
+
+			if (tbl.getSelectedRows().length == 0){
+				toastr['error']('Vui lòng chọn dữ liệu cần xóa!');
+				return;
+			}
+			else{
+				var data = tbl.getSelectedRows().data();
+				
+				if (data.length > 0){
+					var deleteData = [];
+
+					for (i = 0; i < data.length; i++){
+						deleteData.push(data[i][_columns.indexOf('contract_details_id')]);
+					}
+					
+					var deleteFormData = {
+							'action': 'delete',
+							'data': deleteData,
+						};				
+
+					$.ajax({
+					    url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('delete_contract_details')?>",
+					    dataType: 'json',
+					    data: deleteFormData,
+					    type: 'POST',
+					    success: function (data) {
+					        if(data.deny) {
+					            toastr["error"](data.deny);
+					            return;
+					        }
+
+					        toastr['success']('Xóa thành công chi tiết hợp đồng!');
+							tbl.DataTable().rows('.selected').remove().draw(false);
+					    },
+					    error: function(err){
+					        alert("Error!");
+					        console.log(err);
+					    }
+					});	        	
+				}
+				else{
+					tbl.DataTable().rows('.selected').remove().draw(false);
+				}
+			}
+		});
+
+    	$(document).on('click', '#btnSave', function(){
+			if (!($('#contract_code').val())){
+                toastr['error']('Vui lòng nhập Mã hợp đồng!');
+                return;
+            }
+
+            if (!($('#contract_name').val())){
+                toastr['error']('Vui lòng nhập Mã hợp đồng!');
+                return;
+            }
+
+            if (!($('#cus_id').val())){
+                toastr['error']('Vui lòng chọn Khách hàng');
+                return;
+            }
+
+            if (!($('#start_time').val())){
+                toastr['error']('Vui lòng chọn Ngày ký');
+                return;
+            }
+
+            if (!($('#finish_time').val())){
+                toastr['error']('Vui lòng chọn Ngày hết hạn');
+                return;
+            }
+
+    		if ($('#sample_contract_id').val() == ''){
+    			var newData = tbl.getDataByColumns(_columns);
+
+    			if (newData.length == 0){
+    				toastr['error']('Không tồn tại dữ liệu thêm mới/ chỉnh sửa!');
+    				return;
+    			}
+    			
+    			var d = getDateTimeFormatString(new Date()),
+		        	contract_data 		= [{
+		        		'contract_code': $('#contract_code').val(),
+		        		'contract_name': $('#contract_name').val(),
+		        		'start_time'   : covertToSQLDefaultFinishTime($('#start_time').val()),
+		        		'finish_time'  : covertToSQLDefaultFinishTime($('#finish_time').val()),
+		        		'cus_id' 	   : $('#cus_id').attr('id'),
+		        		'cus_name' 	   : $('#cus_id').val(),
+		        		'cus_type_id'  : $('#cus_id').attr('cus_type_id'),
+		        		'cus_type_code': $('#cus_id').attr('cus_type_code'),
+		        		'cus_type_name': $('#cus_id').attr('cus_type_name'),
+		        		'nation_id'	   : $('#cus_id').attr('nation_id'),
+		        		'nation_code'  : $('#cus_id').attr('nation_code'),
+		        		'nation_name'  : $('#cus_id').attr('nation_name'),
+		        		'city_id'	   : $('#cus_id').attr('city_id'),
+		        		'city_code'    : $('#cus_id').attr('city_code'),
+		        		'city_name'    : $('#cus_id').attr('city_name'),
+		        		'tax_no'       : $('#cus_id').attr('tax_no'),
+		        		'fax'    	   : $('#cus_id').attr('fax'),
+		        		'bank_acc'     : $('#cus_id').attr('bank_acc'),
+		        		'bank_name'    : $('#cus_id').attr('bank_name'),
+		        		'created_by'    : <?="'".$_SESSION['user_name']."'";?>,
+		        		'create_time'  : d,
+		        		'updated_by'    : <?="'".$_SESSION['user_name']."'";?>,
+		        		'update_time'  : d,
+		        	}],
+		        	contractFormData 	= {
+		        		'action': 'add',
+		        		'data'	: contract_data
+		        	},
+		        	contractDetailsData = [];      
+
+		        for(i = 0; i < newData.length; i++){
+		        	if (newData[i]['trf_trs_id'] && newData[i]['stock_type_id']){
+			    		contractDetailsData.push({
+			    			'contract_code'	: $('#contract_code').val(),
+			    			'trf_trs_id'   	: newData[i]['trf_trs_id'],
+			    			'trf_trs_code'  : newData[i]['trf_trs_code'],
+			    			'trf_trs_name'  : newData[i]['trf_trs_name'],
+			    			'stock_type_id' : newData[i]['stock_type_id'],
+			    			'stock_type_code'  : newData[i]['stock_type_code'],
+			    			'stock_type_name'  : newData[i]['stock_type_name'],
+			    			'currency_id'  	: newData[i]['currency_id'],
+			    			'currency_code' : newData[i]['currency_code'],
+			    			'currency_name' : newData[i]['currency_name'],
+			    			'include_vat'  	: newData[i]['include_vat'],
+			    			'vat'  			: newData[i]['vat'],
+			    			'air_freight_rates'  : newData[i]['air_freight_rates'],
+			    			'air_freight_rates_contract'  : newData[i]['air_freight_rates_contract'],
+			    			'sea_freight_rates'  : newData[i]['sea_freight_rates'],
+			    			'sea_freight_rates_contract'  : newData[i]['sea_freight_rates_contract'],
+			    			'road_freight_rates' : newData[i]['road_freight_rates'],
+			    			'road_freight_rates_contract' : newData[i]['road_freight_rates_contract'],
+			    			'iron_freight_rates' : newData[i]['iron_freight_rates'],
+			    			'iron_freight_rates_contract' : newData[i]['iron_freight_rates_contract'],
+			    			'warehouse_id_dep'   : newData[i]['warehouse_id_dep'],
+			    			'warehouse_code_dep' : newData[i]['warehouse_code_dep'],
+			    			'warehouse_name_dep' : newData[i]['warehouse_name_dep'],
+			    			'warehouse_id_des' 	 : newData[i]['warehouse_id_des'],
+			    			'warehouse_code_des' : newData[i]['warehouse_code_des'],
+			    			'warehouse_name_des' : newData[i]['warehouse_name_des'],
+			    			'expense'  		: newData[i]['expense'], 
+			    			'expense_contract'   : newData[i]['expense_contract'], 
+			    			'created_by'    : <?="'".$_SESSION['user_name']."'";?>,
+			        		'create_time'  : d,
+			        		'updated_by'    : <?="'".$_SESSION['user_name']."'";?>,
+			        		'update_time'  : d,
+			    		});
+			    	}
+			    }
+
+			    var contractDetailsFormData = {
+		        	'action': 'add',
+		        	'data'	: contractDetailsData,
+		       	}
+
+		        $.ajax({
+				    url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('add_contract')?>",
+				    dataType: 'json',
+				    data: contractFormData,
+				    type: 'POST',
+				    success: function (data) {
+				        if(data.deny) {
+				            toastr["error"](data.deny);
+				            return;
+				        }
+				        	
+				        if (contractFormData.action == 'add'){
+				        	toastr['success']('Thêm thành công Hợp đồng!');
+				        	$.ajax({
+							    url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('add_contract_details')?>",
+							    dataType: 'json',
+							    data: contractDetailsFormData,
+							    type: 'POST',
+							    success: function (data) {
+							        if(data.deny) {
+							            toastr["error"](data.deny);
+							            return;
+							        }
+
+							        if (contractDetailsFormData.action == 'add'){
+							        	location.reload();
+							        }
+							  
+							        return;
+							    },
+							    error: function(err){
+							        alert("Error!");
+							        console.log(err);
+							    }
+							});
+				        }
+
+				        return;
+				    },
+				    error: function(err){
+				        alert("Error!");
+				        console.log(err);
+				    }
+				});
+
+		        
+    		}
+    		else{
+    			var editData = tbl.getEditData();    	
+
+    			if (editData.length == 0){
+    				toastr['error']('Không tồn tại dữ liệu thêm mới/ chỉnh sửa!');
+    				return;
+    			}
+
+    			var contractDetailsData = [],
+	            	d = getDateTimeFormatString(new Date());
+		        for(i = 0; i < editData.length; i++){
+		        	if (editData[i]['trf_trs_id'] && editData[i]['stock_type_id']){
+			    		contractDetailsData.push({
+			    			'contract_details_id': editData[i]['contract_details_id'],
+			    			'contract_code'	: $('#contract_code').val(),
+			    			'trf_trs_id'   	: editData[i]['trf_trs_id'],
+			    			'trf_trs_code'  : editData[i]['trf_trs_code'],
+			    			'trf_trs_name'  : editData[i]['trf_trs_name'],
+			    			'stock_type_id' : editData[i]['stock_type_id'],
+			    			'stock_type_code'  : editData[i]['stock_type_code'],
+			    			'stock_type_name'  : editData[i]['stock_type_name'],
+			    			'currency_id'  	: editData[i]['currency_id'],
+			    			'currency_code' : editData[i]['currency_code'],
+			    			'currency_name' : editData[i]['currency_name'],
+			    			'include_vat'  	: editData[i]['include_vat'],
+			    			'vat'  			: editData[i]['vat'],
+			    			'air_freight_rates'  : editData[i]['air_freight_rates'],
+			    			'air_freight_rates_contract'  : editData[i]['air_freight_rates_contract'],
+			    			'sea_freight_rates'  : editData[i]['sea_freight_rates'],
+			    			'sea_freight_rates_contract'  : editData[i]['sea_freight_rates_contract'],
+			    			'road_freight_rates' : editData[i]['road_freight_rates'],
+			    			'road_freight_rates_contract' : editData[i]['road_freight_rates_contract'],
+			    			'iron_freight_rates' : editData[i]['iron_freight_rates'],
+			    			'iron_freight_rates_contract' : editData[i]['iron_freight_rates_contract'],
+			    			'warehouse_id_dep'   : editData[i]['warehouse_id_dep'],
+			    			'warehouse_code_dep' : editData[i]['warehouse_code_dep'],
+			    			'warehouse_name_dep' : editData[i]['warehouse_name_dep'],
+			    			'warehouse_id_des' 	 : editData[i]['warehouse_id_des'],
+			    			'warehouse_code_des' : editData[i]['warehouse_code_des'],
+			    			'warehouse_name_des' : editData[i]['warehouse_name_des'],
+			    			'expense'  			 : editData[i]['expense'], 
+			    			'expense_contract'   : editData[i]['expense_contract'], 
+			    			'created_by'    : <?="'".$_SESSION['user_name']."'";?>,
+			        		'create_time'  : d,
+			        		'updated_by'    : <?="'".$_SESSION['user_name']."'";?>,
+			        		'update_time'  : d,
+			    		});
+			    	}		        	
+		        }
+                
+		        var contractDetailsFormData = {
+		       		'action': 'edit',
+		        	'data'	: contractDetailsData,
+		        }	
+
+		        $.ajax({
+				    url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('update_contract_details')?>",
+				    dataType: 'json',
+				    data: contractDetailsFormData,
+				    type: 'POST',
+				    success: function (data) {
+				        if(data.deny) {
+				            toastr["error"](data.deny);
+				            return;
+				        }
+                
+				        if (contractDetailsFormData.action == 'edit'){
+				        	toastr['success']('Chỉnh sửa thành công dữ liệu chi tiết hợp đồng!');
+				        }
+				    },
+				    error: function(err){
+				        alert("Error!");
+				        console.log(err);
+				    }
+				});	
+    		}
+    	});
+    });
+</script>
+

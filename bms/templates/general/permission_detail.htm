@@ -1,0 +1,48 @@
+<table  border="0" width="100%" cellspacing="0" cellpadding="0">					
+    <tr>
+        <td class="catbd" align="center" style="padding-bottom:10px;">
+            <table border="0" width="98%" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td colspan="3"><input onclick="checkall_permission();" <?= (isset($return_val['checkall']) ? ($return_val['checkall'] == 1 ? ' checked ' : '') : '') ?> type="checkbox" value="1" name="checkall" id="checkall_id">&nbsp;<a class="cart_payment" href="javascript:void(0);" onclick="document.getElementById('checkall_id').checked=!document.getElementById('checkall_id').checked; checkall_permission();">Tất cả các quyền</a></td>
+                </tr>
+
+                <?php
+                $return_val['fmenu_id'] = array();
+                $fmenu = get_data("select fmenu_id from user_group_permission where user_id='" . $return_val['user_id'] . "'");
+                if(count($fmenu)==0) {
+                  $fmenu=get_data("select fmenu_id from user_group_permission where group_id='" . $return_val['group_id'] . "'");  
+                }
+                for ($i = 0; $i < count($fmenu); $i++) {
+                    $return_val['fmenu_id'][$i] = $fmenu[$i]['fmenu_id'];
+                    $return_val['fmenu_id_group'][$i] = $fmenu[$i]['fmenu_id'];
+                }
+                $fmenu = get_data("select * from function_menu where fmenu_parid is null order by order_by");
+                $l = 0;
+                for ($k = 0; $k < count($fmenu); $k++) {
+                    echo '<tr><td colspan="6" height="25"><b>' . $fmenu[$k]['fmenu_name'] . '</b></td></tr>';
+                    $fmenu_sub = get_data("select * from function_menu where fmenu_parid='" . $fmenu[$k]['fmenu_id'] . "' and fmenu_act!='logout' order by order_by");
+                    $i = 0;
+                    for ($t = 0; $t < ceil(count($fmenu_sub) / 4); $t++) {
+                        echo '<tr>';
+                        for ($j = 0; $j < 4; $j++) {
+                            echo '<td valign="top">';
+                            if (isset($fmenu_sub[$i])) {
+                                //(!empty($return_val['user_id']) && @in_array($fmenu_sub[$i]['fmenu_id'], $return_val['fmenu_id_group']) ? 'disabled' : '')
+                                echo '<input ' . (@in_array($fmenu_sub[$i]['fmenu_id'], $return_val['fmenu_id']) ? ' checked ' : '') . ' name="fmenu_id[]" type="checkbox" id="fmenu_' . $l . '" value="' . $fmenu_sub[$i]['fmenu_id'] . '"><a class="cart_payment" href="javascript:void(0);" onclick="document.getElementById(\'fmenu_' . $l . '\').checked=!document.getElementById(\'fmenu_' . $l . '\').checked;">' . $fmenu_sub[$i]['fmenu_name'] . '</a><br>';
+                                $l++;
+                            }
+                            $i++;
+                            echo '</td>';
+                        }
+                        echo '</tr>';
+                    }
+                }
+                ?>										
+            </table>
+        </td></tr>
+</table>	
+<table  border="0" width="100%" cellspacing="0" cellpadding="0">					
+    <tr>
+        <td colspan="2" height="40"><input style="font-weight:bold;cursor:pointer;" class="button" type="submit" name="permission_sm" value="Lưu phân quyền" /></td>
+    </tr>																				
+</table>	

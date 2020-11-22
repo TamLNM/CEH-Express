@@ -1,0 +1,50 @@
+<form onkeypress="return tabOnEnter(document.activeElement, event);" onsubmit="return false;" name="frmadmin" method="post" action="?eda_act=<?=md5('general')?>&eda_code=<?= md5('add_city_sm')?>" style="margin:0px">
+	<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+	    <tr>
+	        <td width="30" align="center">
+	            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/city.png" width="18" height="18" />
+	        </td>
+	        <td height="25"><b>Thêm Tỉnh/ Thành phố mới</b></td>
+	        <td align="right" style="padding-right:5px;"><img onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('customer_type_manager')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+	    </tr>
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+            			<tr>
+			              	<td height="25" width="15%" align="left"><b>(*) Quốc gia</b></td>
+			              	<td width="35%">
+				              	<select style="width: 70%" class="catbg" name="nation_id" id="nation_id"  data-placeholder="Chọn quốc gia">	
+								    <?php $country_list = get_data('select * from nation order by nation_name'); 
+								        for ($i = 0; $i < count($country_list); $i++){
+								            echo ('<option value="'.$country_list[$i]['nation_id'].'">'.$country_list[$i]['nation_name'].'</option>');
+								        }
+								    ?>
+								</select>
+							</td>
+			              	<td height="25" width="15%" align="left" style="padding-left:20px;"><b>Tỉnh/ thành phố (*)</b></td>
+			              	<td width="35%">
+              					<input style="width: 70%;" class="catbg" name="city_name" id="city_name" type="text" value="<?=isset($return_val['city_name'])?$return_val['city_name']:''?>" />
+              				</td>
+				        </tr>
+				    </table>
+				</td>
+			</tr>
+		</table>
+		<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+	        <tr>
+	          	<td  height="30" style="padding-left:5px;">
+	          		<input style="font-weight:bold;cursor:pointer;" onclick="document.forms[0].submit();" class="button" type="button" name="button" value="Lưu thông tin" />&nbsp;
+	          	</td>
+	        	<td align="right" style="padding-right:5px;"><img  onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('cus_manager')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+	        </tr>
+	    </table> 
+	</table>
+</form>
+<?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+
+<script type="text/javascript">
+	$(document).ready(function () {	
+
+	});
+</script>

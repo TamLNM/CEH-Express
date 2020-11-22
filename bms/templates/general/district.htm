@@ -1,0 +1,189 @@
+<?php $data 	   = get_data("select * from district order by district_code, district_name"); ?>
+<?php $nation_list = get_data("select * from nation"); ?>
+<?php $city_list   = get_data("select * from city"); ?>
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/district.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Quản lý Quận/ Huyện</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+
+<div style="margin: 10px;" id="div_contenttable">
+	<input hidden id="table_name" value="district">
+	<table id="contenttable" class="table table-striped display nowrap" cellspacing="0" style="width: 99.5%">
+		<thead>
+			<tr>
+				<th class="editor-cancel" col-name="STT" width="10%">STT</th>
+				<th col-name="district_id"></th>
+				<th class="editor-cancel" col-name="nation_name">Quốc gia</th>
+				<th class="editor-cancel" col-name="city_name">Tỉnh/ Thành phố</th>
+				<th col-name="district_code">Mã Quận/ Huyện</th>
+				<th col-name="district_name">Tên Quận/ Huyện</th>
+				<th col-name="nation_id"></th>
+				<th col-name="nation_code"></th>
+				<th col-name="city_id"></th>
+				<th col-name="city_code"></th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php $index = 1; 
+				for($i=0; $i < count($data); $i++){?>	
+				<tr>
+					<td class="editor-cancel" contenteditable="true" align="center"><?=$index++;?></td>
+					<td contenteditable="true" align="center"><?=$data[$i]['district_id'];?></td>
+					<td class="editor-cancel" contenteditable="true" align="center"><?=$data[$i]['nation_name'];?></td>
+					<td class="editor-cancel" contenteditable="true" align="center"><?=$data[$i]['city_name'];?></td>
+					<td contenteditable="true" align="center"><?=$data[$i]['district_code'];?></td>
+					<td contenteditable="true" align="center"><?=$data[$i]['district_name'];?></td>
+					<td contenteditable="true" align="center"><?=$data[$i]['nation_id'];?></td>
+					<td contenteditable="true" align="center"><?=$data[$i]['nation_code'];?></td>
+					<td contenteditable="true" align="center"><?=$data[$i]['city_id'];?></td>
+					<td contenteditable="true" align="center"><?=$data[$i]['city_code'];?></td>
+				</tr>
+			<?php } ?>
+		</tbody>
+	</table>
+</div>
+
+<div id="cell-context" class="btn-group" style="padding-top: 12px;">
+	<ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<div id="cell-context-2" class="btn-group" style="padding-top: 12px;">
+	<ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<?php
+	include("bms/templates/add_row_popup.htm");
+?>
+
+<input id="editor-input" hidden="">
+
+<script type="text/javascript">
+	$(document).ready(function () {
+		var tbl 			= $('#contenttable'),
+			_columns 		= ['STT', 'district_id', 'nation_name', 'city_name', 'district_code', 'district_name', 'nation_id', 'nation_code', 'city_id', 'city_code'];
+
+		var dataTbl = tbl.newDataTable({
+			scrollY: '55vh',
+			columnDefs: [
+				{ type: "num", className: "text-center", targets: _columns.indexOf('STT') },
+				{ className: "text-center", targets: _columns.getIndexs(['city_name', 'nation_name', 'district_code', 'district_name'])},
+				{ className: "hiden-input", targets: _columns.getIndexs(['district_id', 'nation_id', 'nation_code', 'city_id', 'city_code'])},
+			],
+			order: [[ _columns.indexOf('STT'), 'asc' ]],
+			paging: false,
+			keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            arrayColumns: _columns,
+		});
+		tbl.editableTableWidget();
+		tbl.initComplete({
+			ADD: 'ADD',
+			SAVE: 'SAVE',
+			DELETE: 'DELETE'
+		});
+
+		var nationList = [];
+		<?php for($i = 0; $i < count($nation_list); $i++){ ?>
+			nationList.push({
+							 'nation_code': <?="'".$nation_list[$i]['nation_code']."'";?>,
+							 'nation_name': <?="'".$nation_list[$i]['nation_name']."'";?>,
+							 'nation_id'  : <?="'".$nation_list[$i]['nation_id']."'";?>,
+						});
+		<?php } ?>
+
+		tbl.setExtendDropdown({
+			target: "#cell-context",
+			source: nationList,
+			colIndex: _columns.indexOf("nation_name"), 
+			onSelected: function(cell, value){ 
+				var nation_name = '', nation_id = '';
+				for (i = 0; i < nationList.length; i++){
+					if (nationList[i].nation_code == value){
+						nation_name = nationList[i].nation_name;
+						nation_id   = nationList[i].nation_id;
+						i = nationList.length;
+					}
+				}
+
+				var tempCell = cell;
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("nation_name");
+				tbl.DataTable().cell(tempCell).data(nation_name).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("nation_id");
+				tbl.DataTable().cell(tempCell).data(nation_id).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("nation_code");
+				tbl.DataTable().cell(cell).data(value).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_name");
+				tbl.DataTable().cell(cell).data('').draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_code");
+				tbl.DataTable().cell(cell).data('').draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_id");
+				tbl.DataTable().cell(cell).data('').draw(false);
+
+				var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+				if(!crRow.hasClass("addnew")){
+		        	tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+	        	}	
+
+
+	        	var cityList = [];
+	        	<?php for($i = 0; $i < count($city_list); $i++){ ?>
+	        		if (nation_id == <?=$city_list[$i]['nation_id'];?>){
+						cityList.push({
+							'city_code': <?="'".$city_list[$i]['city_code']."'";?>,
+							'city_name': <?="'".$city_list[$i]['city_name']."'";?>,
+							'city_id'  : <?="'".$city_list[$i]['city_id']."'";?>,
+						});
+					}
+				<?php } ?>	
+
+				tbl.setExtendDropdown({
+					target: "#cell-context-2",
+					source: cityList,
+					colIndex: _columns.indexOf("city_name"), 
+					onSelected: function(cell, value){ 
+						var city_name= '', city_id = '';
+						for (i = 0; i < cityList.length; i++){
+							if (cityList[i].city_code == value){
+								city_name = cityList[i].city_name;
+								city_id   = cityList[i].city_id;
+								i 		  = cityList.length;
+							}
+						}
+
+						var tempCell = cell;
+						tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_name");
+						tbl.DataTable().cell(cell).data(city_name).draw(false);
+
+						tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_code");
+						tbl.DataTable().cell(cell).data(value).draw(false);
+
+						tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_id");
+						tbl.DataTable().cell(cell).data(city_id).draw(false);
+
+
+						var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+						if(!crRow.hasClass("addnew")){
+				        	tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+			        	}	
+					}
+				});	
+			}
+		});	
+	});
+</script>

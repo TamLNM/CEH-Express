@@ -1,0 +1,624 @@
+<?php $stock_type_list 		= get_data("select * from stock_type order by stock_type_code, stock_type_name"); ?>
+<?php $warehouse_list 		= get_data("select * from warehouse order by warehouse_code, warehouse_name"); ?>
+<?php $tariff_list          = get_data("select * from ord_tariff order by warehouse_id_des, ord_trf_code"); ?>
+<?php $tariff_details_list  = get_data("select * from ord_tariff_details order by ord_trf_code"); ?>
+<?php $user_info     		= get_data("select * from users where user_id = '".$sessions->get_session('user_id')."'"); ?>
+<?php $trs_internal_warehouse_code_list = get_data("select distinct(trs_internal_warehouse_code) from ord_tariff order by trs_internal_warehouse_code"); ?>
+
+<style>
+	.checkbox .input-span, .radio .input-span, table.dataTable td .checkbox span {
+		height: 12px!important;
+		width: 12px!important;
+	}
+	.checkbox .input-span::after, .radio .input-span::after, table.dataTable td .checkbox span:after {
+	    left: 3px!important;
+	    top: -1px!important;
+	}
+	#contenttable_wrapper .datatable-header #contenttable_filter label{
+		font-size: 12px;
+		padding-left: 5px;
+	}
+	#contenttable_wrapper .datatable-header #contenttable_filter .input-xs{
+		width: 150px!important;
+		height: 25px;
+	}
+</style>
+
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/check_import_stock.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Kiểm tra nhập hàng</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+
+<div style="margin: 10px;" id="div_contenttable">
+	<input hidden id="table_name" value="check_import_stock">
+	<div style="width: 978px;">
+		<table border="0" width="100%" cellspacing="0" cellpadding="0">
+			 <tr style="height: 25px;">
+			 	<td style="width: 125px">Thời gian (*)</td>
+				<td style="width: 300px;">
+					<input style="width:125px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="start_time" type="text" placeholder="Thời gian bắt đầu"/>                      
+					<input style="width:125px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="finish_time" type="text" placeholder="Thời gian kết thúc"/>
+				</td>
+
+			 	<td style="width: 85px">Kho nhận (*)</td>
+				<td>
+					<select id="warehouse_id_des" style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px; height: 18px!important;">
+					  	<option disabled selected>Chọn kho hàng</option>
+					  	<?php 
+                            for($i=0; $i < count($warehouse_list); $i++){ ?>
+                                <option value="<?=$warehouse_list[$i]['warehouse_id']?>" attrX="<?=$warehouse_list[$i]['warehouse_code']?>" attrY="<?=$warehouse_list[$i]['warehouse_name']?>"><?=$warehouse_list[$i]['warehouse_name']?></option>
+                        <?php } ?>
+					</select>
+				</td>
+
+				<td></td>				
+		    </tr>
+		    <tr style="height: 25px;">
+		    	<td style="width: 125px">Số chứng từ (*)</td>
+				<td style="width: 300px;">
+					<select id="trs_internal_warehouse_code" style="width: 250px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px; height: 18px!important;">
+					  	<option disabled selected>Chọn số chứng từ</option>
+						<!--
+					  	<?php 
+                            for($i=0; $i < count($trs_internal_warehouse_code_list); $i++)
+                            	if ($trs_internal_warehouse_code_list[$i]['trs_internal_warehouse_code'] != ''){ ?>
+                                <option value="<?=$trs_internal_warehouse_code_list[$i]['trs_internal_warehouse_code']?>"><?=$trs_internal_warehouse_code_list[$i]['trs_internal_warehouse_code']?></option>
+                        <?php } ?>
+                    -->
+					</select>
+				</td>	
+
+		    	<td style="width: 125px">Kho gửi (*)</td>
+				<td>
+					<input style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px; height: 18px!important;" name="" id="warehouse_id_dep" type="text" readonly placeholder="Kho gửi hàng"/>                     
+				</td>		    		
+			</tr>
+		</table>
+	</div>
+	<div style="width: 978px; margin-top: 10px;">
+		<table id="contenttable" style="width: 100%;margin-bottom: 10px;" class="table table-striped display nowrap" cellspacing="0">
+		   	<thead>
+			    <tr> 
+			        <th col-name="tick">
+			        	<label class="checkbox checkbox-success"><input type="checkbox" id="checkAll"><span class="input-span"></span></label>
+			        </th>
+			        <th col-name="order_id">Mã order</th>
+			        <th col-name="total_price">Tổng tiền</th>
+			        <th col-name="sender_name">Người gửi</th>
+			        <th col-name="sender_address">Địa chỉ người gửi</th>
+			        <th col-name="receiver_name">Người nhận</th>
+			        <th col-name="receiver_address">Địa chỉ nhận</th>
+			        <th col-name="receiver_tel">SĐT nhận hàng</th>
+			        <th col-name="total_stock_weight">Tổng trọng lượng</th>
+			        <th col-name="status">Trạng thái</th>
+			        <th col-name="remark">Ghi chú</th>
+			    </tr>
+			</thead>
+		    <tbody id="tbody_contenttable"></tbody>
+		</table>
+		<div id="tblORDDetailsTab" width="100%" border="0" cellpadding="0" cellspacing="0"  style="margin-top: 15px;">
+			<div  style="font-weight: bold;">CHI TIẾT ORDER <span id="order_id"></span></div>
+		    <table id="tbl_trf_ord_details" style="width: 100%;" class="table table-striped display nowrap" cellspacing="0">
+		        <thead>
+		            <tr>
+		                <th class="editor-cancel" col-name="STT" width="10%">STT</th>
+						<th col-name="ord_trf_details_id"></th>
+		                <th col-name="ord_trf_code"></th>
+		                <th col-name="stock_type_id"></th>
+		                <th col-name="stock_type_code"></th>
+		                <th col-name="stock_type_name">Loại hàng</th>
+		                <th col-name="stock_type_details">Diễn giải</th>
+		                <th col-name="numeric">Số lượng gửi</th>
+		                <th contenteditable="true" col-name="receive_numeric">Số lượng nhận</th>
+						<th col-name="stock_weight">Trọng lượng gửi</th>
+						<th contenteditable="true" col-name="receive_stock_weight">Trọng lượng nhận</th>
+						<th contenteditable="true" col-name="remark">Ghi chú</th>
+			        	<th class="editor-cancel" col-name="confirm">Xác nhận</th>
+		            </tr>
+		        </thead>
+		        <tbody id="tbody_tblOrderList"></tbody>
+		    </table>
+		</div>
+	</div>
+</div>
+
+<input id="editor-input" hidden="" type="text">
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		var tbl 				= $('#contenttable'),
+			tblORDDetails 		= $('#tbl_trf_ord_details'),
+            _columns 			= ['tick', 'order_id', 'total_price', 'sender_name', 'sender_address', 'receiver_name', 'receiver_address', 'receiver_tel', 'total_stock_weight', 'status', 'remark'],
+            _ORDDetailsCoumns	= ['STT', 'ord_trf_details_id', 'ord_trf_code', 'stock_type_id', 'stock_type_code', 'stock_type_name', 'stock_type_details', 'numeric', 'receive_numeric', 'stock_weight', 'receive_stock_weight', 'remark', 'confirm'],
+            checkboxList 		= [],
+            checkListComplete   = [],
+            checkIdxComplete    = 0,
+            ordIDList 			= [];
+
+        tbl.newDataTable({
+            scrollY: '30vh',
+            columnDefs: [
+                { className: "text-center", targets: _columns.getIndexs(['tick', 'order_id', 'total_price', 'sender_name', 'receiver_name', 'total_stock_weight', 'status', 'remark', 'sender_address', 'receiver_tel', 'receiver_address'])},
+            ],
+            paging: false,
+            keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            paging: false,
+            info: false,
+            buttons: [],
+            arrayColumns: _columns,
+        });
+        tbl.initComplete({
+			XNNK: 'XNNK',
+		});
+
+        tblORDDetails.newDataTable({
+            scrollY: '30vh',
+            columnDefs: [
+				{ type: "num", className: "text-center", targets: _ORDDetailsCoumns.indexOf('STT') },
+                { className: "text-center", targets: _ORDDetailsCoumns.getIndexs(['numeric', 'receive_numeric', 'stock_weight', 'receive_stock_weight', 'stock_type_details', 'confirm'])},
+                { className: "hiden-input", targets: _ORDDetailsCoumns.getIndexs(['ord_trf_details_id', 'ord_trf_code', 'stock_type_id', 'stock_type_code',])},
+            ],
+            paging: false,
+            keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            paging: false,
+            info: false,
+            buttons: [],
+            searching: false,
+            arrayColumns: _ORDDetailsCoumns,
+        });
+		tblORDDetails.editableTableWidget();
+
+		$('#start_time, #finish_time').datetimepicker({
+            controlType: 'select',
+            oneLine: true,
+            dateFormat: 'dd/mm/yy',
+            timeFormat: 'HH:mm:00',
+            timeInput: true,
+            onSelect: function () {
+                /* Do nothing */
+            }   
+        });
+
+		var d = new Date();
+        $('#start_time').val(getDefaultStartTime(d));
+        $('#finish_time').val(getDefaultFinishTime(d));
+        $("#trs_internal_warehouse_code, #warehouse_id_des").select2();
+
+        $('#warehouse_id_des').on('change', function(){
+        	var warehouse_id_des = $(this).val(),
+        		list 			 = [];
+
+        	$('#trs_internal_warehouse_code').empty().append('<option disabled selected>Chọn số chứng từ</option>');
+
+        	<?php for ($i = 0; $i < count($tariff_list); $i++) { ?>
+//console.log(<?="'".$tariff_list[$i]['ord_trf_code']."'";?>,<?="'".$tariff_list[$i]['reality_warehouse_id_des']."'";?>, <?="'".$tariff_list[$i]['status']."'";?>);
+		       	if (warehouse_id_des == <?="'".$tariff_list[$i]['reality_warehouse_id_des']."'";?> && <?="'".$tariff_list[$i]['status']."'";?> == 'CK'){       		
+
+		       		var flag = true;
+
+		       		for (k = 0; k < list.length; k++){
+		       			if (list[k] == <?="'".$tariff_list[$i]['trs_internal_warehouse_code']."'";?>){
+		       				flag = false;
+		       				k = list.length;
+		       			}
+		       		}
+
+		       		if (list.length == 0 || flag){
+		       			list.push(<?="'".$tariff_list[$i]['trs_internal_warehouse_code']."'";?>);
+
+			       		var obj = document.getElementById('trs_internal_warehouse_code'),
+			       			opt = document.createElement('option');
+
+						opt.value = <?="'".$tariff_list[$i]['trs_internal_warehouse_code']."'";?>;
+						opt.innerHTML = opt.value;
+						obj.appendChild(opt);
+
+						$('#trs_internal_warehouse_code option[value="' + <?="'".$tariff_list[$i]['trs_internal_warehouse_code']."'";?> + '"').attr(
+							{ 	
+								WHID_DEP: <?="'".$tariff_list[$i]['warehouse_id_dep']."'";?>,
+								WHC_DEP:  <?="'".$tariff_list[$i]['warehouse_code_dep']."'";?>,
+								WHN_DEP:  <?="'".$tariff_list[$i]['warehouse_name_dep']."'";?>,
+							}
+						);
+					}
+		       	}
+		    <?php } ?>
+		    tbl.dataTable().fnClearTable();
+		    checkListComplete = [];
+		    checkIdxComplete  = 0;
+        });
+
+        $('#trs_internal_warehouse_code').on('change', function(){
+        	$('#warehouse_id_dep').val($('#trs_internal_warehouse_code option:selected').attr('WHN_DEP'));
+        	$('#warehouse_id_dep').attr({
+        		WHID_DEP : 	$('#trs_internal_warehouse_code option:selected').attr('WHID_DEP'),
+        		WHC_DEP  : 	$('#trs_internal_warehouse_code option:selected').attr('WHC_DEP'),
+        		WHN_DEP	 :  $('#trs_internal_warehouse_code option:selected').attr('WHN_DEP'),
+       		});
+
+ 			inittblData();       	
+        });
+
+        function inittblData(){
+        	if (!($('#trs_internal_warehouse_code').val()) || !($('#warehouse_id_des').val())){
+        		return;
+        	}
+
+        	checkboxList = [];
+
+        	var warehouse_id 	= $('#warehouse_id_des').val(),
+        		rows			= [],
+        		warehouse_name = '',
+        		warehouse_name,
+        		currencyName;
+
+            <?php for($k = 0; $k < count($warehouse_list); $k++){ ?>
+            	var chk = false;
+        		
+
+        		<?php for ($i = 0; $i < count($tariff_list); $i++) { 
+        			if ($warehouse_list[$k]['warehouse_id'] == $tariff_list[$i]['warehouse_id_dep']){ ?>
+        				if ($('#trs_internal_warehouse_code').val() == <?="'".$tariff_list[$i]['trs_internal_warehouse_code']."'";?>){
+        					if (($('#warehouse_id_dep').val() == 'Tất cả kho') || $('#warehouse_id_dep').attr('WHID_DEP') == <?="'".$tariff_list[$i]['warehouse_id_dep']."'";?>){
+				        		var row = [],
+				        			totalWeight = 0,
+				        			totalMoney  = 0;
+		        			
+		        				warehouse_name = <?="'".$warehouse_list[$k]['warehouse_name']."'";?>;
+				        		
+				        		<?php for ($j = 0; $j < count($tariff_details_list); $j++) { 
+				        			if ($tariff_details_list[$j]['ord_trf_code'] == $tariff_list[$i]['ord_trf_code']){ ?>
+				        				totalWeight  += parseFloat(<?="'".$tariff_details_list[$j]['stock_weight']."'";?>)
+				        				currencyName = (<?="'".$tariff_details_list[$j]['currency_name']."'";?>);
+				        				totalMoney	 += parseFloat(<?="'".$tariff_details_list[$j]['total_money']."'";?>)
+				        				checkIdxComplete++;
+					        		<?php }
+					        	} ?>
+					        	if (warehouse_id == <?="'".$tariff_list[$i]['reality_warehouse_id_des']."'";?> && <?="'".$tariff_list[$i]['status']."'";?> == 'CK'){
+		        					chk = true;
+
+					        		checkboxList.push(<?="'".$tariff_list[$i]['ord_trf_code']."'";?>);
+					        		ordIDList.push(<?="'".$tariff_list[$i]['ord_trf_id']."'";?>);
+
+					        		row.push('<label class="checkbox checkbox-success"><input class="btn_chb" id="' + <?="'".$tariff_list[$i]['ord_trf_code']."'";?> + '" type="checkbox"><span class="input-span"></span></label>');
+					        		row.push(<?="'".$tariff_list[$i]['ord_trf_code']."'";?>);
+					        		row.push(totalMoney + ' ' + currencyName);
+					        		row.push(<?="'".$tariff_list[$i]['sender_name']."'";?>);
+					        		row.push(<?="'".$tariff_list[$i]['sender_address']."'";?>);
+					        		row.push(<?="'".$tariff_list[$i]['receiver_name']."'";?>);
+					        		row.push(<?="'".$tariff_list[$i]['receiver_address']."'";?>);
+					        		row.push(<?="'".$tariff_list[$i]['receiver_tel']."'";?>);
+					        		row.push(totalWeight + ' (kg)');
+				        			switch (<?="'".$tariff_list[$i]['status']."'";?>){
+				        				case 'KT':   
+					        				row.push('Khởi tạo');
+				        					break;
+				        				case 'NK':
+					        				row.push('Nhập kho gửi');       					
+				        					break;
+				        				case 'CK':
+					        				row.push('Chuyển kho');      					
+				        					break;
+				        				case 'NKN':
+					        				row.push('Nhập kho nhận');      					
+				        					break;
+				        				default:
+				        				 	break;
+				        			}
+					        		row.push(<?="'".$tariff_list[$i]['remark']."'";?>);
+					        		rows.push(row);	
+					        	}
+					        }
+				        }
+		       		<?php } ?>
+		        <?php } ?>
+			<?php } ?>
+
+		    tbl.dataTable().fnClearTable();
+		    if(rows.length > 0){
+				tbl.dataTable().fnAddData(rows);
+			}
+
+			$('.checkbox .input-span, .radio .input-span').css('cssText', 'height: 12px!important; width: 12px!important;');
+			$('.checkbox .input-span::after, .radio .input-span::after').css('cssText', 'left: 3px!important; top: -1px!important;');
+        }
+        
+        $('#tblORDDetailsTab').hide();
+        $(document).on('click', '.btn_chb', function(){
+        	if ($(this).is(':checked')){
+	        	var ord_trf_code 	= $(this).attr('id'),
+	        		rows 			= [],
+	        		index  			= 1;
+
+	        	if (!ord_trf_code) return;
+
+	        	$('#order_id').html(ord_trf_code);
+	        	$('#tblORDDetailsTab').show();
+	        	<?php for ($i = 0; $i < count($tariff_details_list); $i++) { ?>
+	        		var row = [];
+		        	if (ord_trf_code == <?="'".$tariff_details_list[$i]['ord_trf_code']."'";?>){
+	        			row.push(index++);
+	        			row.push(<?="'".$tariff_details_list[$i]['ord_trf_details_id']."'";?>);
+	        			row.push(<?="'".$tariff_details_list[$i]['ord_trf_code']."'";?>);
+						row.push(<?="'".$tariff_details_list[$i]['stock_type_id']."'";?>);
+						row.push(<?="'".$tariff_details_list[$i]['stock_type_code']."'";?>);
+						row.push(<?="'".$tariff_details_list[$i]['stock_type_name']."'";?>);
+						row.push(<?="'".$tariff_details_list[$i]['stock_type_details']."'";?>);
+						row.push(<?="'".($tariff_details_list[$i]['numeric'] != 0 ? $tariff_details_list[$i]['numeric'] : '')."'";?>);
+						row.push(<?="'".($tariff_details_list[$i]['receive_numeric'] ? $tariff_details_list[$i]['receive_numeric'] : '')."'";?>);
+						row.push(<?="'".($tariff_details_list[$i]['stock_weight'] ? $tariff_details_list[$i]['stock_weight'] : '')."'";?>);
+						row.push(<?="'".($tariff_details_list[$i]['receive_stock_weight'] ? $tariff_details_list[$i]['receive_stock_weight'] : '')."'";?>);
+						row.push(<?="'".($tariff_details_list[$i]['remark'] ? $tariff_details_list[$i]['remark'] : '')."'";?>);
+
+						if (<?="'".$tariff_details_list[$i]['receive_numeric']."'";?> != 0 || <?="'".$tariff_details_list[$i]['receive_stock_weight']."'";?> != ''){
+							row.push('Đã xác nhận <button class="reconfirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 7.5vw; background-color: white; border: red solid 1px; color: red; margin-left: 10px; font-weight: bold" attrX="' + <?="'".$tariff_details_list[$i]['ord_trf_details_id']."'";?> + '" attrY="' + <?="'".$tariff_details_list[$i]['ord_trf_code']."'";?> + '"><p style="margin-top: auto; margin-bottom: auto ">Xác nhận lại</p></button>');
+						}
+						else{
+							row.push('<button class="confirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 6vw; background-color: white; border: #207b99 solid 1px; color: #207b99; margin-left: 10px; font-weight: bold" attrX="' + <?="'".$tariff_details_list[$i]['ord_trf_details_id']."'";?> + '" attrY="' + <?="'".$tariff_details_list[$i]['ord_trf_code']."'";?> + '"><p style="margin-top: auto; margin-bottom: auto">Xác nhận</p></button>');
+						}
+
+						rows.push(row);
+		        	}
+		        <?php } ?>
+
+		        tblORDDetails.dataTable().fnClearTable();
+			    if(rows.length > 0){
+					tblORDDetails.dataTable().fnAddData(rows);
+				}
+			}
+			else{
+	        	$('#tblORDDetailsTab').hide();
+			}
+        });
+
+        var ord_details_data 	= [],
+        	idxCheck1		 	= 1; // Remove duplicate
+        $(document).on('change', "#tbl_trf_ord_details tbody tr td:nth-child(" + (parseInt(_ORDDetailsCoumns.indexOf('receive_numeric')) + 1) + ")", function(e){
+        	if (idxCheck1 == 1){
+	        	var inp 	 = $(e.target),
+	        		tempInp  = inp,
+	        		iRow 	 = inp.closest('tr')[0]['rowIndex'] - 1,
+	        		ord_trf_details_id = tblORDDetails.find("tbody tr:eq(" + iRow + ") td:eq(" + (_ORDDetailsCoumns.indexOf('ord_trf_details_id')) + ")").first()[0]['innerText'],
+	        		ord_trf_code = tblORDDetails.find("tbody tr:eq(" + iRow + ") td:eq(" + (_ORDDetailsCoumns.indexOf('ord_trf_code')) + ")").first()[0]['innerText'],
+	        		remark 	 = tblORDDetails.find("tbody tr:eq(" + iRow + ") td:eq(" + (_ORDDetailsCoumns.indexOf('remark')) + ")").first()[0]['innerText'],
+	        		cellText = e.target['textContent'],
+	        		chkExist = false;
+
+	        	for (i = 0; i < ord_details_data.length; i++){
+	        		if (ord_details_data[i].ord_trf_details_id == ord_trf_details_id){
+	        			ord_details_data[i].receive_numeric = cellText,
+	        			chkExist = true;
+	        			i = ord_details_data.length;
+	        		}
+	        	}
+
+	       		if (!chkExist){
+	       			ord_details_data.push({
+	       				'ord_trf_details_id'	: ord_trf_details_id,
+	       				'ord_trf_code' 	 		: ord_trf_code,
+	       				'receive_numeric'		: cellText,
+	       				'remark'				: remark,
+	       			});
+	       		}
+	        	idxCheck1++;
+	        }
+	        else{
+	        	idxCheck1 = 1;
+	        }
+        });
+
+        var idxCheck2 = 1;
+        $(document).on('change', "#tbl_trf_ord_details tbody tr td:nth-child(" + (parseInt(_ORDDetailsCoumns.indexOf('receive_stock_weight')) + 1) + ")", function(e){
+        	if (idxCheck2 == 1){
+	        	var inp 	 = $(e.target),
+	        		tempInp  = inp,
+	        		iRow 	 = inp.closest('tr')[0]['rowIndex'] - 1,
+	        		ord_trf_details_id = tblORDDetails.find("tbody tr:eq(" + iRow + ") td:eq(" + (_ORDDetailsCoumns.indexOf('ord_trf_details_id')) + ")").first()[0]['innerText'],
+	        		ord_trf_code = tblORDDetails.find("tbody tr:eq(" + iRow + ") td:eq(" + (_ORDDetailsCoumns.indexOf('ord_trf_code')) + ")").first()[0]['innerText'],
+	        		remark	 =  tblORDDetails.find("tbody tr:eq(" + iRow + ") td:eq(" + (_ORDDetailsCoumns.indexOf('remark')) + ")").first()[0]['innerText'],				
+	        		cellText = e.target['textContent'],
+	        		chkExist = false;
+
+	        	for (i = 0; i < ord_details_data.length; i++){
+	        		if (ord_details_data[i].ord_trf_details_id == ord_trf_details_id){
+	        			ord_details_data[i].receive_stock_weight = cellText,
+	        			chkExist = true;
+	        			i = ord_details_data.length;
+	        		}
+	        	}
+
+	       		if (!chkExist){
+	       			ord_details_data.push({
+	       				'ord_trf_details_id'	: ord_trf_details_id,
+	       				'ord_trf_code' 	 		: ord_trf_code,
+	       				'receive_stock_weight'	: cellText,
+	       				'remark'				: remark,
+	       			});
+	       		}
+	        	idxCheck2++;
+	        }
+	        else{
+	        	idxCheck2 = 1;
+	        }
+        });
+
+        var idxCheck3 = 1;
+        $(document).on('change', "#tbl_trf_ord_details tbody tr td:nth-child(" + (parseInt(_ORDDetailsCoumns.indexOf('remark')) + 1) + ")", function(e){
+        	if (idxCheck3 == 1){
+	        	var inp 	 = $(e.target),
+	        		tempInp  = inp,
+	        		iRow 	 = inp.closest('tr')[0]['rowIndex'] - 1,
+	        		ord_trf_details_id = tblORDDetails.find("tbody tr:eq(" + iRow + ") td:eq(" + (_ORDDetailsCoumns.indexOf('ord_trf_details_id')) + ")").first()[0]['innerText'],
+	        		ord_trf_code = tblORDDetails.find("tbody tr:eq(" + iRow + ") td:eq(" + (_ORDDetailsCoumns.indexOf('ord_trf_code')) + ")").first()[0]['innerText'],
+	        		receive_numeric = tblORDDetails.find("tbody tr:eq(" + iRow + ") td:eq(" + (_ORDDetailsCoumns.indexOf('receive_numeric')) + ")").first()[0]['innerText'],
+	        		receive_stock_weight = tblORDDetails.find("tbody tr:eq(" + iRow + ") td:eq(" + (_ORDDetailsCoumns.indexOf('receive_stock_weight')) + ")").first()[0]['innerText'],
+	        		cellText = e.target['textContent'],
+	        		chkExist = false;
+
+	        	for (i = 0; i < ord_details_data.length; i++){
+	        		if (ord_details_data[i].ord_trf_details_id == ord_trf_details_id){
+	        			ord_details_data[i].remark = cellText,
+	        			chkExist = true;
+	        			i = ord_details_data.length;
+	        		}
+	        	}
+
+	       		if (!chkExist){
+	       			ord_details_data.push({
+	       				'ord_trf_details_id'	: ord_trf_details_id,
+	       				'ord_trf_code' 	 		: ord_trf_code,
+	       				'receive_stock_weight' 	: receive_stock_weight,
+	       				'receive_numeric'		: receive_numeric,
+	       				'remark'				: cellText,
+	       			});
+	       		}
+	        	idxCheck3++;
+	        }
+	        else{
+	        	idxCheck3 = 1;
+	        }
+        });
+
+        $('#confirm_import_stock').hide();
+      	$(document).on('click', '#confirm_import_stock', function(){
+      		var currentDateTime = getDateTimeFormatString(new Date()),
+      			ORDTRFData 		= [{
+      				'trs_internal_warehouse_code': $('#trs_internal_warehouse_code').val(),
+      				'released_by'	: <?="'".$user_info[0]['user_name']."'";?>,
+      				'release_time'	: currentDateTime,
+      				'updated_by'	: <?="'".$user_info[0]['user_name']."'";?>,
+      				'update_time'	: currentDateTime,
+      				'status' 		: 'NKN',
+      			}];
+
+		    var formData = {			
+	      		'action': 'edit',
+				'data'	: ORDTRFData,
+				'ordIDList': ordIDList,
+			};
+
+			$.ajax({
+		        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('update_ORD_TRF_on_release')?>",
+		        dataType: 'json',
+		        data: formData,
+		        type: 'POST',
+		        success: function (data) {
+		            if(data.deny) {
+		                toastr["error"](data.deny);
+		                return;
+		            }
+		            
+		            alert('Tất cả dữ liệu đã được xác nhận. Quá trình nhập hàng thành công!');
+		            location.reload();
+		            return;
+		        },
+		        error: function(err){
+		            alert("Error!");
+		            console.log(err);
+		        }
+		    });
+      	});
+
+      	$(document).on('mouseup', '.confirm_details', function(e){	
+      		var trf_details_id 	= $(this).attr('attrX'),
+      			order_code 	   	= $(this).attr('attrY');
+
+      		confirmDetails(e, 'confirm_details', trf_details_id, order_code);
+      	});
+
+      	$(document).on('mouseup', '.reconfirm_details', function(e){	
+      		var trf_details_id 	= $(this).attr('attrX'),
+      			order_code 	   	= $(this).attr('attrY');
+
+      		confirmDetails(e, 'reconfirm_details', trf_details_id, order_code);
+      	});
+
+      	function confirmDetails(e, screenName, trf_details_id, order_code){
+			var rowIdx = e['target']['offsetParent']['_DT_CellIndex'].row,
+				colIdx = e['target']['offsetParent']['_DT_CellIndex'].column,
+				cell   = tblORDDetails.find("tbody tr:eq(" + rowIdx + ") td:eq(" + colIdx + ")");
+
+      		var currentDateTime = getDateTimeFormatString(new Date()),
+      			chk 			= false,
+      			data 			= [];
+
+      		for (i = 0; i < ord_details_data.length; i++){
+      			if (!(ord_details_data[i]['receive_numeric']) && !(ord_details_data[i]['receive_stock_weight'])){
+      				i = ord_details_data;
+      			}
+      			else if (ord_details_data[i]['ord_trf_details_id'] == trf_details_id){
+      				ord_details_data[i]['updated_by'] 	= <?="'".$user_info[0]['user_name']."'";?>;
+      				ord_details_data[i]['update_time'] 	= currentDateTime;	
+      				chk = true;
+      				data.push(ord_details_data[i]);
+      				i = ord_details_data.length;
+      			}
+      		}
+
+      		if (!chk){
+      			toastr['error']('Vui lòng nhập số lượng nhận/ trọng lượng nhận!');
+      			return;
+      		}
+
+	      	var formDataDetails = {			
+	      		'action': 'edit',
+				'data'	: data,
+			};
+
+			$.ajax({
+		        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('update_ORD_TRF_Details')?>",
+		        dataType: 'json',
+		        data: formDataDetails,
+		        type: 'POST',
+		        success: function (data) {
+		            if(data.deny) {
+		                toastr["error"](data.deny);
+		                return;
+		            }
+
+		            toastr['success']('Cập nhật dữ liệu nhập hàng thành công!');
+		            if (screenName == 'confirm_details'){
+		            	tblORDDetails.DataTable().cell(cell).data('Đã xác nhận <button class="reconfirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 7.5vw; background-color: white; border: red solid 1px; color: red; margin-left: 10px; font-weight: bold" attrX="' + trf_details_id + '" attrY="' + order_code + '"><p style="margin-top: auto; margin-bottom: auto ">Xác nhận lại</p></button>').draw(false);
+		            }
+
+		            var flag	 = true,
+		            	chkValue = formDataDetails.data[0]['ord_trf_details_id'];
+		            for (i = 0; i < checkListComplete.length; i++){
+		            	if (checkListComplete[i] == chkValue){
+		            		flag = false;
+		            		i = checkListComplete.length;
+		            	}
+		            }
+
+		            if (flag){
+		            	checkListComplete.push(chkValue);
+		            	if (checkListComplete.length == checkIdxComplete){
+		            		$('#confirm_import_stock').trigger('click');
+		            	}
+		            }
+		            
+		            return;
+		        },
+		        error: function(err){
+		            alert("Error!");
+		            console.log(err);
+		        }
+		    });
+      	}
+    });
+</script>

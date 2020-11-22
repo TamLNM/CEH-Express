@@ -1,0 +1,373 @@
+<?php
+  global $head;
+  $inv_id=intval(@$_GET['eda_id']);
+  $invs=get_data("select * from out_invoices where inv_id=".intval(@$_GET['eda_id']));
+  $inv=$invs[0];
+  $stock=get_data("select * from stocks where stock_id=".intval(@$inv['stock_id']))[0];
+  $invd=get_data("select mat.mat_name,msu.msu_name,invd.* from out_invoice_details invd,materials mat, mat_msu mms,meansure msu , stock_mat_msu smm where smm.smm_id=invd.smm_id and mms.mms_id=smm.mms_id and msu.msu_id=mms.msu_id and mms.mat_id=mat.mat_id and invd.inv_id=".intval(@$inv['inv_id']));
+  $inv['sohd']=sprintf("%08d", $inv['sohd']);
+  $cus=@get_data("select * from customers where cus_id=".intval(@$inv['cus_id']))[0];
+
+$hoadon = get_data("select * from caidat_hoadon where stock_id = '{$inv['stock_id']}' order by ch_id desc")[0];
+if(isset($hoadon['khhd'])){
+        $kyhieu=@$hoadon['khhd'];
+        $sohd=sprintf("%07d", intval(@$hoadon['hientai'])+1);
+}
+else
+{
+    $hoadon = get_data("select * from out_invoices where phathanh = (select max(phathanh) from out_invoices where stock_id=".$stock['stock_id'].") limit 1");
+        $kyhieu=@$hoadon[0]['khhd'];
+        $hoadon = get_data("select max(sohd) sohd from out_invoices where khhd = '{$kyhieu}'");
+        $sohd=sprintf("%07d", intval(@$hoadon[0]['sohd'])+1);
+}
+
+
+
+
+
+  
+
+
+
+
+    if(@$inv['khhd']==""){
+        $inv['khhd']=$kyhieu;
+    }
+    if(@$inv['sohd']==0){
+        $inv['sohd']=$sohd;
+    }
+    $created_user=get_data("select * from users where user_id=".intval(@$sessions->get_session('user_id')))[0];
+    
+?>
+<html>
+<head>
+<LINK REL="SHORTCUT ICON" HREF="<?=$head['logo']?>">
+<title><?= $action->title?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="<?=ROOT_URL?>bms/skins/hideprint.css" type="text/css" media="print">
+<script language="javascript" src="bms/common/jquery.js"></script>
+<style>
+BODY, TD, TH{
+	color:#000000;
+	font-family: Arial;
+	font-size: 13px;
+	margin:0px;
+}
+p {
+    margin:0px;
+    margin-top:3px;
+}
+*{
+    font-family: TimesNewRoman, "Times New Roman", Times, Baskerville, Georgia, serif;
+    line-height: 18px;
+    font-size: 13px;
+}
+.tbl_hh tbody td{
+    border-bottom: none;
+    border-top: none;
+    height: 28px;
+
+}
+.hidden_parent{
+    visibility: visible;
+}
+.pshow{
+    visibility: visible;
+}
+@media print{
+.hidden_parent{
+    visibility: hidden;
+}
+.pshow{
+    visibility: visible;
+}
+}
+</style>
+</head>
+<body style="background:#333;">
+    <div style="height:5px;width:<?=@$_GET['type']=='mini'?'210px;':'800px;'?>margin:auto;background:#fff;">&nbsp;</div>
+
+  <table align="center" width="<?=@$_GET['type']=='mini'?'210':'800'?>" border="0" cellpadding="0" cellspacing="0" style="background:#fff;">
+    <tr>
+    <td class="hidden_parent" style="padding-left:10px;padding-right: 10px;">
+        <table border="1" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0" style="border-collapse:collapse;width: 100%;">
+            <tr>
+                <td rowspan="4" width="500px" valign="top" style="line-height: 18px;">
+                    <img style="float:left;padding-right:5px;vertical-align: middle;width:100px" src="<?=$head['logo']?>" >
+                    <div STYLE="font-size:18px;text-align: center;">CÔNG TY CỔ PHẦN CÁP - NHỰA VĨNH KHÁNH</div>
+                    <div STYLE="text-align: center;">854 Quốc lộ 1K, Khu Phố Châu Thới, Phường Bình An,</div>
+                    <div STYLE="text-align: center;">Thị Xã Dĩ An, Tỉnh Bình Dương, Việt Nam</div>
+                    <div STYLE="text-align: center;">Điện thoại : 0274.3751 501 / Fax : 0274.3751 699</div>
+                    <div STYLE="text-align: center;">Mã số thuế: <b style="font-size: 15px">3 7 0 0 5 1 0 6 5 0</b></div>
+                    <div STYLE="font-size:18px;text-align: center;"><?=$stock['ten_chi_nhanh']?></div>
+                    <div STYLE="text-align: center;"><?=$stock['address']?></div>
+                    <div STYLE="text-align: center;">Điện thoại : <?=$stock['sdt']?> / Fax : <?=$stock['fax']?></div>
+                    <div STYLE="text-align: center;">Mã số thuế: <b style="font-size: 15px"><?=$stock['mst']?></b></div>
+                    <div STYLE="text-align: center;">Số tài khoản : <?=$stock['stk']?> Tại NH <?=$stock['nganhang']?></div>
+
+                </td>
+                <td colspan="2" valign="top" style="line-height: 18px;">
+                    <div style="text-align: right;padding-bottom: 5px;">Mẫu số: 01GTKT3/003</div>
+                    <div>
+                        <div style="text-align: center;font-weight: bold;">HÓA ĐƠN</div>
+                        <div style="text-align: center;font-weight: bold;">GIÁ TRỊ GIA TĂNG</div>
+                        <div style="text-align: center;">Liên 1: Lưu</div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align=center>Ký hiệu</td>
+                <td align=center>Số hóa đơn</td>
+            </tr>
+            <tr>
+                <td id=khhd style="text-align: center;" contenteditable="true" spellcheck=false ><?=@$inv['khhd']?></td>
+                <td id=sohd style="text-align: center;" contenteditable="true" spellcheck=false ><?=@$inv['sohd']?></td>
+            </tr>
+            <tr>
+                <td colspan=2>Ngày phát hành: <span class="pshow"><?=date("d/m/Y")?></span></td>
+            </tr>
+        </table>
+<div style="padding-top:10px;"></div>
+        <table  border="0" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0" style="border-collapse:collapse;width: 100%;">
+            <tr>
+                <td style="white-space: nowrap;">Họ tên người mua hàng : </td>
+                <td width="100%"><div style="border-bottom: #b6b6b6 1px dotted;padding-bottom:14px;height:0px;"><div class="pshow"><?=$cus['daidien']?></div></div></td>
+            </tr>
+        </table>
+
+        <table  border="0" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0" style="border-collapse:collapse;width: 100%;">
+            <tr>
+                <td style="white-space: nowrap;">Đơn vị : </td>
+                <td width="100%"><div style="border-bottom: #b6b6b6 1px dotted;padding-bottom:14px;height:0px;"><div class="pshow"><?=$cus['cus_name']?></div></div></td>
+            </tr>
+        </table>
+
+        <table  border="0" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0" style="border-collapse:collapse;width: 100%;">
+            <tr>
+                <td style="white-space: nowrap;">Địa chỉ : </td>
+                <td width="100%"><div style="border-bottom: #b6b6b6 1px dotted;padding-bottom:14px;height:0px;"><div class="pshow"><?=$cus['address']?></div></div></td>
+            </tr>
+        </table>
+
+        <table  border="0" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0" style="border-collapse:collapse;width: 100%;">
+            <tr>
+                <td style="white-space: nowrap;">Mã số thuế : </td>
+                <td width="100%"><div style="border-bottom: #b6b6b6 1px dotted;padding-bottom:14px;height:0px;"><div class="pshow"><?=$cus['tax_no']?></div></div></td>
+            </tr>
+        </table>
+
+        <table  border="0" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0" style="border-collapse:collapse;width: 100%;">
+            <tr>
+                <td width="1%" style="white-space: nowrap;">Hình thức thanh toán : </td>
+                <td width=""><div style="border-bottom: #b6b6b6 1px dotted;padding-bottom:14px;height:0px;"><div class="pshow">Tiền mặt / Chuyển khoản</div></div></td>
+                <td width="1%" style="white-space: nowrap;">Số tài khoản : </td>
+                <td width="35%"><div style="border-bottom: #b6b6b6 1px dotted;padding-bottom:14px;height:0px;"><div class="pshow"><?=$cus['bank_acc']?></div></div></td>
+            </tr>
+        </table>
+		
+
+
+
+
+
+
+
+<div style="padding-top:10px;"></div>
+
+
+
+
+<table class="tbl_hh" border="1" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0" style="border-collapse:collapse;width: 100%;">
+            <thead>
+            <tr>
+                <th>STT</th>
+                <th>Tên hàng hóa, Dịch vụ</th>
+                <th>Đơn vị tính</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
+                <th>Thành tiền</th>
+            </tr>
+            <tr>
+                <th>1</th>
+                <th>2</th>
+                <th>3</th>
+                <th>4</th>
+                <th>5</th>
+                <th>6 = 4 x 5</th>
+            </tr>
+            </thead>
+            <tbody>
+<?php
+$tong=0;
+$stt=0;
+foreach ($invd as $key => $value) {
+    $stt++;
+                    ?>
+                <tr class="pshow">
+                    <td align=center><?=($stt)?></td>
+                    <td><?=$value['mat_name']?></td>
+                    <td align=center><?=$value['msu_name']?></td>
+                    <td align=center ><?=numF($value['mat_quantity'])?></td>
+                    <td align=right style="padding-right: 10px"><?=numF($value['price'])?></td>
+                    <td align=right style="padding-right: 10px"><?=numF($value['price']*$value['mat_quantity'])?></td>
+                </tr>
+                    <?php
+                    $tong+=($value['price']*$value['mat_quantity']);
+                }
+                if(10-$stt>0){
+                    ?>
+                <tr class="pshow">
+                    <td></td>
+                    <td style="max-width: 300px;width: 300px;" rowspan="<?=(10-$stt)?>" id=ghichu  contenteditable="true" spellcheck=false valign=top><?=@$inv['hd_note']?></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                    <?php
+                }
+                for ($i=0; $i < 10-$stt-1; $i++) {
+                    ?>
+                <tr class="pshow">
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                    <?php
+                }
+                ?>
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan=5 align="right">Cộng tiền hàng: </td>
+                    <td class="pshow"><?=numF($tong)?></td>
+                </tr>
+                <tr>
+                    <td colspan=5 align="right"><span style="float: left;">Thuế suất GTGT: <span class="pshow"><?=numF($inv['vat_per'])?></span> %</span>Tiền thuế GTGT: </td>
+                    <td class="pshow"><?=numF($inv['vat_price'])?></td>
+                </tr>
+                <tr>
+                    <td colspan=5 align="right">Tổng cộng tiền thanh toán: </td>
+                    <td class="pshow"><?=numF($tong+$inv['vat_price'])?></td>
+                </tr>
+</tfoot>
+                
+            
+        </table>
+
+<div style="padding-top:10px;"></div>
+
+<table  border="0" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0" style="border-collapse:collapse;width: 100%;">
+            <tr>
+                <td style="white-space: nowrap;">Số tiền viết bằng chữ:</td>
+                <td width="100%"><div style="border-bottom: #b6b6b6 1px dotted;padding-bottom:14px;height:0px;">
+                    <div class="pshow"><?=doc_so($tong+$inv['vat_price'])?></div>
+                </div></td>
+            </tr>
+            <tr>
+                
+                <td width="100%" colspan="2"><div style="border-bottom: #b6b6b6 1px dotted;padding-bottom:14px;height:0px;">
+                    <div class="pshow"></div>
+                </div></td>
+            </tr>
+        </table>
+
+
+<table align="center" width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>   
+    <td align="center" width="20%">
+        <b>Người lập biểu</b><br>(Ký ghi rõ họ tên)<br>
+        <b class="pshow"><?=$created_user['full_name']?></b>
+    </td>
+    <td align="center" width="20%"><b>Kế toán trưởng</b><br>(Ký ghi rõ họ tên)</td>
+    <td align="center" width="20%"><b>Tổng giám đốc</b><br>(Ký ghi rõ họ tên, Đóng dấu)</td> 
+    </tr> 
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </td>
+    </tr>
+    <tr><td  style="padding-top:10px;">
+
+    <div class="hideprint" style="padding-top:30px;">      	
+    <table align="center"  border="0" cellpadding="0" cellspacing="0" style="cursor:pointer;">
+    <tr><td width="50" align="center"><img class="print_it" src="<?=ROOT_URL?>/bms/images/icon/preview.gif" width="32"></td>
+    <td class="print_it"><b>In ấn</b></td>
+    <td width="50" align="center" style="padding-left:20px;"><img onclick="window.close();" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="24"></td>
+    <td onclick="window.close();"><b>Đóng</b></td>
+    </tr>
+    </table>
+    </div>             
+    </td></tr>
+   </table>
+    <div style="height:5px;width:<?=@$_GET['type']=='mini'?'210px;':'800px;'?>margin:auto;background:#fff;">&nbsp;</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $(document).on("click",".print_it",function(){
+
+
+$.post( "?eda_code=<?= md5('phat_hanh_hd') ?>&inv_id=<?=$inv_id?>&eda_type=ajax",{
+    "khhd":$("#khhd").text(),
+    "sohd":$("#sohd").text(),
+    "ghichu":$("#ghichu").text(),
+    "inv_id":<?=$inv_id?>
+}, function() {
+            })
+            .done(function(data) {
+                data=JSON.parse(data)||{"err":"None"};
+                console.log(data);
+                if(data.success)
+                    window.print();
+
+                if(data.err)
+                    alert(data.err);
+
+            })
+            .fail(function() {
+            });
+
+
+
+
+
+
+
+
+
+
+
+            
+        });
+
+
+
+
+
+
+    });
+</script>
+
+
+
+
+
+
+
+
+</body>
+</html>

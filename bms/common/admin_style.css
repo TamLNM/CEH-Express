@@ -1,0 +1,27 @@
+.menudottedline {
+	border-top: #ffffff 1px solid;
+	border-bottom: #cccccc 1px solid;
+	background-color: #f1f3f5;
+}
+
+.leftdottedline {
+	border-right: #ffffff 1px solid;
+	border-top: #ffffff 1px solid;
+	border-bottom: #cccccc 1px solid;
+	background-color: #f1f3f5;
+}
+
+.rightdottedline {
+	border-top: #ffffff 1px solid;
+	border-left: #ffffff 1px solid;
+	border-bottom: #cccccc 1px solid;
+	background-color: #f1f3f5;
+}
+
+.centerdottedline {
+	border-right: #cccccc 1px solid;
+	border-top: #ffffff 1px solid;
+	border-left: #cccccc 1px solid;
+	border-bottom: #cccccc 1px solid;
+	background-color: #ffffff;
+}

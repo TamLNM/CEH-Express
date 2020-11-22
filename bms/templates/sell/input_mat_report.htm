@@ -1,0 +1,350 @@
+<?php
+if (empty($return_val['report_type']))
+    $return_val['report_type'] = 4;
+//print_r($return_val);die();
+if (isset($return_val["datefrom"])) {
+    $sdate = explode("/", $return_val["datefrom"]);
+    if ($sdate[0] > 0 && $sdate[0] <= 31 && $sdate[1] > 0 && $sdate[1] <= 12 && $sdate[2] <= date('Y')) {
+        $sdate = mktime(0, 0, 0, $sdate[1], $sdate[0], $sdate[2]);
+    }
+}
+if (!isset($sdate)) {
+    if (date('m') > 1)
+        $sdate = mktime(0, 0, 0, date('m') - 1, date('d'), date('Y'));
+    else
+        $sdate = mktime(0, 0, 0, 12, date('d'), date('Y') - 1);
+    $return_val["datefrom"] = date('d/m/Y', $sdate);
+}
+if (isset($return_val["dateto"])) {
+    $edate = explode("/", $return_val["dateto"]);
+    if ($edate[0] > 0 && $edate[0] <= 31 && $edate[1] > 0 && $edate[1] <= 12 && $edate[2] <= date('Y')) {
+        $edate = mktime(23, 59, 59, $edate[1], $edate[0], $edate[2]);
+    }
+}
+if (!isset($edate)) {
+    $edate = mktime(23, 59, 59, date('m'), date('d'), date('Y'));
+}
+if ($action->eda_type != 'ajax') {
+    ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/js/select2.min.js" defer></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/css/select2.min.css" rel="stylesheet"/>
+    <Script type="text/javascript" src="<?=ROOT_URL?>bms/common/CalendarPopup.js"></Script>
+    <script language="javaScript" id="jscal1x">
+        var cal = new CalendarPopup("calendarpopup");
+        cal.setTodayText("Hôm nay");
+        cal.showNavigationDropdowns();
+        cal.setYearSelectStartOffset(20);
+        cal.setMonthNames("Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12");
+        cal.setDayHeaders("CN", "T2", "T3", "T4", "T5", "T6", "T7");
+    </script>
+    <SCRIPT LANGUAGE="JavaScript">document.write(getCalendarStyles());</SCRIPT>
+    <DIV ID="calendarpopup" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></DIV>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td width="30" align="center">
+                <img style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/documents.png" width="18" height="18"/>        
+            </td>
+            <td  height="25"><b>Báo cáo nhập hàng</b></td>
+            <td align="right" style="padding-right:5px;"><img onclick="window.location = '?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+        <?php
+        if (!check_func('view_input_all')) {
+            echo '<tr>
+                    <td style="padding-left:10px;"><b>Người nhập: </b>' . $sessions->get_session('user_name') . ($sessions->get_session('full_name') != '' ? ' (' . $sessions->get_session('full_name') . ')' : '') . '</td>
+                </tr>';
+            echo '<tr>
+                    <td height=5><img src="bms/images/spacer.gif" height=10></td>
+                </tr>';
+        }
+        ?>
+    </table>
+    <table align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td width="60"><b>Từ ngày</b></td>
+            <td width="70">
+                <input readonly style="width:70px;" class="catbg"  onclick="cal.select(document.getElementById('datefrom'), 'anchor1', 'dd/MM/yyyy');
+                if (document.getElementById('datefrom').value == '') {
+                    d = new Date();
+                    CP_refreshCalendar(0, 1 + d.getMonth(), d.getFullYear())
+                }
+                ;
+                return false;" class="textbox" value="<?= isset($return_val['datefrom']) ? $return_val['datefrom'] : '' ?>" onBlur="check_date(this);" name="datefrom" id="datefrom" type="text" />
+            </td><td width="20">
+                <A href="javascript:void()" onclick="cal.select(document.getElementById('datefrom'), 'anchor1', 'dd/MM/yyyy');
+                if (document.getElementById('datefrom').value == '') {
+                    d = new Date();
+                    CP_refreshCalendar(0, 1 + d.getMonth(), d.getFullYear())
+                }
+                ;
+                return false;"><img  NAME="anchor1" ID="anchor1" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+            </td>
+            <td width="70" style="padding-right:15px;" align="right"><b>Đến ngày</b></td>
+            <td width="70">
+                <input readonly style="width:70px;" class="catbg"  onclick="cal.select(document.getElementById('dateto'), 'anchor2', 'dd/MM/yyyy');
+                if (document.getElementById('dateto').value == '') {
+                    d = new Date();
+                    CP_refreshCalendar(0, 1 + d.getMonth(), d.getFullYear())
+                }
+                ;
+                return false;" class="textbox" value="<?= isset($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>" onBlur="check_date(this);" name="dateto" id="dateto" type="text" />
+            </td> <td width="30">
+                <A href="javascript:void()" onclick="cal.select(document.getElementById('dateto'), 'anchor2', 'dd/MM/yyyy');
+                if (document.getElementById('dateto').value == '') {
+                    d = new Date();
+                    CP_refreshCalendar(0, 1 + d.getMonth(), d.getFullYear())
+                }
+                ;
+                return false;"><img  NAME="anchor2" ID="anchor2" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+            </td>   
+            <td width="130">
+                <select multiple class="catbg" style="width:120px;" name="cat_id" id="cat_id" placeholder="Tất cả chủng loại">
+                    <option value="">Tất cả chủng loại</option>
+                    <?php
+                    $cat = get_data("select * from categories where IFNULL(cat_type,'')!='XD' order by cat_name");
+                    for ($i = 0; $i < count($cat); $i++){
+
+
+
+                        echo '<option ' . (@in_array($cat[$i]['cat_id']."", @explode(",", @$return_val['cat_id'])) ? 'selected' : '') . ' value="' . $cat[$i]['cat_id'] . '">' . $cat[$i]['cat_name'] . '</option>';
+                    }
+                    ?>	
+                </select>       
+            </td>
+            <td width="130">
+                <select multiple class="catbg" style="width:120px;" name="stock_id" id="stock_id" placeholder="Tất cả kho hàng">
+                    <option value="">Tất cả kho hàng</option>
+                    <?php
+                        $chk_mainstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+                        $chk_empstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+                        if (count($chk_mainstock) > 0 && count($chk_empstock) > 0) {
+                            $stock = get_data("select stock_id, stock_name, user_id from stocks order by stock_name");
+                        } else if (count($chk_mainstock) > 0) {
+                            $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id is null or user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+                        } else {
+                            $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+                        }
+
+                        for ($i = 0; $i < count($stock); $i++)
+                            echo '<option ' . (@in_array($stock[$i]['stock_id']."", @explode(",", @$return_val['stock_id'])) ? 'selected' : '')  . ' value="' . $stock[$i]['stock_id'] . '">' . $stock[$i]['stock_name'] . '</option>';
+                    ?>	 
+                </select>       
+            </td>          
+            <td width="140">
+                <select multiple style="width:130px;" class="catbg" name="sup_id" id="sup_id" placeholder="Tất cả nhà cung cấp">
+                    <option value="">Tất cả nhà cung cấp</option>
+                    <?php
+                    $sup = get_data("select * from supliers order by sup_name");
+                    for ($i = 0; $i < count($sup); $i++)
+                        echo '<option ' . (@in_array($sup[$i]['sup_id']."", @explode(",", @$return_val['sup_id'])) ? 'selected' : '') . ' value="' . $sup[$i]['sup_id'] . '">' . $sup[$i]['sup_name'] . '</option>';
+                    ?>              
+                </select>         
+            </td>
+            <td width="190">
+                <input onkeyup="if (chkenter(event))
+                    reloadreport();" onfocus="if (this.value == 'Mã phiếu hoặc mã nhà CC')
+                    this.value = '';" onblur="if (this.value == '')
+                    this.value = 'Mã phiếu hoặc mã nhà CC';" style="width:180px;font-style: italic;" value="<?= @!empty($return_val['keyword']) ? $return_val['keyword'] : 'Mã phiếu hoặc mã nhà CC' ?>" class="catbg" name="keyword" id="keyword"/>       
+            </td>        
+            <td><input onclick="reloadreport();" type="button" value="Xem" class="button"></td>
+        </tr>
+        <tr>
+            <td colspan="10">
+                <table align="center" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <td style="padding-right:5px;" align="right"><input id="report_type1" <?= (isset($return_val['report_type']) ? ($return_val['report_type'] == 1 ? 'checked' : '') : 'checked') ?> type="radio" name="report_type" value="1"/></td>
+                    <td  height="25"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('report_type1').checked = !document.getElementById('report_type1').checked">Hiển thị theo phiếu nhập</a></td>
+                    <td align="right" style="padding-right:5px;"><input id="report_type2" <?= (isset($return_val['report_type']) ? ($return_val['report_type'] == 2 ? 'checked' : '') : '') ?> type="radio" name="report_type" value="2"/></td>
+                    <td ><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('report_type2').checked = !document.getElementById('report_type2').checked">Hiển thị theo chủng loại</a></td>
+                    <td align="right" style="padding-right:5px;"><input id="report_type3" <?= (isset($return_val['report_type']) ? ($return_val['report_type'] == 3 ? 'checked' : '') : '') ?> type="radio" name="report_type" value="3"/></td>
+                    <td ><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('report_type3').checked = !document.getElementById('report_type3').checked">Hiển thị theo nhà cung cấp</a></td>
+
+                    <td align="right" style="padding-right:5px;"><input id="report_type4" <?= (isset($return_val['report_type']) ? ($return_val['report_type'] == 4 ? 'checked' : '') : '') ?> type="radio" name="report_type" value="4"/></td>
+                    <td ><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('report_type4').checked = !document.getElementById('report_type4').checked">Hiển thị tổng hợp</a></td>
+                    <td  height="30" style="padding-left:5px;" width="30">
+                        <?php
+                        if (check_func('input_excel')) {
+                            ?>
+                            <img src="<?=ROOT_URL?>bms/images/icon/excel.png" height="24">
+                            <?php
+                        }
+                        ?>
+                    </td>
+                    <td   style="padding-left:5px;">
+                        <?php
+                        if (check_func('input_excel')) {
+                        ?>
+                        <a class="cart_payment" href="javascript:void()" onclick="window.open('?eda_code=<?= md5('excel_export') ?>&eda_type=ajax&eda_module=input&datefrom=' + document.getElementById('datefrom').value + '&dateto=' + document.getElementById('dateto').value + '&stock_id=' + $('#stock_id').val() + '&cat_id=' + $('#cat_id').val() + '&sup_id=' + $('#sup_id').val() + '&report_type=' + get_radio());" target="_blank"><b>Xuất Excel</b></a>
+                            <?php
+                        }
+                        ?>
+                    </td> 
+                </table>
+            </td>
+        </tr>
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>	
+    <?php
+} else {
+    ?>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+
+    <table align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td width="60"><b>Từ ngày:</b></td>
+            <td width="150">
+                <?= !empty($return_val['datefrom']) ? $return_val['datefrom'] : 'Tất cả' ?> - <?= !empty($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>
+            </td> 
+            <td width="70" style="padding-left:20px;"><b>Chủng loại:</b></td>
+            <td width="120">
+                <?php
+                $cat = get_data("select cat_name from categories where  cat_id='" . $return_val['cat_id'] . "'");
+                if (count($cat) > 0)
+                    echo $cat[0]['cat_name'];
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>
+            <td width="60"><b>Kho hàng:</b></td>
+            <td width="100">
+                <?php
+                $stock = get_data("select stock_name from stocks where  stock_id='" . $return_val['stock_id'] . "'");
+                if (count($stock) > 0)
+                    echo $stock[0]['stock_name'];
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>           
+            <td width="90" style="padding-left:20px;"><b>Nhà cung cấp:</b></td>
+            <td width="120">  
+                <?php
+                $sup = get_data("select sup_name from supliers where  sup_id='" . $return_val['sup_id'] . "'");
+                if (count($sup) > 0)
+                    echo $sup[0]['sup_name'];
+                else
+                    echo "Tất cả";
+                ?>              
+            </td>
+        </tr>
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>	
+    <?php
+}
+
+if ($return_val['report_type'] == 1)
+    include ('bms/templates/sell/input_mat_report_inv.htm');
+else if ($return_val['report_type'] == 2)
+    include ('bms/templates/sell/input_mat_report_cat.htm');
+else if ($return_val['report_type'] == 3)
+    include ('bms/templates/sell/input_mat_report_usr.htm');
+else if ($return_val['report_type'] == 4)
+    include ('bms/templates/sell/input_mat_report_all.htm');
+if ($action->eda_type != 'ajax') {
+    ?>	
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td  height="30" style="padding-left:5px;" width="30">
+                <img src="<?=ROOT_URL?>bms/images/icon/preview.gif" height="24">
+            </td>
+            <td width="150"  style="padding-left:5px;">
+                <a class="cart_payment" href="javascript:void()" onclick="window.open('?eda_code=<?= md5('view_report') ?>&eda_type=ajax&eda_module=sell/input_mat_report&datefrom=' + document.getElementById('datefrom').value + '&dateto=' + document.getElementById('dateto').value + '&stock_id=' + $('#stock_id').val() + '&cat_id=' + $('#cat_id').val() + '&sup_id=' + $('#sup_id').val() + '&report_type=' + get_radio());"><b>Xem dạng in ấn</b></a>
+            </td>          
+            <td  height="30" style="padding-left:5px;" width="30">
+                <?php
+                if (check_func('input_excel')) {
+                    ?>
+                    <img src="<?=ROOT_URL?>bms/images/icon/excel.png" height="24">
+                    <?php
+                }
+                ?>
+            </td>
+            <td   style="padding-left:5px;">
+                <?php
+                if (check_func('input_excel')) {
+                    ?>
+                    <a class="cart_payment" href="javascript:void()"
+                       onclick="window.open('?eda_code=<?= md5('excel_export') ?>&eda_type=ajax&eda_module=input&datefrom=' + document.getElementById('datefrom').value + '&dateto=' + document.getElementById('dateto').value + '&stock_id=' + $('#stock_id').val() + '&cat_id=' + $('#cat_id').val() + '&sup_id=' + $('#sup_id').val() + '&report_type=' + get_radio());"
+                       target="_blank"><b>Xuất Excel</b></a>
+                    <?php
+                }
+                ?>
+            </td>             
+            <td align="right" style="padding-right:5px;"><img  onclick="window.location = '?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>       
+    <script language="javascript">
+        function get_radio()
+        {
+            return (document.getElementById('report_type1').checked ? 1 : (document.getElementById('report_type2').checked ? 2 : (document.getElementById('report_type3').checked ? 3:4)))
+        }
+        function reloadreport() {
+            window.location = '?eda_act=<?= md5('sell') ?>&eda_code=<?= md5('input_mat_report') ?>&datefrom=' + document.getElementById('datefrom').value + '&dateto=' + document.getElementById('dateto').value + '&cat_id=' + $('#cat_id').val() + '&sup_id=' + $('#sup_id').val() + '&keyword=' + document.getElementById('keyword').value + '&stock_id=' + $('#stock_id').val() + '&report_type=' + get_radio();
+        }
+
+        $(document).ready(function(){
+
+            $("#cat_id").select2({placeholder: "Tất cả loại sản phẩm",closeOnSelect: false});
+            $("#stock_id").select2({placeholder: "Tất cả kho",closeOnSelect: false});
+            $("#sup_id").select2({placeholder: "Tất cả nhà cung cấp",closeOnSelect: false});
+            $(document).on("change","#sup_id",function(){
+                $("#sup_id").trigger("click");
+            });
+
+        });
+
+
+
+    </script>   
+    <style type="text/css">
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered li{
+            display: contents;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered li.select2-selection__choice:after{
+            content:" , ";
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered{
+            margin-bottom: -10px !important;
+            padding-top: 6px;
+        }
+.tbl_box_ov{
+    width: 998px;
+    overflow-y: hidden;
+}
+.tbl_box_ov .tbl_box{
+    width: 2000px;
+}
+.select2-container--default .select2-selection--multiple{
+    padding-top:3px;
+}
+.select2-search.select2-search--inline .select2-search__field[placeholder='']{
+    display: none !important;
+}
+.select2-search.select2-search--inline .select2-search__field:not([placeholder='']){
+    display: inline-block !important;
+    position: relative;
+    top: -5px;
+}
+    </style>
+    <?php
+}
+?>

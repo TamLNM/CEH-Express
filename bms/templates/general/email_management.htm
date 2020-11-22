@@ -1,0 +1,270 @@
+<?php $warehouse_list = get_data("select * from warehouse order by warehouse_code, warehouse_name"); ?>
+<?php $eman_list      = get_data("select * from email_management"); ?>
+
+<style type="text/css">
+	.input{
+		background-color: white!important;
+		border-radius: 5px;
+		padding-left: 5px;
+		border: solid 1px rgb(170,170,170);
+	}	
+</style>
+
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/email_management.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Cấu hình Email</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+
+<div style="margin: 10px;" id="div_contenttable">
+	<input hidden id="table_name" value="email_management">
+	<input hidden id="eman_id" value="">
+	<div>
+	    <table border="0" width="100%" cellspacing="0" cellpadding="0">
+		    <tr style="height: 30px;">
+		    	<td style="width: 80px;">Kho</td>
+		        <td>
+					<select id="warehouse_id" style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px; height: 18px!important;">
+					  	<option disabled selected>Chọn kho hàng</option>
+					  	<?php 
+                            for($i=0; $i < count($warehouse_list); $i++){ ?>
+                                <option value="<?=$warehouse_list[$i]['warehouse_id']?>" attrX="<?=$warehouse_list[$i]['warehouse_code']?>" attrY="<?=$warehouse_list[$i]['warehouse_name']?>"><?=$warehouse_list[$i]['warehouse_name']?></option>
+                        <?php } ?>
+					</select>
+				</td>
+    			<td style="width: 60px;">Email</td>
+		        <td>
+					<input class="input" style="width: 150px;" name="email" id="email" type="text" autocomplete="off">
+				</td>	
+				<td style="width: 60px;">Password</td>
+		        <td>
+					<input class="input" style="width: 150px;" name="password" id="password" type="text" autocomplete="off">
+				</td>		         
+		   	</tr>
+		    <tr style="height: 30px;">
+		    	<td style="width: 80px;">SMTPSecure</td>
+		        <td>
+					<select id="SMTPSecure" style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px; height: 18px!important;">
+					  	<option disabled selected>Chọn SMTPSecure</option>
+					  	<option id="tls" value="tls">tls</option>
+					  	<option id="ssl" value="ssl">ssl</option>
+					</select>
+				</td>	
+		    	<td style="width: 60px;">Host</td>
+		        <td>
+		        	<!--
+					<select id="host" style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px; height: 18px!important;">
+					  	<option disabled selected>Chọn host</option>
+					  	<option value="add_host">Thêm host mới</option>
+					</select>
+				-->
+					<input class="catbg input" style="width: 150px;" name="host" id="host" type="text">
+				</td>
+    			<td style="width: 60px;">Port</td>
+		        <td>
+		        	<!--
+					<select id="port" style="width: 150px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px; height: 18px!important;">
+					  	<option disabled selected>Chọn port</option>
+					</select>
+				-->
+					<input class="catbg input" style="width: 150px;" name="port" id="port" type="text">
+				</td>		         
+		   	</tr>
+		</table>
+	</div>
+</div>
+
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right: 0px; height: 30px;" id="">
+    <tr>
+        <td height="25" align="right">
+        	<button id="save_setting" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 150px; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-right: 10px;">
+        		<p style="margin-top: auto; margin-bottom: auto">
+        			<span class="btn-icon"><i class="fa fa-save"></i>Lưu cấu hình</span>
+        		</p>
+        	</button>
+        </td>
+    </tr>
+</table>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		var mailData = [
+				{'type': 'gmail', 	'host': 'smtp.gmail.com', 		'port': '465', 'SMTPSecure': 'ssl'},
+				{'type': 'gmail', 	'host': 'smtp.gmail.com', 		'port': '587', 'SMTPSecure': 'tls'},
+				{'type': 'outlook', 'host': 'smtp.live.com', 		'port': '587', 'SMTPSecure': 'tls'},
+				{'type': 'yahoo', 	'host': 'smtp.mail.yahoo.com', 	'port': '465', 'SMTPSecure': 'tls'},
+			];
+
+        $("#warehouse_id, #SMTPSecure").select2();
+		
+        $(document).on('change', '#warehouse_id', function(){
+        	var warehouse_id = this.value;
+
+			<?php if (count($eman_list) > 0)
+				for ($i = 0; $i < count($eman_list); $i++){ ?>
+				if (warehouse_id == <?="'".$eman_list[$i]['warehouse_id']."'";?>){
+					$('#eman_id').val(<?="'".$eman_list[$i]['eman_id']."'";?>);
+					$('#email').val(<?="'".$eman_list[$i]['email']."'";?>);
+					$('#password').val(<?="'".$eman_list[$i]['password']."'";?>);
+					$('#SMTPSecure').val(<?="'".$eman_list[$i]['SMTPSecure']."'";?>);
+					$('#' + <?="'".$eman_list[$i]['SMTPSecure']."'";?>).trigger('change');
+					$('#host').val(<?="'".$eman_list[$i]['host']."'";?>);
+					$('#port').val(<?="'".$eman_list[$i]['port']."'";?>);			
+				}
+			<?php } ?>
+        });
+
+        $(document).on('change', '#email', function(){
+       		$('#host, #port').prop('readonly', false);
+       		$('#host').val('');
+       		$('#port').val('');
+
+        	var email = this.value;
+
+       		if (email.indexOf('gmail') != -1 ||
+       			email.indexOf('yahoo') != -1 ||
+       			email.indexOf('outlook') != -1){
+       			if (email.indexOf('outlook') != -1){
+       				$('#host').val('smtp.live.com');
+       				$('#port').val('587');
+       				$('#host, #port').prop('readonly', true);
+
+       				$('#SMTPSecure').val('tls');
+       				$('#tls').trigger('change');
+       				return;
+       			}
+
+       			if (email.indexOf('yahoo') != -1){
+       				$('#host').val('smtp.mail.yahoo.com');
+       				$('#port').val('465');
+       				$('#host, #port').prop('readonly', true);
+
+       				$('#SMTPSecure').val('tls');
+       				$('#tls').trigger('change');
+       				return;
+       			}
+       		}
+       		else{
+
+       		}
+        });
+
+        $(document).on('change', '#SMTPSecure', function(){
+       		$('#host, #port').prop('readonly', false);
+
+        	var SMTPSecure  = this.value,
+        		email 		= $('#email').val();
+
+        	if (SMTPSecure == 'tls'){
+        		if (email.indexOf('gmail') != -1){
+        			$('#host').val('smtp.gmail.com');
+       				$('#port').val('587');
+       				$('#host, #port').prop('readonly', true);
+       				return;
+        		}
+        	}
+        	else{
+				if (email.indexOf('gmail') != -1){
+        			$('#host').val('smtp.gmail.com');
+       				$('#port').val('465');
+       				$('#host, #port').prop('readonly', true);
+       				return;
+        		}
+        	}
+        });
+
+        $(document).on('change', '#host', function(){
+        	var hostSlt = $(this).val();
+
+        	if (hostSlt){
+        		if(hostSlt == 'add_host'){
+        			$('#hostip_id').show();
+        			$('#portip_id').show();
+        			$('#host').next(".select2-container").hide();
+        			$('#port').next(".select2-container").hide();
+        		}
+	        }
+	    });
+
+	    $('#save_setting').on('click', function(){
+	    	if (!($('#warehouse_id').val())){
+	    		toastr['error']('Vui lòng chọn kho cần cài đặt cấu hình Email!');
+	    		return;
+	    	}
+
+	    	if (!($('#email').val())){
+	    		toastr['error']('Vui lòng nhập địa chỉ email!');
+	    		return;
+	    	}
+
+	    	if (!($('#password').val())){
+	    		toastr['error']('Vui lòng nhập mật khẩu!');
+	    		return;
+	    	}
+
+	    	if (!($('#SMTPSecure').val())){
+	    		toastr['error']('Vui lòng nhập SMTPSecure!');
+	    		return;
+	    	}
+
+	    	if (!($('#host').val())){
+	    		toastr['error']('Vui lòng nhập host!');
+	    		return;
+	    	}
+
+	    	if (!($('#port').val())){
+	    		toastr['error']('Vui lòng nhập port!');
+	    		return;
+	    	}
+
+	    	var data = [{
+	    			'warehouse_id'	: $('#warehouse_id').val(),
+	    			'warehouse_code': $('#warehouse_id option:selected').attr('attrX'),
+	    			'warehouse_name': $('#warehouse_id option:selected').attr('attrY'),
+	    			'email' 		: $('#email').val(),
+	    			'password' 		: $('#password').val(),
+	    			'SMTPSecure'  	: $('#SMTPSecure').val(),
+	    			'host' 			: $('#host').val(),
+	    			'port' 			: $('#port').val(),
+	    		}],
+	    		action = $('#eman_id').val() ? 'edit' : 'add', 
+	    		formData = { 'action': action, 'data': data};
+
+	    	console.log(formData);
+	    	$.ajax({
+	            url: "?eda_act=<?=md5('general')?>&eda_code=<?= md5('add_edit_email_management')?>",
+	            dataType: 'json',
+	            data: formData,
+	            type: 'POST',
+	            success: function (data) {
+	                if(data.deny) {
+	                    toastr["error"](data.deny);
+	                    return;
+	                }
+
+	                if (formData.action == 'add'){
+	                	toastr['success']('Thêm mới cấu hình email thành công!');
+	                	setTimeout(function(){
+	                		location.reload();
+	                	}, 1500);
+	                }
+	               	
+	               	if (formData.action == 'edit'){
+	                	toastr['success']('Chỉnh sửa thông tin cấu hình email thành công!');
+	                	setTimeout(function(){
+	                		location.reload();
+	                	}, 1500);
+	                }
+	            },
+	            error: function(err){
+	                alert("Error!");
+	                console.log(err);
+	            }
+	        });
+	    });
+	});
+</script>

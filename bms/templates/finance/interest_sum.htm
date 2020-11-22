@@ -1,0 +1,454 @@
+<?php
+	if(!isset($return_val['report_type'])) {
+		$return_val['report_type']=4;
+	}
+	if(!isset($return_val['month'])) {
+		$return_val['month']='';
+	}
+	if(!isset($return_val['year'])) {
+		$return_val['year']=date('Y');
+	}		
+	if($action->eda_type!='ajax')
+	{
+?>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+	        <td width="30" align="center">
+	          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/documents.png" width="18" height="18"/>        
+	        </td>
+	        <td  height="25">
+	        	<b>Báo cáo Lãi/Lỗ bán hàng</b>
+	        </td>
+	        <td align="right" style="padding-right:5px;">
+	        	<img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/>
+	        </td>
+        </tr>
+    </table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td height="40" style="padding-right:5px;" align="right" width="40"><input  id="report_type1" <?= ($return_val['report_type']==1?'checked':'')?> type="radio" name="report_type" value="1"/></td>
+	<td width="80"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('report_type1').checked=!document.getElementById('report_type1').checked;">Ngắn gọn</a></td>
+	<td align="right" style="padding-right:5px;" width="40"><input  id="report_type2" <?= ($return_val['report_type']==2?'checked':'')?> type="radio" name="report_type" value="2"/></td>
+	<td width="80"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('report_type2').checked=!document.getElementById('report_type2').checked;">Sản phẩm</a></td>
+	<td align="right" style="padding-right:5px;" width="40"><input  id="report_type3" <?= ($return_val['report_type']==3?'checked':'')?> type="radio" name="report_type" value="3"/></td>
+	<td width="80"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('report_type3').checked=!document.getElementById('report_type3').checked;">Mua hàng</a></td>
+	<td align="right" style="padding-right:5px;" width="40"><input  id="report_type4" <?= ($return_val['report_type']==4?'checked':'')?> type="radio" name="report_type" value="4"/></td>
+	<td width="80"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('report_type4').checked=!document.getElementById('report_type4').checked;">Đơn hàng</a></td>
+	<td width="130">
+	<select class="catbg" style="width:120px;" name="day" id="day">
+	<option value="">Tất cả các ngày</option>
+<?php	
+	for($i=1; $i<=31;$i++) {
+		echo '<option '.($i==$return_val['day']?'selected':'').' value="'.$i.'">Ngày '.str_pad($i,2,0,STR_PAD_LEFT).'</option>';
+	}
+?>		
+	</select>
+	</td>
+	<td width="130">
+	<select class="catbg" style="width:120px;" name="month" id="month">
+	<option value="">Tất cả các tháng</option>
+<?php	
+	for($i=1; $i<=12;$i++) {
+		echo '<option '.($i==$return_val['month']?'selected':'').' value="'.$i.'">Tháng '.str_pad($i,2,0,STR_PAD_LEFT).'</option>';
+	}
+?>		
+	</select>
+	</td>
+	<td width="120">
+	<select class="catbg" style="width:110px;" name="year" id="year">
+<?php	
+	for($i=date('Y')-5; $i<date('Y')+5;$i++) {
+		echo '<option '.($i==$return_val['year']?'selected':'').' value="'.$i.'">Năm '.$i.'</option>';
+	}
+?>	
+	</select>	
+	</td>
+	<td><input type="button" class="button" value="Xem" onclick="load_interest();"></td>
+	</tr>
+	<table>
+
+<?php
+	} else {
+?>
+<table align="center" width="98%" border="0" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+<tr>
+<td height="25">Kỳ thống kê: <?=(!empty($return_val['month'])?'tháng '.$return_val['month'].' ':'').'năm '.$return_val['year']?></td>
+</tr>
+</table>
+<?php	
+	}
+        ?>	
+<style>
+    table.tbl td {
+        font-size:11px;
+    }            
+</style>
+	<table class="tbl" align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse;">
+	    <tr>
+		<td width="23%" align="center" bgcolor="#afd7ff" height="25"><b>Nội dung thống kê Lãi/Lỗ</b></td>
+		<?php
+		if(intval(@$return_val['report_type'])==3||intval(@$return_val['report_type'])==4){
+		?>
+		<td width="1%" align="center" bgcolor="#afd7ff"><b>Người mua</b></td>
+		<td width="1%" align="center" bgcolor="#afd7ff"><b>Ngày</b></td>
+		<?php
+		}
+		?>
+		<td width="8%" align="center" bgcolor="#afd7ff"><b>Tổng tiền bán</b></td>
+		<td width="8%" align="center" bgcolor="#afd7ff"><b>Tổng tiền gốc</b></td>
+		<td width="8%" align="center" bgcolor="#afd7ff"><b>Lãi ròng</b></td>
+		<td width="8%" align="center" bgcolor="#afd7ff"><b>Tổng thu khác</b></td>
+        <td width="8%" align="center" bgcolor="#afd7ff"><b>Tổng chi</b></td>
+        <?php
+		if(intval(@$return_val['report_type'])==4){
+		?>
+		<td width="8%" align="center" bgcolor="#afd7ff"><b>VAT</b></td>
+		<?php
+		}
+		?>
+		
+		<td width="8%" align="center" bgcolor="#afd7ff"><b>Đã trả</b></td>
+		<td width="8%" align="center" bgcolor="#afd7ff"><b>Dư nợ</b></td>
+		<td width="8%" align="center" bgcolor="#afd7ff"><b>Lãi/Lỗ</b></td>		
+		</tr>
+<?php
+	$total=0;
+	$quantity=0;
+	$total_cat=0;
+	$quantity_cat=0;
+	$str='';
+	$sum_mat_in_amount=0;
+	$sum_mat_in_amount_cat=0;	
+	$sum_bin=0;
+	$sum_interest=0;
+	$sum_cus=0;
+	$sum_vat=0;
+	$sum_tra=0;
+        $sum_bin2=0;
+        $sum_vat_total=0;
+	for($j=1;$j<=12;$j++) {
+		if(intval(@$return_val['month'])==0 || (intval(@$return_val['month'])>0 && intval(@$return_val['month'])==$j)){
+if(intval(@$return_val['month'])>0 && intval(@$return_val['month'])==$j){
+	$year=intval($return_val['year']);
+$minm=(intval(@$return_val['month'])==0?1:intval(@$return_val['month']));
+$maxm=(intval(@$return_val['month'])==0?12:intval(@$return_val['month']));
+$mind=(intval(@$return_val['day'])==0?1:intval(@$return_val['day']));
+$maxd=(intval(@$return_val['day'])==0?date('t',mktime(0,0,0,$maxm,1,$year)):intval(@$return_val['day']));
+$sdate=strtotime($year."-".$minm."-".$mind." 00:00:01");
+$edate=strtotime($year."-".$maxm."-".$maxd." 23:59:59");
+}
+else
+{
+	$year=intval($return_val['year']);
+$minm=$j;
+$maxm=$j;
+$mind=(intval(@$return_val['day'])==0?1:intval(@$return_val['day']));
+$maxd=(intval(@$return_val['day'])==0?date('t',mktime(0,0,0,$maxm,1,$year)):intval(@$return_val['day']));
+$sdate=strtotime($year."-".$minm."-".$mind." 00:00:01");
+$edate=strtotime($year."-".$maxm."-".$maxd." 23:59:59");
+}
+		}
+		else
+		{
+goto end_fnv;
+		}
+		// $sdate=mktime(0,0,0,$j,1,$return_val['year']);
+		// $edate=mktime(23,59,59,$j,date('t',mktime(0,0,0,$j,1,$return_val['year'])),$return_val['year']);
+if(intval(@$return_val['report_type'])==2 || intval(@$return_val['report_type'])==1){
+
+		$inv=get_data("select mat.mat_name,sum(invd.inamount) inamount, msu.msu_name, mms.mms_id, mat.mat_id, smm.stock_id, msu.msu_id, inv.total, sum(invd.mat_quantity) quantity from out_invoices inv, out_invoice_details invd, stock_mat_msu smm, mat_msu mms, materials mat, meansure msu  where  inv.inv_type=0 and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id  and smm.mms_id=mms.mms_id and mms.msu_id=msu.msu_id and mms.mat_id=mat.mat_id and inv.created_date between ".$sdate." and ".$edate." group by inv.inv_id order by mat.mat_name");
+		//print_r($inv);die();
+		for($i=0;$i<count($inv);$i++)
+		{
+			$total+=$inv[$i]['total'];
+			$quantity+=$inv[$i]['quantity'];
+			$total_cat+=$inv[$i]['total'];
+			$quantity_cat+=$inv[$i]['quantity'];	
+			$mat_in_amount=intval($inv[$i]['inamount']);
+			//$mat_in_amount=get_aprice($inv[$i]['mms_id'],$j,$inv[$i]['mat_id'],$inv[$i]['msu_id'],$inv[$i]['quantity'])*$inv[$i]['quantity'];
+                        $sum_mat_in_amount+=$mat_in_amount;
+			$sum_mat_in_amount_cat+=$mat_in_amount;		
+			if($return_val['report_type']==2 && ($return_val['month']==$j||empty($return_val['month']))) {
+				$str.= '<tr>
+				<td style="padding-left:5px;" height="25"> - '.$inv[$i]['mat_name'].' ('.numN($inv[$i]['quantity'],0,","," ").' '.$inv[$i]['msu_name'].')</td>
+				<td align="right" style="padding-right:5px;">'.numN($inv[$i]['total'],0,","," ").'</td>
+				<td align="right" style="padding-right:5px;">'.numN($mat_in_amount,0,","," ").'</td>
+				<td align="right" style="padding-right:5px;">'.numN($inv[$i]['total']-$mat_in_amount,0,","," ").'</td>
+				<td align="right" style="padding-right:5px;"></td>
+				<td align="right" style="padding-right:5px;"></td>
+                <td align="right" style="padding-right:5px;"></td>
+				<td align="right" style="padding-right:5px;"></td>
+				<td align="right" style="padding-right:5px;"></td>
+				</tr>';
+			}
+		
+		}
+	}
+if(intval(@$return_val['report_type'])==3){
+
+
+	$str2="";
+		$inv=get_data("select cus.cus_name,sum(invd.inamount) inamount,cus.cus_id,inv.created_date,inv.inv_code,inv.inv_id, mat.mat_name, msu.msu_name, mms.mms_id, mat.mat_id, smm.stock_id, msu.msu_id, sum(invd.amount) total, sum(invd.mat_quantity) quantity from customers cus, out_invoices inv, out_invoice_details invd, stock_mat_msu smm, mat_msu mms, materials mat, meansure msu  where cus.cus_id=inv.cus_id and inv.inv_type=0 and  inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id  and smm.mms_id=mms.mms_id and mms.msu_id=msu.msu_id and mms.mat_id=mat.mat_id and inv.created_date between ".$sdate." and ".$edate." group by inv.inv_id, mms.mms_id order by inv.inv_id desc");
+		for($i=0;$i<count($inv);$i++)
+		{
+			$total+=$inv[$i]['total'];
+			$quantity+=$inv[$i]['quantity'];
+			$total_cat+=$inv[$i]['total'];
+			$quantity_cat+=$inv[$i]['quantity'];
+			$mat_in_amount=intval($inv[$i]['inamount']);
+			//$mat_in_amount=get_aprice($inv[$i]['mms_id'],$j,$inv[$i]['mat_id'],$inv[$i]['msu_id'],$inv[$i]['quantity'])*$inv[$i]['quantity'];
+                        $sum_mat_in_amount+=$mat_in_amount;
+			$sum_mat_in_amount_cat+=$mat_in_amount;		
+			if(intval(@$return_val['report_type'])==3) {
+				$str2.= '<tr>
+				<td style="padding-left:5px;" height="25"> - '.$inv[$i]['mat_name'].' ('.numN($inv[$i]['quantity'],0,","," ").' '.$inv[$i]['msu_name'].')</td>
+				<td style="padding-left:5px;" height="25">'.$inv[$i]['cus_name'].'<br>(<a target=_blank href="?eda_act=8325324b47e1e62a1c2998a640cbdc72&eda_code=2b0bda49dd1c1d1bee8b8e761dc9b0d0&eda_id='.$inv[$i]['inv_id'].'">'.$inv[$i]['inv_code'].'</a>)</td>
+				<td style="padding-left:5px;" height="25">'.date('d/m/Y H:i',$inv[$i]['created_date']).'</td>
+				<td align="right" style="padding-right:5px;">'.numN($inv[$i]['total'],0,","," ").'</td>
+				<td align="right" style="padding-right:5px;">'.numN($mat_in_amount,0,","," ").'</td>
+				<td align="right" style="padding-right:5px;">'.numN($inv[$i]['total']-$mat_in_amount,0,","," ").'</td>
+				<td align="right" style="padding-right:5px;"></td>
+				<td align="right" style="padding-right:5px;"></td>
+                <td align="right" style="padding-right:5px;"></td>
+				<td align="right" style="padding-right:5px;"></td>
+				<td align="right" style="padding-right:5px;"></td>
+				</tr>';
+			}
+		
+		}
+
+}
+if(intval(@$return_val['report_type'])==4){
+
+
+	$str4="";
+		$inv=get_data("select inv.payment, cus.cus_name,sum(invd.inamount) inamount,inv.vat_price, (select sum(pp.pp_price) from phuphi pp where pp.pp_type=0 and pp.pp_show=0 and pp.inv_id=inv.inv_id ) thukhac,(select sum(pp.pp_price) from phuphi pp where pp.pp_type=1 and pp.pp_show=0 and pp.inv_id=inv.inv_id ) tongchi,cus.cus_id,inv.created_date,inv.inv_code,inv.inv_id, sum(invd.price*invd.mat_quantity) total2,inv.total from  customers cus, out_invoices inv, out_invoice_details invd, stock_mat_msu smm, mat_msu mms, materials mat, meansure msu  where cus.cus_id=inv.cus_id and inv.inv_type=0 and  inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id  and smm.mms_id=mms.mms_id and mms.msu_id=msu.msu_id and mms.mat_id=mat.mat_id and inv.created_date between ".$sdate." and ".$edate." group by inv.inv_id order by inv.inv_id desc");
+		//print_r($inv);
+		for($i=0;$i<count($inv);$i++)
+		{
+			$inv[$i]['tongchi']=floatval($inv[$i]['tongchi']);
+			$inv[$i]['thukhac']=floatval($inv[$i]['thukhac']);
+			//$inv[$i]['total']=$inv[$i]['total']-$inv[$i]['vat_price'];
+			$lairong=$inv[$i]['total']-$inv[$i]['inamount'];
+			$total+=$inv[$i]['total'];
+			//$quantity+=$inv[$i]['quantity'];
+			$total_cat+=$inv[$i]['total'];
+			//$quantity_cat+=$inv[$i]['quantity'];
+			$mat_in_amount=intval($inv[$i]['inamount']);
+			//$mat_in_amount=get_aprice($inv[$i]['mms_id'],$j,$inv[$i]['mat_id'],$inv[$i]['msu_id'],$inv[$i]['quantity'])*$inv[$i]['quantity'];
+            $sum_mat_in_amount+=$mat_in_amount;
+			$sum_mat_in_amount_cat+=$mat_in_amount;
+			//$thukhac=$inv[$i]['thukhac']+$inv[$i]['vat_price'];
+			$thukhac=$inv[$i]['thukhac'];
+			//$inv[$i]['tongchi']+=$inv[$i]['vat_price'];
+			$lai=$lairong+$thukhac-$inv[$i]['tongchi']-$inv[$i]['vat_price'];
+			//$no=$inv[$i]['total']-$inv[$i]['payment']+($thukhac-$inv[$i]['tongchi']);
+			$no=$inv[$i]['total']-$inv[$i]['payment'];
+			$invdl=get_data("select invd.*,mat.mat_name from out_invoice_details invd,materials mat,stock_mat_msu smm, mat_msu mms where smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and invd.smm_id=smm.smm_id and invd.inv_id=".intval($inv[$i]['inv_id']));
+			$check_vat=get_data("select sum(bin.amount) amount from budget_invoices bin, item_type itt  where bin.bin_type>0 and itt.item_name='Đóng VAT' and  bin.created_date between ".$sdate." and ".$edate."  and bin.item_id=itt.item_id and itt.item_type=1 and bin.oinv_id=".intval($inv[$i]['inv_id']));
+			
+			$addl="";
+			$vatdong="";
+			if(floatval(@$check_vat[0]['amount'])>=floatval(@$inv[$i]['vat_price']))
+				$vatdong="<sup>Đã nộp</sup>";
+			else
+				$vatdong="<sup>".floatval($check_vat[0]['amount'])." / </sup>";
+			foreach ($invdl as $key => $value) {
+				$addl.="<br><i>[".$value['mat_name']."] <b>x ".$value['mat_quantity']."</b> giá [<b>".numF($value['price'])."</b>]</i>";
+			}
+			if(intval(@$return_val['report_type'])==4) {
+				$tra=$inv[$i]['total']-$no;
+				$sum_tra+=$tra;
+				$str4.= '<tr>
+				<td style="padding-left:5px;" height="25"><b>[<a target=_blank href="?eda_act=8325324b47e1e62a1c2998a640cbdc72&eda_code=5831fb9bee1129a0c8b7e12db6526798&eda_id='.$inv[$i]['inv_id'].'">'.$inv[$i]['inv_code'].'</a>]</b>'.$addl.'</td>
+				<td style="padding-left:5px;" height="25">'.$inv[$i]['cus_name'].'</td>
+				<td style="padding-left:5px;" height="25">'.date('d/m/Y H:i',$inv[$i]['created_date']).'</td>
+				<td align="right" style="padding-right:5px;">'.numN($inv[$i]['total']).'</td>
+				<td align="right" style="padding-right:5px;">'.numN($mat_in_amount).'</td>
+				<td align="right" style="padding-right:5px;">'.numN($lairong).'</td>
+				<td align="right" style="padding-right:5px;">'.numN($thukhac).'</td>
+				<td align="right" style="padding-right:5px;">'.numN($inv[$i]['tongchi']).'</td>
+				<td align="right" style="padding-right:5px;">'.$vatdong.numN($inv[$i]['vat_price']).'</td>
+				<td align="right" style="padding-right:5px;">'.numN($tra).'</td>
+				<td align="right" style="padding-right:5px;">'.numN($no).'</td>
+                <td align="right" style="padding-right:5px;">'.numN($lai).'</td>
+				
+				</tr>';
+			}
+		
+		}
+
+}
+
+		$bin=get_data("select sum(bin.amount) amount from budget_invoices bin, item_type itt  where bin.bin_type>0 and IFNULL(itt.budget_type,'')!='VAY' and IFNULL(itt.budget_type,'')!='CN' and  bin.created_date between ".$sdate." and ".$edate."  and bin.item_id=itt.item_id and itt.item_type=1  order by bin.bin_type, itt.item_name");			
+        $bin2=get_data("select sum(bin.amount) amount from budget_invoices bin, item_type itt  where bin.bin_type=0 and IFNULL(itt.budget_type,'')='' and  bin.created_date between ".$sdate." and ".$edate."  and bin.item_id=itt.item_id and itt.item_type=0  order by bin.bin_type, itt.item_name");
+        $congnoadd=get_data("select sum(cn.price) price from congno cn,out_invoices inv where inv.inv_id=cn.inv_id and cn.price>0 and inv.created_date between ".$sdate." and ".$edate."");
+        $congnormv=get_data("select sum(cn.price) price from congno cn,out_invoices inv where inv.inv_id=cn.inv_id and cn.price<0 and inv.created_date between ".$sdate." and ".$edate."");
+        $vatadd_total=get_data("select sum(vat_price) price from out_invoices where created_date between ".$sdate." and ".$edate."");
+        $vatadd=get_data("select sum(bin.amount) amount from budget_invoices bin, item_type itt  where bin.bin_type>0 and itt.item_name='Đóng VAT' and  bin.created_date between ".$sdate." and ".$edate."  and bin.item_id=itt.item_id and itt.item_type=1  order by bin.bin_type, itt.item_name");
+        //print_r($vatadd);
+        $phuphiadd=get_data("select sum(pp.pp_price) price from phuphi pp,out_invoices inv where pp.inv_id=inv.inv_id and pp.pp_type=0 and pp.pp_show=1 and pp.inv_id=pp.inv_id and inv.created_date between ".$sdate." and ".$edate."");
+        $phuphirmv=get_data("select sum(pp.pp_price) price from phuphi pp,out_invoices inv where pp.inv_id=inv.inv_id and pp.pp_type=1 and pp.pp_show=1 and pp.inv_id=pp.inv_id and inv.created_date between ".$sdate." and ".$edate."");
+		$cus=get_data("select  sum(inv.total) total, sum(inv.payment) payment   from out_invoices inv where inv.created_date between ".$sdate." and ".$edate);
+		//echo ("select  sum(inv.total) total, sum(inv.payment) payment   from out_invoices inv where inv.created_date between ".$sdate." and ".$edate);
+		//echo "---$j---<br>";
+		//$bin2[0][0]+=intval(@$congnoadd[0][0])+intval(@$phuphiadd[0][0]);
+		//$bin[0][0]+=abs(intval(@$congnormv[0][0]))+intval(@$phuphirmv[0][0]);
+		$bin2[0][0]=intval(@$congnoadd[0][0]);
+		$bin[0][0]=abs(intval(@$congnormv[0][0]));
+		if(count($bin)>0) {
+			$sum_bin+=$bin[0][0];
+			$sum_interest+=$total_cat-$sum_mat_in_amount_cat-(count($bin)>0?$bin[0][0]:0);
+		}
+		if(count($bin2)>0) {
+			$sum_bin2+=$bin2[0][0];
+			$sum_interest+=(count($bin2)>0?$bin2[0][0]:0);
+		}                
+		if(count($cus)>0) {
+			$sum_cus+=$cus[0][0]-$cus[0][1];
+		}		
+		if($return_val['month']==$j||empty($return_val['month'])) {
+			echo '<tr '.($return_val['report_type']==2 || $return_val['report_type']==3 || $return_val['report_type']==4?'style="background-Color:#eeeeee;"':'').'>
+			<td height="25" align="center"><b>'.(intval(@$return_val['day'])>0?'Ngày '.intval(@$return_val['day'])." ":'').'Tháng '.str_pad($j,2,'0',STR_PAD_LEFT).'</b></td>';
+			if(intval(@$return_val['report_type'])==3 || intval(@$return_val['report_type'])==4){
+				echo "<td></td><td></td>";
+			}
+			echo '<td align="right" style="padding-right:5px;"><b>'.numN($total_cat,0,","," ").'</b></td>
+			<td align="right" style="padding-right:5px;"><b>'.numN($sum_mat_in_amount_cat,0,","," ").'</b></td>
+			<td align="right" style="padding-right:5px;"><b>'.numN($total_cat-$sum_mat_in_amount_cat,0,","," ").'</b></td>
+			<td align="right" style="padding-right:5px;"><b>';
+			if(count($bin2)>0) {
+				//echo numN($bin2[0][0],0,","," ");
+				echo numN(abs(@$congnoadd[0][0]),0,","," ");
+			}
+			echo '</b></td><td align="right" style="padding-right:5px;"><b>';
+			if(count($bin)>0) {
+				//echo numN($bin[0][0],0,","," ");
+				echo numN(abs(@$congnormv[0][0]),0,","," ");
+			}
+			echo '</b></td>';
+			if(intval(@$return_val['report_type'])==4){
+				$sum_vat_total+=floatval($vatadd_total[0][0]);
+				$sum_vat+=floatval($vatadd[0][0]);
+				echo '<td align="right" style="padding-right:5px;">'.(floatval(@$vatadd[0][0])>0?"<sup>Đã nộp</sup>":"").'<b>'.numN(floatval($vatadd[0][0]),0,","," ").'</b></td>';
+			}
+			echo '<td align="right" style="padding-right:5px;"><b>';
+			if(count($cus)>0) {
+				//echo numN($cus[0][0]-$cus[0][1]+floatval(@$congnormv[0][0])+floatval(@$congnoadd[0][0]),0,","," ");
+				echo numN($cus[0][1],0,","," ");
+			}
+			
+			echo '</b></td>';
+
+			echo '<td align="right" style="padding-right:5px;"><b>';
+			if(count($cus)>0) {
+				//echo numN($cus[0][0]-$cus[0][1]+floatval(@$congnormv[0][0])+floatval(@$congnoadd[0][0]),0,","," ");
+				echo numN($cus[0][0]-$cus[0][1],0,","," ");
+			}			
+			echo '</b></td>';
+
+			echo '<td align="right" style="padding-right:5px;"><b>'.numN($total_cat-$sum_mat_in_amount_cat+intval(@$congnormv[0][0])+intval(@$congnoadd[0][0])-floatval(@$vatadd_total[0][0]),0,","," ").'</b></td>';
+
+			
+
+			echo '</tr>';
+			if($return_val['report_type']==2) {
+				echo $str;
+				$str='';			
+			}
+			if($return_val['report_type']==3) {
+				echo $str2;
+				$str2='';			
+			}	
+			if($return_val['report_type']==4) {
+				echo $str4;
+				$str4='';			
+			}		
+		}
+		end_fnv:
+		$total_cat=0;
+		$quantity_cat=0;
+		$sum_mat_in_amount_cat=0;
+
+	}
+	//$bin=get_data("select sum(bin.amount) amount from budget_invoices bin, item_type itt  where bin.bin_type>0 and IFNULL(itt.budget_type,'')!='VAY' and IFNULL(itt.budget_type,'')!='CN' and  bin.created_date between ".mktime(0,0,0,1,1,$return_val['year'])." and ".mktime(23,59,59,12,date('t',mktime(0,0,0,12,1,$return_val['year'])),$return_val['year'])."  and bin.item_id=itt.item_id and itt.item_type=1  order by bin.bin_type, itt.item_name");			
+?>	
+	    <tr style="background-Color:#dddddd;">
+		<td height="25" align="center"><b>Tổng hợp</b></td>
+		<?php
+			if(intval(@$return_val['report_type'])==3 || intval(@$return_val['report_type'])==4){
+				echo "<td></td><td></td>";
+			}
+
+?>
+		<td align="right" style="padding-right:5px;"><b><?= numN($total,0,","," ")?></b></td>
+		<td align="right" style="padding-right:5px;"><b><?= numN($sum_mat_in_amount,0,","," ")?></b></td>
+		<td align="right" style="padding-right:5px;"><b><?= numN($total-$sum_mat_in_amount,0,","," ")?></b></td>
+		<td align="right" style="padding-right:5px;"><b><?= numN($sum_bin2,0,","," ")?></b></td>
+        <td align="right" style="padding-right:5px;"><b><?= numN($sum_bin,0,","," ")?></b></td>
+        <?php
+			if( intval(@$return_val['report_type'])==4){
+				echo '<td align="right" style="padding-right:5px;">'.(floatval(@$sum_vat)>0?"<sup>Đã nộp</sup>":"").'<b>'.numN(floatval($sum_vat),0,","," ").'</b></td>';
+			}
+
+?>
+<td align="right" style="padding-right:5px;"><b><?= numN($sum_tra,0,","," ")?></b></td>
+<td align="right" style="padding-right:5px;"><b><?= numN($sum_cus,0,","," ")?></b></td>
+		<td align="right" style="padding-right:5px;"><b><?= numN($total-$sum_mat_in_amount+$sum_bin2-$sum_bin-$sum_vat_total,0,","," ")?></b></td>		
+		</tr>
+	</table>
+<?php
+	if($action->eda_type!='ajax')
+	{
+?>	
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=10></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;" width="30">
+          <img src="<?=ROOT_URL?>/bms/images/icon/preview.gif" height="24">
+          </td>
+          <td   style="padding-left:5px;">
+          <a class="cart_payment" href="javascript:void()" onclick="window.open('?eda_code=<?= md5('view_report')?>&eda_type=ajax&eda_module=finance/interest_sum&day='+document.getElementById('day').value+'&month='+document.getElementById('month').value+'&year='+document.getElementById('year').value+'&report_type='+get_radio());"><b>Xem dạng in ấn</b></a>
+          </td>          
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>       
+        <script language="javascript">
+			function get_radio()
+			{
+				return (document.getElementById('report_type1').checked?1:(document.getElementById('report_type2').checked?2:(document.getElementById('report_type3').checked?3:4)))
+			}
+
+			function load_interest() {
+				window.location="?eda_act=<?=md5('finance')?>&eda_code=<?= md5('interest_sum')?>&day="+document.getElementById('day').value+"&month="+document.getElementById('month').value+"&year="+document.getElementById('year').value+"&report_type="+get_radio();
+			}
+        </script>   
+<?php
+	}
+	function get_aprice($id,$month,$mat_id, $msu_id,$quantity) {
+		global $return_val,$sessions;
+		$amount=0;
+		$inv_in=get_data("select sum(invd.amount)/sum(invd.mat_quantity) amount from (select invd.amount, invd.mat_quantity from invoices inv, invoice_details invd  where invd.mat_quantity>0  and inv.inv_type=1 and  inv.inv_id=invd.inv_id and invd.mms_id=".$id." and inv.created_date<".mktime(23,59,59,$month,date('t',mktime(0,0,0,$month,1,$return_val['year'])),$return_val['year'])." order by created_date desc limit 3) invd");              
+		//$inv_in=get_data("select sum(amount)/sum(mat_quantity) amount from (SELECT @total:=0) r, (select invd.amount, invd.mat_quantity, @total:=if(@total is null, 0, @total)+invd.mat_quantity as total,if(@total is null, 0, @total)-invd.mat_quantity as old_total from invoices inv, invoice_details invd  where invd.mat_quantity>0  and inv.inv_type=1 and  inv.inv_id=invd.inv_id and invd.mms_id=".$id." and inv.created_date<".mktime(23,59,59,$month,date('t',mktime(0,0,0,$month,1,$return_val['year'])),$return_val['year'])." order by created_date desc) invd where invd.old_total<".$quantity);              
+		$instock=get_data("select  avg(smm.price) amount from stock_mat_msu  smm where smm.mms_id=".$id."  and price>0 group by smm.mms_id");
+		$amount= $inv_in[0][0];
+		if($amount==0&&count($instock)>0) {
+			$amount= $instock[0][0];
+		}
+		if($amount==0) {
+			$msp=get_data("select mms.msu_id, mms.mms_id  from mat_split msp, mat_msu mms, stock_mat_msu smm  where  msp.smm_id=smm.smm_id and smm.mms_id=mms.mms_id  and mms.mat_id='".$mat_id."' and ".$msu_id." in (msu_list) and msp.created_date<".mktime(23,59,59,$month,date('t',mktime(0,0,0,$month,1,$return_val['year'])),$return_val['year'])." group by mms.mms_id order by msp.created_date desc limit 1");
+			if(count($msp)>0) {
+				$split_multiple=get_data("select msu1.msu_multiple/msu2.msu_multiple from meansure msu1, meansure msu2 where msu1.msu_id='".$msp[0]['msu_id']."' and msu1.msu_parid=msu2.msu_id");
+				$smm_amount=get_data("select invd.amount/invd.mat_quantity amount from invoices inv, invoice_details invd  where inv.inv_id=invd.inv_id and inv.inv_type=1 and invd.mms_id='".$msp[0]['mms_id']."' and inv.created_date<".mktime(23,59,59,$month,date('t',mktime(0,0,0,$month,1,$return_val['year'])),$return_val['year'])."  order by inv.created_date desc");
+				if(count($smm_amount)>0) {
+					$amount=$smm_amount[0][0]/$split_multiple[0][0];
+				}
+			}		
+		}               
+		return $amount;
+	}
+?>	

@@ -1,0 +1,213 @@
+<?php
+$return_url=unserialize($sessions->get_session('return_url'));
+if($action->eda_type!='ajax')
+{
+?>	
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/cart.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Phiếu bảo hành - Dịch vụ</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="<?= $action->eda_code==md5('output_finish')?'window.location=\'?eda_act='.md5('sell').'&eda_code='.md5('output').'\'':'window.location=\''.$return_url['waranty_man'].'\';'?>" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>       
+<?php
+	}
+	$return_val=get_data("select inv.*, usr.full_name from waranty_invoices inv, users usr where inv.inv_id='".$action->eda_id."' and inv.created_user=usr.user_id");
+	if(count($return_val)>0)
+	{
+		$return_val=$return_val[0];	
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding-left:10px;padding-right:10px;padding-top:10px;padding-bottom:10px;">        
+      <table width="780" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td height="25" width="180" align="left"><b>Người nhận</b></td>
+              <td width="200"><?= $return_val['full_name']?></td>
+              <td height="25" width="110" align="left" style="padding-left:20px;"><b>Thời gian nhận</b></td>
+              <td><?= date('d/m/Y H:i',$return_val['created_date'])?></td>
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Bộ phận xử lý</b></td>
+              <td><?php
+               if(!empty($return_val['dept_id'])) {
+                   $store=get_data("select dept_name from waranty_dept where dept_id='".$return_val['dept_id']."' limit 1");
+                   if(count($store)>0) {
+                       echo $store[0]['dept_name'];
+                   } else {
+                       echo 'Không xác định';
+                   }
+               } else {
+                       echo 'Không xác định';
+               }
+               ?></td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Số phiếu</b></td>
+              <td>          
+              <?= $return_val['inv_code']?>
+              </td>             
+            </tr>
+            <tr>
+<?php
+        $usr = get_data("select full_name from users where user_id='" . $return_val['user_id'] . "'");
+        if (count($usr) > 0) {
+            $full_name_get = $usr[0][0];
+        }
+?>
+              <td height="25" align="left"><b>Người tiếp nhận xử lý</b></td>
+              <td><?= $full_name_get?></td>                
+              <td height="25" align="left" style="padding-left:20px;"><b>Tên khách hàng</b></td>
+              <td><?= $return_val['cus_name']?></td>
+            </tr>
+              <tr>
+              <td height="25" align="left"><b>Địa chỉ</b></td>
+              <td ><?= $return_val['address']?></td>              
+              <td height="25" align="left" style="padding-left:20px;"><b>Điện thoại</b></td>
+              <td>
+              <?= $return_val['tel']?>
+              </td>
+            </tr>
+             <tr>
+              <td height="25" align="left"><b>Ghi chú</b></td>
+              <td colspan="3"><?= isset($return_val['comment'])?$return_val['comment']:''?></td>
+            </tr> 
+          </table>
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height="40"><b>DANH SÁCH SẢN PHẨM - DỊCH VỤ</b></td>
+		<td align="right"></td>
+	      </tr>
+	</table>
+	<table width="780" id="mat_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	<tbody>
+	    <tr>
+		<td width="280" align="center" bgcolor="#afd7ff" height="25"><b>Sản phẩm - Dịch vụ</b></td>
+                <td width="90" align="center" bgcolor="#afd7ff"><b>Số lượng</b></td>
+		<td width="120" align="center" bgcolor="#afd7ff"><b>Serial</b></td>
+		<td width="200" align="center" bgcolor="#afd7ff"><b>Ghi chú</b></td>
+                <td width="100" align="center" bgcolor="#afd7ff"><b>Trạng thái</b></td>
+		</tr>
+<?php
+	$mat=get_data("select warnd.*, matd.msu_name, matd.created_date from (select * from waranty_invoice_details where inv_id='".$return_val['inv_id']."') warnd left join (select mat.mat_name,  msu.msu_name, oinvd.invd_id, inv.created_date from stock_mat_msu smm, mat_msu mms, materials mat, meansure msu, out_invoices inv, out_invoice_details oinvd where oinvd.inv_id=inv.inv_id and oinvd.smm_id=smm.smm_id and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id) matd on warnd.oinvd_id=matd.invd_id");
+        $wstatus=array("Chờ xử lý","Chờ BH-Sửa chửa","Chờ trả","Hoàn thành");
+	for($i=0;$i<count($mat);$i++)
+	{
+
+?>	
+		<tr>
+		<td style="padding-left:5px;" height="25">
+		<?= $mat[$i]['mat_name']?>
+                    <?=!empty($mat[$i]['return_date'])?'<br/>Ngày trả: '.date('d/m/Y',$mat[$i]['return_date']):''?>
+		</td>
+		<td align="center"><?= number_format($mat[$i]['mat_quantity'],0,'',' ')?> <?= $mat[$i]['msu_name']?></td>
+                <td align="center"><?= $mat[$i]['serial']?></td>
+                <td align="center"><?= $mat[$i]['warn_desc']?></td>
+                <td align="center"><?= $wstatus[$mat[$i]['warn_status']]?></td>
+                </tr>
+<?php
+	}
+?>    
+	   </tbody>
+	</table>
+</td></tr>
+<?php
+if($action->eda_type!='ajax')
+{
+?>
+<tr><td style="padding-left:20px;"><b>Người thay đổi cuối cùng: </b>
+<?php
+	$usr=get_data("select full_name from users where user_id='".$return_val['created_user']."'");
+	if(count($usr)>0)
+		echo $usr[0]['full_name'];
+	else
+		echo "Không xác định";	
+?>		
+</td><tr>
+<?php
+	}
+?>
+</table>
+<?php
+	}
+	else
+		echo 'Không tìm thấy phiếu bảo hành';
+?>	
+<?php
+if($action->eda_type!='ajax')
+{
+?>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5 ><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	     </table>
+	   <table width="100%"  border="0" cellpadding="0" cellspacing="0">   
+	      <tr>
+                <?php
+                if (check_func('del_waranty')) {
+                ?>                   
+		<td height="25" width="20" style="padding-left:20px;"><img src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" height="18"></td>
+		<td width="120" style="padding-left:5px;cursor:pointer;" onclick="del_output(<?= $action->eda_id?>)"><a class="cart_payment" href="javascript:void()"><b>Xoá phiếu</b></a></td>
+                <?php
+                }
+                ?>
+                <?php
+                if (check_func('edit_waranty')) {
+                ?>                  
+		<td width="20" style="padding-left:20px;"><img src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" height="18"/></td>
+		<td width="120" style="padding-left:5px;" onclick="edit_output(<?= $action->eda_id?>)"><a class="cart_payment" href="javascript:void()"><b>sửa phiếu</b></a></td>
+                <?php
+                }
+                ?>                
+		<td width="20" style="padding-left:20px;"><img src="<?=ROOT_URL?>/bms/images/icon/waranty_out.png" height="18"/></td>
+		<td style="padding-left:5px;" onclick="waranty('<?=$return_val['inv_code']?>',0)"><a class="cart_payment" href="javascript:void()"><b>Xử lý bảo hành - Dịch vụ</b></a></td>
+		<td width="20" style="padding-left:20px;"><img src="<?=ROOT_URL?>/bms/images/icon/waranty_out.png" height="18"/></td>
+		<td style="padding-left:5px;" onclick="waranty('<?=$return_val['inv_code']?>',1)"><a class="cart_payment" href="javascript:void()"><b>Trả bảo hành - Dịch vụ</b></a></td>                
+	      </tr>	      	      
+	</table>
+ <script language="javascript">
+ 	function del_output(id)
+ 	{
+ 		if(id>0)
+ 		{
+ 			c=confirm("Bạn có chắc chắn muốn xoá phiếu bảo hành này không?");
+ 			if(c)
+ 				window.location="?eda_act=<?= md5('waranty')?>&eda_code=<?= md5('waranty_man_del')?>&eda_id="+id;
+ 		}
+ 		else
+ 			alert('Không tìm thấy phiếu bảo hành');
+ 	}
+ 	function edit_output(id)
+ 	{
+ 		if(id>0)
+ 		{
+			window.location="?eda_act=<?= md5('waranty')?>&eda_code=<?= md5('waranty_man_edit')?>&eda_id="+id;
+ 		}
+ 		else
+ 			alert('Không tìm thấy phiếu bảo hành');
+ 	}
+ 	function waranty(c,s)
+ 	{
+		window.location="?eda_act=<?= md5('waranty')?>&eda_code="+(s==0?"<?= md5('waranty_process')?>":"<?= md5('waranty_out')?>")+"&warn_status=-1&inv_code="+c+'&datefrom=1/1/1970';
+ 	}
+ </script>	
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;" width="30">
+          <img src="<?=ROOT_URL?>/bms/images/icon/preview.gif" height="24">
+          </td>
+          <td   style="padding-left:5px;">
+          <a class="cart_payment" href="?eda_code=<?= md5('view_report')?>&eda_type=ajax&eda_module=waranty/view_waranty_in&eda_id=<?= $action->eda_id?>" target="_blank"><b>Xem dạng in ấn</b></a>
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="<?= $action->eda_code==md5('output_finish')?'window.location=\'?eda_act='.md5('sell').'&eda_code='.md5('output').'\'':'window.location=\''.$return_url['waranty_man'].'\';'?>" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>       
+<?php
+	}                
+?>

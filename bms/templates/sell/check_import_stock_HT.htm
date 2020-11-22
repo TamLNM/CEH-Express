@@ -1,0 +1,1069 @@
+<html>
+    <head>
+        <!---->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<link href="assets/css/custom.datatables.css" rel="stylesheet" type="text/css"/>
+        <link href="assets/css/main.min.css" rel="stylesheet" type="text/css"/>
+        <link href="assets/css/ro2.css" rel="stylesheet" type="text/css"/>
+        <script src="assets/vendors/jquery/dist/jquery2-1-4.min.js"></script>
+        <link href="assets/vendors/dataTables/datatables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/scroller.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/css/custom.datatables.css" rel="stylesheet" />
+        <link href="assets/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+        <link href="assets/vendors/line-awesome/css/line-awesome.min.css" rel="stylesheet" />
+        <link href="assets/vendors/themify-icons/css/themify-icons.css" rel="stylesheet" />
+        <script src="assets/js/tablefilter/tablefilter.js"></script>
+        <script src="assets/js/datatables.ext.js"></script>
+        <script src="assets/vendors/dataTables/datatables.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.default.min.css" rel="stylesheet" />
+
+        <link href="assets/vendors/dataTables/datatables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/scroller.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/css/custom.datatables.css" rel="stylesheet" />
+        <link href="assets/vendors/toastr/toastr.min.css" rel="stylesheet" type="text/css" />
+        <script src="assets/js/datatables.ext.js"></script>
+        <script src="assets/vendors/dataTables/dataTables.scroller.min.js"></script>
+
+        <!-- Datetime picker -->
+        <link href="assets/vendors/datetimepicker/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+        <script type="text/javascript" src="assets/vendors/datetimepicker/jquery-ui-timepicker-addon.js"></script>
+
+        <script src="assets/vendors/jquery-ui/jquery-ui.js"></script>
+
+        <!--    TABLES SCROLL-->
+        <script src="assets/vendors/dataTables/dataTables.scroller.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/key_table.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/mindmup-editabletable.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/numeric-input-example.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/autofill.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/scroller.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/select.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/buttons.min.js"></script>
+    	<script type="text/javascript" src="assets/js/qrscan/instascan.min.js"></script>
+
+        <link href="assets/vendors/toastr/toastr.min.css" rel="stylesheet" type="text/css" />
+        <script src="assets/vendors/toastr/toastr.min.js"></script>
+        <style>
+			@media only screen and (max-width: 768px) {
+				#contenttable_list tbody tr td:before{
+					min-width: 80px;
+					display: inline-block;
+				}
+
+				.button-bar-group{
+					text-align: right;
+				}
+				.button-bar-group .btn{
+					margin-bottom:5px;
+					margin-top:5px;
+					max-width: 33px;
+				}	
+				.button-bar-group .btn .fa{
+					padding-right: 50px;
+				}
+				.button-bar-group .btn:hover{
+					max-width: inherit !important;
+					width: auto;
+					min-width: auto;
+				}
+				.button-bar-group .btn:hover .fa{
+					padding-right: 5px;
+				}
+				.datatable-header{
+					margin-top:5px;
+				}
+		        table.mobile_tbl{
+		            display:block;
+		        }
+		        table.mobile_tbl *{
+		            box-sizing: border-box;
+		        }
+		        table.mobile_tbl .dataTables_scrollBody{
+		            overflow: unset;
+		        }
+		        table.mobile_tbl thead{
+		            display: none !important;
+		        }
+		        table.mobile_tbl tbody{
+		            display:block;
+		        }
+		        table.mobile_tbl tbody tr{
+		            display:block;
+		            position: relative;
+		            white-space: normal;
+		            border-bottom: 1px solid #dedede;
+		            height: auto!important;
+		        }
+		        table.mobile_tbl tbody tr:nth-child(odd){
+		            background-color: #b6b6b6;
+
+		        }
+		        table.mobile_tbl tbody tr td{
+		            display:inline-block;
+		            border:none !important;
+		            box-sizing: border-box;
+		            min-width: 49%;
+		            text-align: left !important;
+		            height: 38px!important;
+		        }
+			}
+			.btn-group-sm .btn-icon-only, .btn-icon-only.btn-sm {
+				height: 25px;
+    			width: 25px;
+    			margin-top: 2px;
+			}
+			.btn-group-sm .btn-icon-only [class*=la-], .btn-icon-only.btn-sm [class*=la-] {
+				font-size: 1rem;
+			}
+			::placeholder{
+				font-style: italic;
+				color: #004c93;
+			}
+
+			/* MODAL CSS */
+			/* The Modal (background) */
+			.modal {
+			  display: none; /* Hidden by default */
+			  position: fixed; /* Stay in place */
+			  z-index: 1; /* Sit on top */
+			  padding-top: 100px; /* Location of the box */
+			  left: 0;
+			  top: 0;
+			  width: 100%; /* Full width */
+			  height: 100%; /* Full height */
+			  overflow: auto; /* Enable scroll if needed */
+			  background-color: rgb(0,0,0); /* Fallback color */
+			  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+			}
+
+			/* Modal Content */
+			.modal-content {
+			  background-color: #fefefe;
+			  margin: auto;
+			  border: 1px solid #888;
+			  width: 80%;
+			}
+
+			/* The Close Button */
+			.close {
+			  color: #aaaaaa;
+			  float: right;
+			  font-size: 28px;
+			  font-weight: bold;
+			}
+
+			.close:hover,
+			.close:focus {
+			  color: #000;
+			  text-decoration: none;
+			  cursor: pointer;
+			}
+		</style>
+	</head>
+	<body style="background-color: white">
+		<div align="right">	
+			<div style="display: inline-block; padding-top: 5px; margin-bottom: 5px;">
+				<input hidden id="trs_internal_warehouse_code">
+				<input hidden id="clicked_btn_name">
+
+				<input type="text" style="background-color: white; border: 0.5px solid #004c93; width: 260px; margin-left: 10px; margin-top: 5px; padding-left: 5px; border-radius: 5px;" placeholder="Nhập nội dung tìm kiếm" hidden id="search_text">
+				<button class="btn btn-success btn-icon-only btn-circle btn-sm btn-thick" style="margin-left: 5px;" id="btn_search"><i class="la la-search"></i></button>
+				<button class="btn btn-success btn-icon-only btn-circle btn-sm btn-thick" style="margin-left: 5px;" id="btn_back" hidden><i class="la la-undo"></i></button>
+			</div>
+
+			<div style="display: inline-block;">
+				<button id="check_QR_import_stock" style="margin-top: 5px; font-family: Times New Roman; border-radius: 5px; height: 2rem; width: 140px; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-left: 10px;"><p style="margin-top: auto; margin-bottom: auto"><span class="btn-icon"><i class="fa fa-barcode"></i>Quét CTCK</span></p></button>
+
+				<button id="check_QR_order" style="margin-top: 5px; font-family: Times New Roman; border-radius: 5px; height: 2rem; width: 140px; background-color: rgb(255, 61, 0); border: rgb(255, 61, 0) solid 1px; color: white; margin-left: 10px;"><p style="margin-top: auto; margin-bottom: auto"><span class="btn-icon"><i class="fa fa-barcode"></i>Quét mã order</span></p></button>
+
+				<button id="confirm_import_stock" style="margin-top: 5px; font-family: Times New Roman; border-radius: 5px; height: 2rem; width: 150px; background-color: #28a745; border: #28a745 solid 1px; color: white; margin-left: 10px;"><p style="margin-top: auto; margin-bottom: auto"><span class="btn-icon"><i class="la la-check"></i>Xác nhận NK</span></p></button>
+			</div>	
+		</div>
+		<div id="contenttable_div">
+			<div style="font-size: 12px; padding-left: 5px; padding-top: 10px;">
+				Số chứng từ: <b></b>
+			</div>
+			<div style="font-size: 12px; padding-left: 5px; padding-top: 10px;">
+				<?php 
+					$tariff_list = get_data("select * from ord_tariff order by ord_trf_code");
+					$tariff_details_list  = get_data("select * from ord_tariff_details order by ord_trf_code");
+					$user_info = get_data("select * from users where user_id = '".$sessions->get_session('user_id')."'");
+					$warehouse_list = get_data("select * from warehouse order by warehouse_code, warehouse_name"); 
+				?>
+				<label style="float: left;">Kho: <span id="warehouse_id" style="font-weight: bold">
+					<?php for($i = 0; $i < count($warehouse_list); $i++){ 
+						if ($warehouse_list[$i]['nation_id'] == $user_info[0]['nation_id'] 
+							&& $warehouse_list[$i]['city_id'] == $user_info[0]['city_id']){
+							echo ($warehouse_list[$i]['warehouse_name']);
+						}
+					}?>
+				</span></label>
+				<label style="float: right; padding-right: 10px;">Số dòng: <span id="tbl_row_numeric">3</span></label>
+			</div>
+			<table id="contenttable" style="width: 100%; margin-bottom: 10px; font-size: 12px;" class="table table-striped display nowrap mobile_tbl" cellspacing="0">
+				<thead>
+				    <tr> 
+				        <th col-name="order_id" style="height: 38px;">Mã order</th>
+				        <th col-name="total_price" style="height: 38px;">Trọng lượng</th>
+				    </tr>
+				</thead>
+				<tbody id="tbody_contenttable">		
+				<!--			
+					<?php
+						for($i = 0; $i < count($tariff_list); $i++){
+							if ($tariff_list[$i]['status'] 			== 'CK' 
+								&& $tariff_list[$i]['nation_id'] 	== $user_info[0]['nation_id']
+								&& $tariff_list[$i]['city_id'] 		== $user_info[0]['city_id']){
+								$total_weight = 0;
+								for ($j = 0; $j < count($tariff_details_list); $j++){
+									if ($tariff_list[$i]['ord_trf_code'] == $tariff_details_list[$j]['ord_trf_code']){
+										$total_weight += $tariff_details_list[$j]['stock_weight'];
+									}
+								} ?>	
+								<tr>
+									<td align="center"><?=$tariff_list[$i]['ord_trf_code'];?></td>
+									<td align="center"><?=$total_weight.' (kg)';?></td>
+								</tr>
+							<?php } ?>
+					<?php } ?>
+				-->
+				</tbody>
+			</table>
+		</div>
+		<div id="contenttable_list_div">
+			<div style="font-size: 12px; padding-left: 5px; padding-top: 10px;"></div>	
+				<div style="font-size: 12px; padding-left: 5px; padding-top: 10px;">
+					<label style="float: left;">Số order: <b id="order_code"></b></span></label>
+					<label style="float: right; padding-right: 10px;">Số dòng: <span id="tblList_row_numeric">2</span></label>
+				</div>
+				<div style="margin: 5px;">
+					<table id="contenttable_list" style="text-align:width: 100%;margin-bottom: 10px; font-size: 13px;" class="table table-striped display nowrap mobile_tbl" cellspacing="0">
+						<thead>
+				    	<tr> 			   
+						        <th col-name="total_price" style="min-height: 38px;">Hàng hóa</th>
+						        <th col-name="sender_name" align="center" style="min-height: 38px;">Số lượng</th>
+						        <th col-name="sender_name" style="min-height: 38px;">Trọng lượng</th>
+						        <th col-name="sender_name" style="min-height: 38px;">Ghi chú</th>
+						    </tr>
+						</thead>
+						<tbody id="tbody_contenttable_details"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+
+		<div class="modal" id="" hidden>
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="float: right">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" style="float: left;">Quét mã QR</h4>
+                    </div>
+                    <div class="modal-body">
+                        
+                        <div class="error"></div>
+                    </div>
+                    <div class="modal-footer">
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="groups-modalLabel-1" aria-hidden="true" data-whatever="id">
+			<div class="modal-dialog">
+				<div class="modal-content" id="myModalContent" style="border-radius: 4px; width: 640px;">
+					<div class="modal-header" style="background-color: #207b99; height: 40px;">
+						<label style="height: 30px; color: white; padding-left: 10px; padding-top: 7.5px; font-size: 16px; display: inline-block; font-weight: bold">QUÉT MÃ QR</label>
+
+                        <button  data-dismiss="modal" class="btn btn-danger btn-icon-only btn-circle btn-sm" style="float: right; margin-right: 5px; margin-top: 7.5px; margin-bottom: auto;" id="close_modal">
+                        	<i class="la la-close"></i>
+                        </button>
+					</div>
+					<div class="modal-body" align="center" style="transform: scaleX(-1)!important; -webkit-transform: scaleX(-1)!important;">
+						<div id="interactive" class="viewport">
+                            <video id="preview" preload="auto" autoplay="true" style="margin-left: auto; margin-right: auto;"></video>
+                        </div>
+					</div>
+					<div class="modal-footer" hidden>
+						<div  style="margin: 0 auto!important;">
+							<label class="btn btn-default pull-left">
+                            <i class="fa fa-camera"></i> Use camera app
+                            <input type="file" accept="image/*;capture=camera" capture="camera" class="hidden" />
+                        </label>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		var tbl 				= $('#contenttable'),
+			tblList 			= $('#contenttable_list'),
+            _columns 			= ['order_id', 'total_price'],
+            _listColumns 		= ['1', '2', '3', '4', '5'],
+            ordIDList 			= [];
+
+        tbl.newDataTable({
+            scrollY: '100vh',
+            columnDefs: [
+            ],
+            paging: false,
+            keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            paging: false,
+            info: true,
+            buttons: [],
+            arrayColumns: _columns,
+            searching: false,
+        });
+        tbl.initComplete({
+			QMCT: 'QMCT',
+		});
+
+        tblList.newDataTable({
+            scrollY: '100vh',
+            columnDefs: [
+            ],
+            paging: false,
+            keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            paging: false,
+            info: true,
+            buttons: [],
+            arrayColumns: _listColumns,
+            searching: false,
+        });
+
+		if($(".mobile_tbl").length > 0 && $(window).width()<=768){
+			/* Hide button */
+			$('#check_QR_import_stock').show();
+			$('#check_QR_order').hide();
+			$('#confirm_import_stock').hide();
+			$("#btn_back").prop('disabled', true);
+			$('#btn_back').hide();
+
+	        var css="";
+	        $(".mobile_tbl").each(function(i){
+	            var tblid="#"+$(this).attr("id");        
+	            $(this).find("th").each(function(){
+	                var inx=$(this).index()+1;
+	                css+=tblid+" tbody tr td:nth-child("+inx+"):before{content:\""+$(this).text()+" : \";color:#795548;}";
+	            });
+	            $("head").append("<style>@media only screen and (max-width: 768px){"+css+"}</style>");
+	        });
+
+	        $('#contenttable_div').show();
+	        $('#contenttable_list_div').hide();
+
+	        $('#contenttable_div').css({'width': '100%', 'float': 'none'});
+	    	$('#contenttable_list_div').css({'width': '100%', 'float': 'none', 'margin-top': '0px'});
+
+			$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+
+			$('#myModalContent').css({'width': '100%'});
+	    }
+	    else{
+	    	$('#contenttable_div').show();
+	        $('#contenttable_list_div').show();
+
+			$('#contenttable_div').css({'width': '30%', 'float': 'left'});
+	    	$('#contenttable_list_div').css({'width': '70%', 'float': 'left', 'margin-top': '16px'});
+
+			$("#btn_back").hide();
+			$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+
+			$('#myModalContent').css({'width': '640px'});
+	    }
+		
+		/*
+		window.onresize = function(event) {
+		    if($(".mobile_tbl").length > 0 && $(window).width()<=768){
+				$('#check_QR_order').hide();
+				$('#confirm_import_stock').hide();
+				$('#btn_back').hide();
+
+		        var css="";
+		        $(".mobile_tbl").each(function(i){
+		            var tblid="#"+$(this).attr("id");        
+		            $(this).find("th").each(function(){
+		                var inx=$(this).index()+1;
+		                css+=tblid+" tbody tr td:nth-child("+inx+"):before{content:\""+$(this).text()+" : \";color:#795548;}";
+		            });
+		            $("head").append("<style>@media only screen and (max-width: 768px){"+css+"}</style>");
+		        });
+		        $('#contenttable_div').show();
+		        $('#contenttable_list_div').hide();
+
+		        $('#contenttable_div').show();
+		        $('#contenttable_list_div').hide();
+
+		        $('#contenttable_div').css({'width': '100%', 'float': 'none'});
+		    	$('#contenttable_list_div').css({'width': '100%', 'float': 'none', 'margin-top': '0px'});
+				$($.fn.dataTable.tables(true)).DataTable().columns.adjust();3
+
+				$('#myModalContent').css({'width': '100%'});
+		    }
+		    else{
+				$('#check_QR_order').show();
+				$('#confirm_import_stock').show();
+				$('#btn_back').show();
+
+		    	$('#contenttable_div').show();
+		        $('#contenttable_list_div').show();
+				$('#contenttable_div').css({'width': '40%', 'float': 'left'});
+		    	$('#contenttable_list_div').css({'width': '60%', 'float': 'left', 'margin-top': '16px'});
+
+		    	$("#btn_back").hide();
+				$("#btn_back").prop('disabled', true);
+				$($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+				$('#myModalContent').css({'width': '640px'});
+		    }
+		};
+		*/
+		
+		$('.sorting_1').css({'background-color': 'transparent'});
+		$('.odd').css({'background-color': '#CCFFCC', 'height': '35px'});
+		$('.even').css({'background-color': 'white', 'height': '35px'});
+		$('.dataTables_empty').html('------------ Không có dữ liệu hiển thị ------------');
+		$('.dataTables_empty').css({'background-color': 'white', 'hidden': 'hidden'});
+		$('#contenttable_list_info').hide();
+		
+		updateRowNumeric();
+		function updateRowNumeric(){
+			var tblRowNumeric = $('#contenttable_info').html(),
+				tblListRowNumeric = $('#contenttable_list_info').html();
+			$('#tbl_row_numeric').html(tblRowNumeric.substring(tblRowNumeric.indexOf('of') + 3, tblRowNumeric.indexOf('entries') - 1));
+			$('#tblList_row_numeric').html(tblListRowNumeric.substring(tblListRowNumeric.indexOf('of') + 3, tblListRowNumeric.indexOf('entries') - 1));
+		}
+
+		$(document).on('click', "#contenttable tbody tr", function(e){
+		    var data = tbl.getSelectedData();
+
+		    if (data.length > 0){
+		    	tblList.dataTable().fnClearTable();
+			    $('#order_code').html(data[0][0]);
+
+			    <?php for ($i = 0; $i < count($tariff_list); $i++) { ?>
+			    	if (<?="'".$tariff_list[$i]['ord_trf_code']."'";?> == data[0][0]){
+			    		$('#trs_internal_warehouse_code').val(<?="'".$tariff_list[$i]['trs_internal_warehouse_code']."'";?>)
+			    	}
+			    <?php } ?>
+
+			    var rows = [];
+			    <?php
+			    	for ($i = 0; $i < count($tariff_details_list); $i++) { ?>
+		        	var row = [];
+			    	if (<?="'".$tariff_details_list[$i]['ord_trf_code']."'";?> == data[0][0]){
+		        		row.push(<?="'".$tariff_details_list[$i]['stock_type_name']."'";?>);
+		        		row.push(<?="'".$tariff_details_list[$i]['numeric']."'";?> + '/ <input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 75px;" placeholder="Nhập trọng lượng" id="receive_numeric_of_' + data[0][0] + '"  value="' + (<?="'".$tariff_details_list[$i]['receive_numeric']."'";?> ? <?="'".$tariff_details_list[$i]['receive_numeric']."'";?> : <?="'".$tariff_details_list[$i]['numeric']."'";?>) + '">');
+						row.push(<?="'".$tariff_details_list[$i]['stock_weight']."'";?> + '/ <input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 75px;" placeholder="Nhập trọng lượng" id="receive_stock_weight_of_' + data[0][0] + '" value="' + (<?="'".$tariff_details_list[$i]['receive_stock_weight']."'";?> ? <?="'".$tariff_details_list[$i]['receive_stock_weight']."'";?> : <?="'".$tariff_details_list[$i]['stock_weight']."'";?>) + '">' + ' (kg)');
+						if (<?="'".$tariff_details_list[$i]['receive_stock_weight']."'";?> && <?="'".$tariff_details_list[$i]['receive_stock_weight']."'";?> != ''){
+							row.push('<input id="remark_of_' + <?="'".$tariff_details_list[$i]['ord_trf_code']."'";?> + '" type="text" value="' + <?="'".$tariff_details_list[$i]['remark']."'";?> + '"  style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 100px;" placeholder="Nhập ghi chú">(<span style="font-style: italic; color: red; font-weight: bolder;">Đã xác nhận</span> <button class="confirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 7rem; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-right: 0; font-weight: bold; margin-left: 10px;" attrX="' + <?="'".$tariff_details_list[$i]['ord_trf_details_id']."'";?> + '" attrY="' + data[0][0] + '" id="btnReconfirm_' + data[0][0] + '"><p style="margin-top: auto; margin-bottom: auto;">Xác nhận lại</p></button>)');
+						}
+						else{								
+							row.push('<input id="remark_of_' + <?="'".$tariff_details_list[$i]['ord_trf_code']."'";?> + '" type="text" value="' + <?="'".$tariff_details_list[$i]['remark']."'";?> + '"  style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 100px;" placeholder="Nhập ghi chú"><button class="confirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 5rem; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-right: 10px; font-weight: bold; margin-left: 10px;" attrX="' + <?="'".$tariff_details_list[$i]['ord_trf_details_id']."'";?> + '" attrY="' + data[0][0] + '" id="btnConfirm_' + data[0][0] + '"><p style="margin-top: auto; margin-bottom: auto;">Xác nhận</p></button>');
+						}
+						
+						rows.push(row);
+			    	}
+			    <?php } ?>
+
+			    tblList.dataTable().fnClearTable();
+				if(rows.length > 0){
+					tblList.dataTable().fnAddData(rows);
+					updateRowNumeric();
+				}
+			
+				$('.sorting_1').css({'background-color': 'transparent'});
+				$('.odd').css({'background-color': '#CCFFCC', 'height': '35px'});
+				$('.even').css({'background-color': 'white', 'height': '35px'});
+				$('.dataTables_empty').html('------------ Không có dữ liệu hiển thị ------------');
+			}
+
+			if($(".mobile_tbl").length > 0 && $(window).width()<=768){
+				$('#contenttable_div').hide();
+				$('#contenttable_list_div').hide();
+				$('#search_text').hide();
+				$("#btn_back").prop('disabled', false);
+				$('#contenttable_list_div').show();
+				$('#btn_back').show();
+				$("#btn_back").prop('disabled', false);
+				$('#check_QR_import_stock').hide();
+				$('#check_QR_order').show();
+				$('#confirm_import_stock').hide();
+			}
+			else{
+				/* Do nothing */
+			}
+		});
+		
+		$('#btn_back').on('click', function(){
+			$('#contenttable_div').hide();
+			$('#contenttable_list_div').hide();
+			$('#search_text').hide();
+
+			/* Hide button */
+			$('#check_QR_import_stock').show();
+			$('#check_QR_order').hide();
+			$('#confirm_import_stock').hide();
+			$('#btn_back').hide();
+			$("#btn_back").prop('disabled', true);
+
+			$('#contenttable_div').show();
+
+			$('#check_QR_import_stock').hide();
+			$('#check_QR_order').show();
+
+			$(this).hide();
+		});
+
+		$('#btn_search').on('click', function(){
+			if ($('#search_text').is(":hidden")){
+				$('#search_text').show();
+			}
+			else{
+				$('#search_text').hide();
+			}
+
+		});
+
+		$(document).on('click', '#confirm_import_stock', function(){
+<?php $user_info = get_data("select * from users where user_id = '".$sessions->get_session('user_id')."'"); ?>
+      		var currentDateTime = getDateTimeFormatString(new Date()),
+      			ORDTRFData 		= [{
+      				'trs_internal_warehouse_code': $('#trs_internal_warehouse_code').val(),
+      				'released_by'	: <?="'".$user_info[0]['user_name']."'";?>,
+      				'release_time'	: currentDateTime,
+      				'updated_by'	: <?="'".$user_info[0]['user_name']."'";?>,
+      				'update_time'	: currentDateTime,
+      				'status' 		: 'NKN',
+      			}];
+
+		    var formData = {			
+	      		'action': 'edit',
+				'data'	: ORDTRFData,
+				'ordIDList': ordIDList,
+			};
+
+			$.ajax({
+		        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('update_ORD_TRF_on_release')?>",
+		        dataType: 'json',
+		        data: formData,
+		        type: 'POST',
+		        success: function (data) {
+		            if(data.deny) {
+		                toastr["error"](data.deny);
+		                return;
+		            }
+		            
+		            alert('Tất cả dữ liệu đã được xác nhận. Quá trình nhập hàng thành công!');
+		            location.reload();
+		            return;
+		        },
+		        error: function(err){
+		            alert("Error!");
+		            console.log(err);
+		        }
+		    });
+      	});
+
+		$(document).on('mouseup', '.confirm_details', function(e){	
+      		var trf_details_id 	= $(this).attr('attrX'),
+      			order_code 	   	= $(this).attr('attrY');
+
+			$('#confirm_import_stock').show();
+      		confirmDetails(e, 'confirm_details', trf_details_id, order_code);
+      	});
+
+      	$(document).on('mouseup', '.reconfirm_details', function(e){	
+      		var trf_details_id 	= $(this).attr('attrX'),
+      			order_code 	   	= $(this).attr('attrY');
+
+			$('#confirm_import_stock').show();
+      		confirmDetails(e, 'reconfirm_details', trf_details_id, order_code);
+      	});
+
+      	function confirmDetails(e, screenName, trf_details_id, order_code){
+      		var currentDateTime = getDateTimeFormatString(new Date()),
+      			data 			= [];
+
+      		if (!($('#receive_stock_weight_of_' + order_code).val())){
+      			toastr['error']('Vui lòng nhập trọng lượng nhận!');
+      			return;
+      		}
+
+	      	var currentDateTime = getDateTimeFormatString(new Date()),
+	      		data = [{
+	      			'ord_trf_details_id' 	: trf_details_id,
+	      			'receive_numeric'		: $('#receive_numeric_of_' + order_code).val()		,
+	      			'receive_stock_weight'	: $('#receive_stock_weight_of_' + order_code).val()	,
+	      			'updated_by' 			: <?="'".$user_info[0]['user_name']."'";?>			,
+	      			'update_time' 			: currentDateTime,
+	      			'remark' 				: $('#remark_of_' + order_code).val()				,
+	      		}];
+	      		formDataDetails = {			
+		      		'action': 'edit',
+					'data'	: data,
+				};
+
+			$.ajax({
+		        url: "?eda_act=<?=md5('tariff')?>&eda_code=<?= md5('update_ORD_TRF_Details')?>",
+		        dataType: 'json',
+		        data: formDataDetails,
+		        type: 'POST',
+		        success: function (data) {
+		            if(data.deny) {
+		                toastr["error"](data.deny);
+		                return;
+		            }
+
+		            toastr['success']('Cập nhật dữ liệu nhập hàng thành công!');
+		            if (screenName == 'confirm_details'){
+		            	$('#btnConfirm_' + order_code).parent().html('<input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 100px;" placeholder="Nhập ghi chú">(<span style="font-style: italic; color: red; font-weight: bolder;">Đã xác nhận</span> <button class="confirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 7rem; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-right: 0; font-weight: bold; margin-left: 10px;" attrX="' + trf_details_id + '" attrY="' + order_code + '" id="btnReconfirm_' + order_code + '"><p style="margin-top: auto; margin-bottom: auto;">Xác nhận lại</p></button>)');
+		            }
+
+		            var flag	 = true,
+		            	chkValue = formDataDetails.data[0]['ord_trf_details_id'];
+		            for (i = 0; i < checkListComplete.length; i++){
+		            	if (checkListComplete[i] == chkValue){
+		            		flag = false;
+		            		i = checkListComplete.length;
+		            	}
+		            }
+
+		            if (flag){
+		            	checkListComplete.push(chkValue);
+		            	if (checkListComplete.length == checkIdxComplete){
+		            		$('#confirm_import_stock').trigger('click');
+		            	}
+		            }
+		            
+		            return;
+		        },
+		        error: function(err){
+		            alert("Error!");
+		            console.log(err);
+		        }
+		    });
+		}
+			
+		var modal 	= document.getElementById("myModal");
+		let scanner = new Instascan.Scanner({ video: document.getElementById("preview") });
+
+		$("#check_QR_import_stock").on("click", function () {
+		    modal.style.display = "block";
+		    $('#clicked_btn_name').val('check_QR_import_stock');
+
+		    
+		    scanner.addListener("scan", function (content) {
+		        if (content != "" && $('#clicked_btn_name').val() == "check_QR_import_stock") {
+		        	var sumTotalWeight 	= 0,
+		        		rows 			= [];
+
+					<?php for ($i = 0; $i < count($tariff_list); $i++) { ?>
+						if (<?="'".$tariff_list[$i]['trs_internal_warehouse_code']."'";?> == content){
+							rows.push([<?="'".$tariff_list[$i]['ord_trf_code']."'";?>, 0]);
+						}
+					<?php } ?>
+					
+					for (i = 0; i < rows.length; i++){
+						var sumTotalWeight = 0;
+
+						<?php for ($j = 0; $j < count($tariff_details_list); $j++) { ?>
+					    	if (rows[i][0] == <?="'".$tariff_details_list[$j]['ord_trf_code']."'"?>){ 
+				    			sumTotalWeight += parseFloat(<?="'".$tariff_details_list[$j]['stock_weight']."'"?>);
+				    		}
+						<?php } ?>
+
+						rows[i][1] = (sumTotalWeight + ' (kg)');	
+					}
+					
+					tbl.dataTable().fnClearTable();
+					tblList.dataTable().fnClearTable();
+					if (rows.length > 0){
+						$('#order_code').html('');
+			        	toastr["success"]("Truy xuất thành công danh order với mã chứng từ: " + content);
+						tbl.dataTable().fnAddData(rows);
+						updateRowNumeric();
+				        $('#close_modal').trigger('click');
+
+				        $('#check_QR_import_stock').hide();
+						$('#check_QR_order').show();
+					}
+					else{
+						toastr['error']('Dữ liệu tương ứng với mã chứng từ ' + content + ' không tồn tại trong hệ thống!');
+					}
+
+					$('.sorting_1').css({'background-color': 'transparent'});
+					$('.odd').css({'background-color': '#CCFFCC', 'height': '35px'});
+					$('.even').css({'background-color': 'white', 'height': '35px'});
+					$('.dataTables_empty').html('------------ Không có dữ liệu hiển thị ------------');
+		        }
+		    });
+
+		    Instascan.Camera.getCameras()
+		        .then(function (cameras) {
+		            if (cameras.length > 0) {
+		                if (cameras.length >= 2) scanner.start(cameras[1]);
+		                else scanner.start(cameras[0]);
+		            } else {
+		                console.error("Không tìm thấy camera!");
+		            }
+		        })
+		        .catch(function (e) {
+		            console.error(e);
+		            if (e.type + "" != "NotReadableError") alert("Không hổ trợ trên thiết bị này !");
+		            scanner.stop();
+		        });
+		});
+
+		$("#check_QR_order").on("click", function () {
+		    modal.style.display = "block";
+		    $('#clicked_btn_name').val('check_QR_order');
+
+		    let scanner = new Instascan.Scanner({ video: document.getElementById("preview") });
+		    scanner.addListener("scan", function (content) {
+		        if (content != "" && $('#clicked_btn_name').val() == "check_QR_order") {
+		        	var chkIDExist = false;
+		        	var sumTotalWeight = 0;
+content += '';
+content = content.substring(content.lastIndexOf('=') + 1, content.length);
+					<?php for ($i = 0; $i < count($tariff_list); $i++) { ?>
+						if (<?="'".$tariff_list[$i]['ord_trf_code']."'";?> == content){
+							$('#trs_internal_warehouse_code').val(<?="'".$tariff_list[$i]['trs_internal_warehouse_code']."'";?>);
+							chkIDExist = true;
+			        		ordIDList.push(<?="'".$tariff_list[$i]['ord_trf_id']."'";?>);
+						}
+					<?php } ?>
+
+					if (chkIDExist){
+					    var rows = [];
+
+					    <?php
+					    	for ($i = 0; $i < count($tariff_details_list); $i++) { ?>
+					    	var row = [];
+					    	if (<?="'".$tariff_details_list[$i]['ord_trf_code']."'";?> == content){
+					    		row.push(<?="'".$tariff_details_list[$i]['stock_type_name']."'";?>);
+					    		row.push(<?="'".$tariff_details_list[$i]['numeric']."'";?> + '/ <input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 75px;" placeholder="Nhập trọng lượng" id="receive_numeric_of_' + content + '"  value="' + (<?="'".$tariff_details_list[$i]['receive_numeric']."'";?> ? <?="'".$tariff_details_list[$i]['receive_numeric']."'";?> : <?="'".$tariff_details_list[$i]['numeric']."'";?>) + '">');
+								row.push(<?="'".$tariff_details_list[$i]['stock_weight']."'";?> + '/ <input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 75px;" placeholder="Nhập trọng lượng" id="receive_stock_weight_of_' + content + '" value="' + (<?="'".$tariff_details_list[$i]['receive_stock_weight']."'";?> ? <?="'".$tariff_details_list[$i]['receive_stock_weight']."'";?> : <?="'".$tariff_details_list[$i]['stock_weight']."'";?>) + '">' + ' (kg)');
+								if (<?="'".$tariff_details_list[$i]['receive_stock_weight']."'";?> && <?="'".$tariff_details_list[$i]['receive_stock_weight']."'";?> != ''){
+									row.push('<input type="text" id="remark_of_' + <?="'".$tariff_details_list[$i]['ord_trf_code']."'";?> + '" type="text" value="' + <?="'".$tariff_details_list[$i]['remark']."'";?> + '" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 100px;" placeholder="Nhập ghi chú">(<span style="font-style: italic; color: red; font-weight: bolder;">Đã xác nhận</span> <button class="confirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 7rem; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-right: 0; font-weight: bold; margin-left: 10px;" attrX="' + <?="'".$tariff_details_list[$i]['ord_trf_details_id']."'";?> + '" attrY="' + content + '" id="btnReconfirm_' + content + '"><p style="margin-top: auto; margin-bottom: auto;">Xác nhận lại</p></button>)');
+								}
+								else{								
+									row.push('<input id="remark_of_' + <?="'".$tariff_details_list[$i]['ord_trf_code']."'";?> + '" type="text" value="' + <?="'".$tariff_details_list[$i]['remark']."'";?> + '" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 100px;" placeholder="Nhập ghi chú"><button class="confirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 5rem; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-right: 10px; font-weight: bold; margin-left: 10px;" attrX="' + <?="'".$tariff_details_list[$i]['ord_trf_details_id']."'";?> + '" attrY="' + content + '" id="btnConfirm_' + content + '"><p style="margin-top: auto; margin-bottom: auto;">Xác nhận</p></button>');
+								}
+								
+								rows.push(row);
+								sumTotalWeight += parseFloat(<?="'".$tariff_details_list[$i]['stock_weight']."'";?>);
+					    	}
+					    <?php } ?>
+
+					    tblList.dataTable().fnClearTable();
+						if(rows.length > 0){
+					    	$('#order_code').html(content);
+			        		toastr["success"]("Truy xuất thành công danh sách sản phẩm với mã order: " + content);
+							tblList.dataTable().fnAddData(rows);
+							updateRowNumeric();
+							
+							rows = [content, sumTotalWeight];
+					   		tbl.dataTable().fnClearTable();
+							tbl.dataTable().fnAddData(rows);
+				        	$('#close_modal').trigger('click');
+
+				        	$('#contenttable_div').hide();
+							$('#contenttable_list_div').show();
+
+				        	$('#check_QR_import_stock').hide();
+							$('#check_QR_order').hide();
+							$('#btn_back').show();
+						}
+
+						$('.sorting_1').css({'background-color': 'transparent'});
+						$('.odd').css({'background-color': '#CCFFCC', 'height': '35px'});
+						$('.even').css({'background-color': 'white', 'height': '35px'});
+						$('.dataTables_empty').html('------------ Không có dữ liệu hiển thị ------------');
+					}
+					else{
+						toastr['error']('Dữ liệu tương ứng với mã order ' + content + ' không tồn tại trong hệ thống!');
+					}	
+		        }
+		    });
+
+		    Instascan.Camera.getCameras()
+		        .then(function (cameras) {
+		            if (cameras.length > 0) {
+		                if (cameras.length >= 2) scanner.start(cameras[1]);
+		                else scanner.start(cameras[0]);
+		            } else {
+		                console.error("Không tìm thấy camera!");
+		            }
+		        })
+		        .catch(function (e) {
+		            console.error(e);
+		            if (e.type + "" != "NotReadableError") alert("Không hổ trợ trên thiết bị này !");
+		            scanner.stop();
+		        });
+		});
+
+		$('#close_modal').on('click', function(){
+		    modal.style.display = "none";
+		    scanner.stop();
+		});
+
+		function getDateTimeFormatString(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        return (year + '-' + fillMonth + month + '-' + fillDay + day + " " + fillHour + hour + ':' + fillMin + min + ':' + fillSec + sec);
+	    }
+
+	    function getDefaultTime(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        return (fillDay + day + '/' + fillMonth + month + '/' + year + ' ' + fillHour + hour + ':' + fillMin + min + ':' + fillSec + sec);
+	    }
+
+	    function getDefaultStartTime(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        return ('01/' + fillMonth + month + '/' + year + " 00:00:00");
+	    }
+
+	    function getSQLDefaultStartTime(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        return (year + '-' + fillMonth + month + '-01' + " 00:00:00");
+	    }
+
+
+	    function getDefaultFinishTime(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        switch(month){
+	            case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+	                day = 31;
+	                break;
+	            case 2:
+	                if (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0)){
+	                    day = 29;
+	                }
+	                else{
+	                    day = 28;
+	                }
+	                break;
+	            default:
+	                day = 30;
+	                break;
+	        }
+	        return (day + '/' + fillMonth + month + '/' + year + " 23:59:59");
+	    }
+
+	    function getSQLDefaultFinishTime(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        switch(month){
+	            case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+	                day = 31;
+	                break;
+	            case 2:
+	                if (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0)){
+	                    day = 29;
+	                }
+	                else{
+	                    day = 28;
+	                }
+	                break;
+	            default:
+	                day = 30;
+	                break;
+	        }
+	        return (year + '-' + fillMonth + month + '-' + day + " 23:59:59");
+	    }
+
+	    function covertToSQLDefaultFinishTime(d){
+	        return (d.substring(6,10) + '-' + d.substring(3,5) + '-' + d.substring(0, 2) + d.substring(10, d.length));
+	    }
+
+		var resizefunc = [];
+            $.extend( true, $.fn.dataTable.defaults, {
+                language: {
+                    info: "Số dòng: _TOTAL_",
+                    emptyTable: "------------ Không có dữ liệu hiển thị ------------",
+                    infoFiltered: "(trên _MAX_ dòng)",
+                    infoEmpty: "Số dòng: 0",
+                    search: '<span>Tìm:</span> _INPUT_',
+                    zeroRecords:    "------------ Không có dữ liệu được tìm thấy ------------",
+                    sThousands: ",",
+                    sDecimal: ".",
+                    select: {
+                        rows: {
+                            _: "Đã chọn %d dòng",
+                            0: ""
+                        }
+                    }
+                },
+                search: {
+                    regex: true
+                },
+                info: true,
+                orderClasses: false,
+                paging: false,
+                scrollY: 419,
+                scrollX: true,
+                lengthChange: false,
+                scrollCollapse: false,
+                deferRender: true,
+                processing: true,
+                autoWidth: true,
+                dom: '<"datatable-header"fl<"datatable-info-right"Bip>><"datatable-scroll-wrap"t>',
+                buttons: [
+                    {extend: 'selectAll', text: 'Chọn tất cả', className: 'btn btn-xs btn-default'},
+                    {extend: 'selectNone', text: 'Bỏ chọn', className: 'btn btn-xs btn-default'}
+                ],
+                destroy: true
+            });
+    });
+</script>

@@ -1,0 +1,106 @@
+<?php
+header("Access-Control-Allow-Origin: *");
+
+$headers = apache_request_headers();
+$param=array();
+parse_str( @explode("?", $_SERVER['REQUEST_URI'])[1],$param);
+$token=safe_str(@$_SERVER['HTTP_TOKEN']);
+if($token=="")$token=safe_str(@$param['token']);
+$signalKey=safe_str(@$param['signalKey']);
+
+$err="";
+
+
+$inputJSON = file_get_contents('php://input');
+
+
+
+
+//Test data
+// $inputJSON='{
+//   "customer_code": "KH00000003",
+//   "amount": 220000,
+//   "amount_discount_basic": 1000,
+//   "amount_discount_product": 2000,
+//   "amount_discount": 30000,
+//   "products": [
+//     {
+//       "product_name": "100/70-17",
+//       "product_gai": "MA3D",
+//       "price": 11000,
+//       "number": 20
+//     }
+//   ],
+//   "stocks": [
+//     {
+//       "stock_code": "BD",
+//       "products": [
+//         {
+//           "product_name": "100/70-17",
+//           "product_gai": "MA3D",
+//           "number": 20
+//         }
+//       ]
+//     }
+//   ]
+// }';
+
+
+$data = json_decode($inputJSON, TRUE);
+
+
+
+
+
+$order_code=urldecode(preg_replace('/[^A-Za-z0-9\-\_\.\/\#]/', '',@$param['code']));
+if($order_code=="")$order_code=preg_replace('/[^A-Za-z0-9\-\_\.\#]/', '',@$_SERVER['HTTP_CODE']);
+if($order_code=="")$order_code=preg_replace('/[^A-Za-z0-9\-\_\.\#]/', '',@$data['code']);
+
+
+
+
+
+
+
+$trueSignalKey=sha1("code={$order_code}&secretKey=".SECRET_KEY);
+if($token!=TOKEN){
+	$reback['result']=false;
+	$reback['message']="Sai token !! [".$token."]";
+	echo json_encode($reback,true);die();
+}
+if($trueSignalKey!=$signalKey){
+	$reback['result']=false;
+	$reback['message']="Sai signalKey !! [".$trueSignalKey."]";
+	echo json_encode($reback,true);die();
+}
+
+
+
+
+
+if($order_code==""){
+	$err="Chưa có mã đơn hàng";
+	goto error_out;
+}
+$chk = get_data("select inv_code,inv_id from out_invoices where inv_code='" . $order_code . "'");
+                if (count($chk) > 0) {
+                	$old_id=$chk[0]['inv_id'];
+                	$db->query("update out_invoices set inv_code='" . $order_code . "',cus_id='" . $cus_id . "' where inv_id={$old_id}");
+					$reback['result']=true;
+					$reback['message']="Cập nhật thành công đơn hàng [{$order_code}]";
+					echo json_encode($reback,true);die();
+                }
+                else
+                {
+                		$err="Đơn ".$order_code." không tồn tại";
+	                    goto error_out;
+         
+                }
+
+
+
+error_out:
+$reback['result']=false;
+$reback['message']=$err;
+echo json_encode($reback,true);die();
+?>

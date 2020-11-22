@@ -1,0 +1,103 @@
+<form onkeypress="return tabOnEnter(document.activeElement, event);" onsubmit="return false;" name="frmadmin" method="post" action="?eda_act=<?=md5('general')?>&eda_code=<?= md5('edit_mfa_sm')?>&eda_id=<?= $action->eda_id?>" style="margin:0px">
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/city.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Sửa thông tin hãng sản xuất</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('mfa_manager')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td height="25" width="160" align="left"><b>(*) Tên hãng sản xuất</b></td>
+              <td width="180"><input style="width:180px;" class="catbg" name="mfa_name" id="mfa_name" type="text" value="<?= isset($return_val['mfa_name'])?$return_val['mfa_name']:''?>" /></td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Điện thoại</b></td>
+              <td>
+				<input style="width:180px;" class="catbg" name="tel" id="tel" type="text" value="<?= isset($return_val['tel'])?$return_val['tel']:''?>" />                          
+               </td>
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Email</b></td>
+              <td>
+              <input style="width:180px;" class="catbg" name="email" id="email" type="text" value="<?= isset($return_val['email'])?$return_val['email']:''?>" />
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Website</b></td>
+              <td>
+			<input style="width:180px;" class="catbg" class="textbox" value="<?= isset($return_val['website'])?$return_val['website']:''?>" name="website" id="website" type="text" />
+              </td>             
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Địa chỉ</b></td>
+              <td colspan="3">
+			<input style="width:500px;" class="catbg" class="textbox" value="<?= isset($return_val['address'])?$return_val['address']:''?>" name="address" id="address" type="text" />
+              </td>             
+            </tr>            
+            <tr>
+              <td height="25" align="left"><b>Ghi chú</b></td>
+              <td colspan="3"><textarea  style="width:500px;" class="catbg" name="description" type="text" id="description" cols="80" rows="4"><?= isset($return_val['description'])?$return_val['description']:''?></textarea></td>             
+            </tr>    
+            <tr><td colspan="4" height="25"><b>Chọn chủng loại sản phẩm sản xuất</b></td></tr>
+            <tr><td colspan="4" align="center" bgcolor="#efefef" style="padding-top:5px;padding-left:5px;padding-right:5px;padding-bottom:5px;">
+<?php
+			$cat_table=get_data("select * from categories order by cat_name");
+			$i=0;
+			$st='';
+			$line=ceil(count($cat_table)/5);
+			if(count($cat_table)>0)
+			{
+				$st.= '<table width="760" border="0" cellspacing="0" cellpadding="0">';
+				for($j=0;$j<$line;$j++)
+				{
+					$st.= '<tr>';
+					for($k=0;$k<5;$k++)
+					{
+						$st.= '<td width="20%" height="25">';
+						if($i<count($cat_table))
+						{
+							$st.='<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr>';
+							$chk="";
+							if (isset($return_val['cat_list']))
+								for($t=0;$t<count($return_val['cat_list']);$t++)
+								{
+									if($cat_table[$i]["cat_id"]==$return_val['cat_list'][$t])
+										$chk="checked";
+								}
+							$st.= '<td width="20"><input value="'.$cat_table[$i]['cat_id'].'" '.$chk.' type="checkbox" name="cat_list[]" id="cat_'.$i.'"></td>';
+							$st.= '<td style="cursor:pointer;" onclick="document.getElementById(\'cat_'.$i.'\').checked=!document.getElementById(\'cat_'.$i.'\').checked;">';
+							$st.= $cat_table[$i]["cat_name"]."</td></tr></table>";
+						}
+						else
+							$st.="&nbsp;";
+						$st.= '</td>';
+						$i++;
+					}
+					$st.= '</tr>';
+				}			
+				$st.= '</table>';
+			}
+			echo $st;
+?>			            
+            </td></tr>                                              
+          </table>
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+
+</td></tr>
+</table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          <input style="font-weight:bold;cursor:pointer;" onclick="document.forms[0].submit();" class="button" type="button" name="button" value="Lưu hãng sản xuất" />
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('mfa_manager')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>          
+   </form>
+

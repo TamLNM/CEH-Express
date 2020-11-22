@@ -1,0 +1,517 @@
+<?php
+
+
+$cat_query="";
+$cat_arr=array();
+if(@$_GET['cat_id']!=""){
+    $arr=explode(",", $_GET['cat_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $cat_arr[]=intval($value);
+    }
+    if(count($cat_arr)>0){
+        $cat_query= " and cat.cat_id in (".join(",",$cat_arr).") ";
+    }
+}
+
+
+
+$stocks=array();
+$stock_query="";
+$stock_arr=array();
+if(@$_GET['stock_id']!=""){
+    
+    $arr=explode(",", $_GET['stock_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $stock_arr[]=intval($value);
+    }
+    if(count($stock_arr)>0){
+        $stock_query= " and stock.stock_id in (".join(",",$stock_arr).") ";
+    }
+
+if(count($stock_arr)>0){
+    foreach ($stock_arr as $key => $ss) {
+        $row=get_data("select * from stocks where stock_id=".intval($ss));
+        if(is_array($row) && count($row)>0){
+            $stocks[]=$row[0];
+        }
+    }
+    
+}
+
+}
+
+if(count($stock_arr)<=0){
+$stocks=get_data("select * from stocks");
+    if(is_array($stocks) && count($stocks)>0){
+
+    }
+    else
+        $stocks=array();
+}
+
+$user_query="";
+$user_arr=array();
+if(@$_GET['user_id']!=""){
+    
+    $arr=explode(",", $_GET['user_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $user_arr[]=intval($value);
+    }
+    if(count($user_arr)>0)
+        $user_query= " and user.user_id in (".join(",",$user_arr).") ";
+}
+$where='';
+    if(!check_func('view_input_all')) {
+        $where.=" and inv.created_user='".$sessions->get_session('user_id')."'";
+    }
+if(intval(@$_GET['cus_id'])>0) {
+        $where.=" and cus.cus_id=".intval(@$_GET['cus_id'])." ";
+    }
+// Kho hang , loai hang, ten kh,
+//  no dau ky, 
+//  cong no phai thu,
+//  doanh thu, tien tra,hang tra, chiet khau, 
+//  no cuoi ky, so luong , vo 
+
+
+//print_r($inv);die();
+
+$stock_name=array();
+$user_name=array();
+$cat_name=array();
+$row=get_data("select * from stocks stock where 1=1 ".$stock_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $stock_name[]=$value['stock_name'];
+    }
+}
+
+$row=get_data("select * from users user where 1=1 ".$user_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $user_name[]=$value['user_name'];
+    }
+}
+
+$row=get_data("select * from categories cat where 1=1 ".$cat_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $cat_name[]=$value['cat_name'];
+    }
+}
+
+
+
+
+
+
+//print_r($inv);die();
+
+?>
+<?php
+
+if ($return_val['report_type'] == 5 && @$return_val['eda_module']=="sell/output_report"){
+?>
+<table align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td colspan=2 align="center">
+            <div><b>Từ ngày:</b> <?= !empty($return_val['datefrom']) ? $return_val['datefrom'] : 'Tất cả' ?> -- <b>Đến ngày:</b> <?= !empty($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>
+            </div>
+        </td>
+        </tr>
+        <tr>
+            <td colspan=2 align="center"><b>Chủng loại:</b>
+                <?php
+                if (count($cat_name) > 0 && @$_GET['cat_id']!="")
+                    echo join(" , ",$cat_name);
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>
+        </tr>
+        <tr>
+            <td colspan=2 align="center"><b>Kho hàng:</b>
+                <?php
+                if (count($stock_name) > 0 && @$_GET['stock_id']!="")
+                    echo join(" , ",$stock_name);
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>  
+        </tr>
+        <tr>      
+            <td colspan=2 align="center"><b>Người bán:</b>
+                <?php
+                if (count($user_name) > 0 && @$_GET['user_id']!="")
+                    echo join(" , ",$user_name);
+                else
+                    echo "Tất cả";
+                ?>                 
+            </td>
+        </tr>
+    </table>
+
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+<?php
+}
+?>
+
+<div class=tbl_box_ov>
+<div class="tbl_box2">
+<table align="center" width="98%" border="1" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    
+    <?php
+    if($cat_query!="" && $stock_query!="")
+{
+    $inv=get_data("select stock.stock_name,stock.stock_id,cat.cat_name,cat.cat_id,cus.cus_name,cus.cus_id,sum(invd.amount) phaithu,sum(invd.amount) doanhthu, SUM(case when inv.payment > 0 then (invd.amount/inv.total)*inv.payment else 0 end) tientra, sum(ck_price) chietkhau, sum(invd.mat_quantity) soluong from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, categories cat, users user, meansure msu,stocks stock,stock_mat_msu smm,customers cus where cus.cus_id=inv.cus_id ".$stock_query.$where." and inv.user_id=user.user_id and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and smm.stock_id=stock.stock_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id ".$cat_query.$user_query." and inv.created_date between ".$sdate." and ".$edate." group by stock.stock_id, cat.cat_id,cus.cus_id ");
+?>
+    <tr>
+        <td width="4%" align="center" bgcolor="#afd7ff" height="25"><b>Kho</b></td>
+        <td width="4%" align="center" bgcolor="#afd7ff"><b>Loại hàng</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Tên KH</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Nợ đầu kỳ</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Công nợ phải thu</b></td>
+        <td width="2%" align="center" bgcolor="#afd7ff"><b>Doanh thu</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Tiền trả</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Hàng trả</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Chiết khấu</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Nợ cuối kỳ</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>SL</b></td>
+    </tr>
+    <?php
+
+    $row_html="";
+$t_dauky=0;
+        $t_phaithu=0;
+        $t_doanhthu=0;
+        $t_tientra=0;
+        $t_hangtra=0;
+        $t_chietkhau=0;
+        $t_nocuoi=0;
+        $t_sl=0;
+if(is_array($inv) && count($inv)>0){
+    foreach ($inv as $key => $value) {
+        $stock_query2="";
+        $cat_query2="";
+        $user_query2="";
+        
+        $getdk=get_data("select SUM(case when inv.payment > 0 then (invd.mat_quantity*invd.amount) else 0 end) dauky from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, categories cat, users user, meansure msu,stocks stock,stock_mat_msu smm,customers cus where cus.cus_id=inv.cus_id ".$stock_query2.$where." and inv.user_id=user.user_id and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and smm.stock_id=stock.stock_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id ".$cat_query2.$user_query2." and inv.created_date < ".$sdate." ");
+        //print_r($getdk);die();
+        $value['dauky']=intval(@$getdk[0]['dauky']);
+        $row_html.= '<tr>            
+            <td>'.$value['stock_name'].'</td>
+            <td>'.$value['cat_name'].'</td>
+            <td>'.$value['cus_name'].'</td>
+            <td align=right>'.numF($value['dauky']).'</td>
+            <td align=right>'.numF(($value['dauky']+$value['doanhthu']-$value['tientra'])/2).'</td>
+            <td align=right>'.numF($value['doanhthu']).'</td>
+            <td align=right>'.numF($value['tientra']).'</td>
+            <td>'."0".'</td>
+            <td align=right>'.numF($value['chietkhau']).'</td>
+            <td>'.numF($value['dauky']+$value['doanhthu']-$value['tientra']).'</td>
+            <td>'.$value['soluong'].'</td>
+        </tr>';
+        $t_dauky+=$value['dauky'];
+        $t_phaithu+=($value['dauky']+$value['doanhthu']-$value['tientra'])/2;
+        $t_doanhthu+=$value['doanhthu'];
+        $t_tientra+=$value['tientra'];
+        $t_hangtra+=0;
+        $t_chietkhau+=($value['chietkhau']);
+        $t_nocuoi+=($value['dauky']+$value['doanhthu']-$value['tientra']);
+        $t_sl+=$value['soluong'];
+    }
+}
+$row_html.= '<tr>            
+            <td colspan=3 align=center>Tổng:</td>
+            <td align=right>'.numF($t_dauky).'</td>
+            <td align=right>'.numF($t_phaithu).'</td>
+            <td align=right>'.numF($t_doanhthu).'</td>
+            <td align=right>'.numF($t_tientra).'</td>
+            <td>'.$t_hangtra.'</td>
+            <td align=right>'.numF($t_chietkhau).'</td>
+            <td>'.numF($t_nocuoi).'</td>
+            <td>'.$t_sl.'</td>
+        </tr>';
+    echo $row_html;
+
+}
+
+
+
+
+
+
+
+
+
+
+else
+
+
+
+
+
+
+
+if($cat_query!="" && $stock_query=="")
+{
+    $inv=get_data("select cat.cat_name,cat.cat_id,cus.cus_name,cus.cus_id,sum(invd.amount) phaithu,sum(invd.amount) doanhthu, SUM(case when inv.payment > 0 then (invd.amount/inv.total)*inv.payment else 0 end) tientra, sum(ck_price) chietkhau, sum(invd.mat_quantity) soluong from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, categories cat, users user, meansure msu,stocks stock,stock_mat_msu smm,customers cus where cus.cus_id=inv.cus_id ".$stock_query.$where." and inv.user_id=user.user_id and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and smm.stock_id=stock.stock_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id ".$cat_query.$user_query." and inv.created_date between ".$sdate." and ".$edate." group by  cat.cat_id,cus.cus_id ");
+?>
+    <tr>
+        <td width="4%" align="center" bgcolor="#afd7ff" height="25"><b>Loại hàng</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Tên KH</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Nợ đầu kỳ</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Công nợ phải thu</b></td>
+        <td width="2%" align="center" bgcolor="#afd7ff"><b>Doanh thu</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Tiền trả</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Hàng trả</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Chiết khấu</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Nợ cuối kỳ</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>SL</b></td>
+    </tr>
+    <?php
+
+    $row_html="";
+$t_dauky=0;
+        $t_phaithu=0;
+        $t_doanhthu=0;
+        $t_tientra=0;
+        $t_hangtra=0;
+        $t_chietkhau=0;
+        $t_nocuoi=0;
+        $t_sl=0;
+if(is_array($inv) && count($inv)>0){
+    foreach ($inv as $key => $value) {
+        $stock_query2="";
+        $cat_query2="";
+        $user_query2="";
+        
+        $getdk=get_data("select SUM(case when inv.payment > 0 then (invd.mat_quantity*invd.amount) else 0 end) dauky from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, categories cat, users user, meansure msu,stocks stock,stock_mat_msu smm,customers cus where cus.cus_id=inv.cus_id ".$stock_query2.$where." and inv.user_id=user.user_id and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and smm.stock_id=stock.stock_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id ".$cat_query2.$user_query2." and inv.created_date < ".$sdate." ");
+        //print_r($getdk);die();
+        $value['dauky']=intval(@$getdk[0]['dauky']);
+        $row_html.= '<tr>            
+            <td>'.$value['cat_name'].'</td>
+            <td>'.$value['cus_name'].'</td>
+            <td align=right>'.numF($value['dauky']).'</td>
+            <td align=right>'.numF(($value['dauky']+$value['doanhthu']-$value['tientra'])/2).'</td>
+            <td align=right>'.numF($value['doanhthu']).'</td>
+            <td align=right>'.numF($value['tientra']).'</td>
+            <td>'."0".'</td>
+            <td align=right>'.numF($value['chietkhau']).'</td>
+            <td>'.numF($value['dauky']+$value['doanhthu']-$value['tientra']).'</td>
+            <td>'.$value['soluong'].'</td>
+        </tr>';
+        $t_dauky+=$value['dauky'];
+        $t_phaithu+=($value['dauky']+$value['phaithu']);
+        $t_doanhthu+=($value['dauky']+$value['doanhthu']-$value['tientra'])/2;
+        $t_tientra+=$value['tientra'];
+        $t_hangtra+=0;
+        $t_chietkhau+=($value['chietkhau']);
+        $t_nocuoi+=($value['dauky']+$value['doanhthu']-$value['tientra']);
+        $t_sl+=$value['soluong'];
+    }
+}
+$row_html.= '<tr>            
+            <td colspan=2 align=center>Tổng:</td>
+            <td align=right>'.numF($t_dauky).'</td>
+            <td align=right>'.numF($t_phaithu).'</td>
+            <td align=right>'.numF($t_doanhthu).'</td>
+            <td align=right>'.numF($t_tientra).'</td>
+            <td>'.$t_hangtra.'</td>
+            <td align=right>'.numF($t_chietkhau).'</td>
+            <td>'.numF($t_nocuoi).'</td>
+            <td>'.$t_sl.'</td>
+        </tr>';
+    echo $row_html;
+
+}
+
+
+
+
+
+
+
+
+
+else
+
+
+
+
+
+
+
+
+if($cat_query=="" && $stock_query!="")
+{
+    $inv=get_data("select stock.stock_name,stock.stock_id,cus.cus_name,cus.cus_id,sum(invd.amount) phaithu,sum(invd.amount) doanhthu, SUM(case when inv.payment > 0 then (invd.amount/inv.total)*inv.payment else 0 end) tientra, sum(ck_price) chietkhau, sum(invd.mat_quantity) soluong from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, categories cat, users user, meansure msu,stocks stock,stock_mat_msu smm,customers cus where cus.cus_id=inv.cus_id ".$stock_query.$where." and inv.user_id=user.user_id and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and smm.stock_id=stock.stock_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id ".$cat_query.$user_query." and inv.created_date between ".$sdate." and ".$edate." group by stock.stock_id, cus.cus_id ");
+?>
+    <tr>
+        <td width="4%" align="center" bgcolor="#afd7ff" height="25"><b>Kho</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Tên KH</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Nợ đầu kỳ</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Công nợ phải thu</b></td>
+        <td width="2%" align="center" bgcolor="#afd7ff"><b>Doanh thu</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Tiền trả</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Hàng trả</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Chiết khấu</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Nợ cuối kỳ</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>SL</b></td>
+    </tr>
+    <?php
+
+    $row_html="";
+$t_dauky=0;
+        $t_phaithu=0;
+        $t_doanhthu=0;
+        $t_tientra=0;
+        $t_hangtra=0;
+        $t_chietkhau=0;
+        $t_nocuoi=0;
+        $t_sl=0;
+if(is_array($inv) && count($inv)>0){
+    foreach ($inv as $key => $value) {
+        $stock_query2="";
+        $cat_query2="";
+        $user_query2="";
+        
+        $getdk=get_data("select SUM(case when inv.payment > 0 then (invd.mat_quantity*invd.amount) else 0 end) dauky from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, categories cat, users user, meansure msu,stocks stock,stock_mat_msu smm,customers cus where cus.cus_id=inv.cus_id ".$stock_query2.$where." and inv.user_id=user.user_id and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and smm.stock_id=stock.stock_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id ".$cat_query2.$user_query2." and inv.created_date < ".$sdate." ");
+        //print_r($getdk);die();
+        $value['dauky']=intval(@$getdk[0]['dauky']);
+        $row_html.= '<tr>            
+            <td>'.$value['stock_name'].'</td>
+            <td>'.$value['cus_name'].'</td>
+            <td align=right>'.numF($value['dauky']).'</td>
+            <td align=right>'.numF(($value['dauky']+$value['doanhthu']-$value['tientra'])/2).'</td>
+            <td align=right>'.numF($value['doanhthu']).'</td>
+            <td align=right>'.numF($value['tientra']).'</td>
+            <td>'."0".'</td>
+            <td align=right>'.numF($value['chietkhau']).'</td>
+            <td>'.numF($value['dauky']+$value['doanhthu']-$value['tientra']).'</td>
+            <td>'.$value['soluong'].'</td>
+        </tr>';
+        $t_dauky+=$value['dauky'];
+        $t_phaithu+=($value['dauky']+$value['doanhthu']-$value['tientra'])/2;
+        $t_doanhthu+=$value['doanhthu'];
+        $t_tientra+=$value['tientra'];
+        $t_hangtra+=0;
+        $t_chietkhau+=($value['chietkhau']);
+        $t_nocuoi+=($value['dauky']+$value['doanhthu']-$value['tientra']);
+        $t_sl+=$value['soluong'];
+    }
+}
+$row_html.= '<tr>            
+            <td colspan=2 align=center>Tổng:</td>
+            <td align=right>'.numF($t_dauky).'</td>
+            <td align=right>'.numF($t_phaithu).'</td>
+            <td align=right>'.numF($t_doanhthu).'</td>
+            <td align=right>'.numF($t_tientra).'</td>
+            <td>'.$t_hangtra.'</td>
+            <td align=right>'.numF($t_chietkhau).'</td>
+            <td>'.numF($t_nocuoi).'</td>
+            <td>'.$t_sl.'</td>
+        </tr>';
+    echo $row_html;
+
+}
+
+
+
+
+
+
+
+
+
+else
+
+
+
+
+
+
+
+
+if($cat_query=="" && $stock_query=="")
+{
+    $inv=get_data("select cus.cus_name,cus.cus_id,sum(invd.amount) phaithu,sum(invd.amount) doanhthu, SUM(case when inv.payment > 0 then (invd.amount/inv.total)*inv.payment else 0 end) tientra, sum(ck_price) chietkhau, sum(invd.mat_quantity) soluong from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, categories cat, users user, meansure msu,stocks stock,stock_mat_msu smm,customers cus where cus.cus_id=inv.cus_id ".$stock_query.$where." and inv.user_id=user.user_id and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and smm.stock_id=stock.stock_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id ".$cat_query.$user_query." and inv.created_date between ".$sdate." and ".$edate." group by cus.cus_id ");
+?>
+    <tr>
+        <td width="5%" align="center" bgcolor="#afd7ff" height="25"><b>Tên KH</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Nợ đầu kỳ</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Công nợ phải thu</b></td>
+        <td width="2%" align="center" bgcolor="#afd7ff"><b>Doanh thu</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Tiền trả</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Hàng trả</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Chiết khấu</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>Nợ cuối kỳ</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff"><b>SL</b></td>
+    </tr>
+    <?php
+
+    $row_html="";
+$t_dauky=0;
+        $t_phaithu=0;
+        $t_doanhthu=0;
+        $t_tientra=0;
+        $t_hangtra=0;
+        $t_chietkhau=0;
+        $t_nocuoi=0;
+        $t_sl=0;
+if(is_array($inv) && count($inv)>0){
+    foreach ($inv as $key => $value) {
+        $stock_query2="";
+        $cat_query2="";
+        $user_query2="";
+        
+        $getdk=get_data("select SUM(case when inv.payment > 0 then (invd.mat_quantity*invd.amount) else 0 end) dauky from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, categories cat, users user, meansure msu,stocks stock,stock_mat_msu smm,customers cus where cus.cus_id=inv.cus_id ".$stock_query2.$where." and inv.user_id=user.user_id and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and smm.stock_id=stock.stock_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id ".$cat_query2.$user_query2." and inv.created_date < ".$sdate." ");
+        //print_r($getdk);die();
+        $value['dauky']=intval(@$getdk[0]['dauky']);
+        $row_html.= '<tr>
+            <td>'.$value['cus_name'].'</td>
+            <td align=right>'.numF($value['dauky']).'</td>
+            <td align=right>'.numF(($value['dauky']+$value['doanhthu']-$value['tientra'])/2).'</td>
+            <td align=right>'.numF($value['doanhthu']).'</td>
+            <td align=right>'.numF($value['tientra']).'</td>
+            <td>'."0".'</td>
+            <td align=right>'.numF($value['chietkhau']).'</td>
+            <td>'.numF($value['dauky']+$value['doanhthu']-$value['tientra']).'</td>
+            <td>'.$value['soluong'].'</td>
+        </tr>';
+        $t_dauky+=$value['dauky'];
+        //$t_phaithu+=($value['dauky']+$value['phaithu']);
+        $t_phaithu+=($value['dauky']+$value['doanhthu']-$value['tientra'])/2;
+        $t_doanhthu+=$value['doanhthu'];
+        $t_tientra+=$value['tientra'];
+        $t_hangtra+=0;
+        $t_chietkhau+=($value['chietkhau']);
+        $t_nocuoi+=($value['dauky']+$value['doanhthu']-$value['tientra']);
+        $t_sl+=$value['soluong'];
+    }
+}
+$row_html.= '<tr>            
+            <td align=center>Tổng:</td>
+            <td align=right>'.numF($t_dauky).'</td>
+            <td align=right>'.numF($t_phaithu).'</td>
+            <td align=right>'.numF($t_doanhthu).'</td>
+            <td align=right>'.numF($t_tientra).'</td>
+            <td>'.$t_hangtra.'</td>
+            <td align=right>'.numF($t_chietkhau).'</td>
+            <td>'.numF($t_nocuoi).'</td>
+            <td>'.$t_sl.'</td>
+        </tr>';
+    echo $row_html;
+
+}
+    ?>
+</table>
+</div>
+</div>

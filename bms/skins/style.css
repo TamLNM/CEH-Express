@@ -1,0 +1,93 @@
+html {background:#303131}
+body{top:0;left:0;margin:0;padding:0;font-family:Arial, sans-serif;font-size:12px;}
+a{text-decoration:none;}
+img{border:0;}
+h1, h2, h3{font-family: arial;color:#333;margin:0px;font-weight:normal;}
+h2 {color:#333;font-size:20px;line-height:30px;font-weight:normal;padding-bottom:10px;padding-top:10px;}
+h3 {font-size:16px;}
+h1 a, h2 a, h3 a, .greenlink {color:green;}
+h1 a:hover, h2 a:hover, h3 a:hover, .greenlink:hover {color:red;}
+#regsubmit{width:100px;height:30px;background: #990000;border:1px solid #4e0f0f;font-weight:bold;color:#fff;text-align:center;font-size:11pt;cursor:pointer;margin:0px;}
+#regsubmit:hover, #loginbt:hover{color:yellow;background:#ff6600;}
+#loginbt {padding:4px;font-size:13px;cursor:pointer;width:90px;color:#fff;background: #666;border:1px solid #95a2ae;margin:0px;}
+.loginmore {background:url('./img/mankey.png') no-repeat;margin-left:2px;width:35px;height:33px;float:left;position: relative;}
+#loginmorebox {position: absolute;width:170px;line-height:22px;height:70px;background:#666;right:0px;top:33px;padding:10px;text-align:left;visibility: hidden;}
+form{margin:0;}
+#contactform div {margin-top:10px;}
+#divivufrm div {margin-top:5px;}
+form div .label{float:left;width:150px;text-align: right;margin-right:20px;margin-top:5px;color:#333;}
+form .intro{color:#555;}
+.righticon {float:right;width:20px;height:20px;margin-left:5px;}
+select, .textbox{border: 1px #ccc solid;background-color: #fff;margin:0px;}
+select:focus, .textbox:focus{border: 1px #ff6600 solid;background-color: #fffed0;}
+select:hover, .textbox:hover{border: 1px #ff6600 solid;}
+a{color: #004c93;}
+a:hover{color:red;}
+#logo {
+    float:left;color:#fff;font-weight:bold;font-size:24px;padding-top:10px;font-family: Arial;text-shadow: 2px 2px #333;
+}
+#wrapper{width:998px;margin:auto;overflow:hidden;border:1px solid #e6bbbb;margin-bottom:20px;}
+#header {background: green;height:60px;}
+#headerwrap {height:55px;width:998px;margin:auto;padding-top:5px;}
+#headbar {color:white;height:41px;margin-top:5px;width:510px;float:right;background: #ffc000 url(./img/headbar.png) no-repeat;}
+#headbar .textbox {padding:4px;}
+#regbox{margin-right:5px;margin-left:380px;}
+#infobox{width:340px;float:left;margin-left:30px;margin-bottom:30px;}
+#loginbox {float:right;width:465px;text-align: left;margin:0px;padding-top:7px;}
+#footer{padding-top:7px;padding-bottom:20px;text-align:center;color:#ccc;font-size:13px;border-top: 1px solid #e6bbbb;background:#303131 url(./img/gl-div-footer-bg.gif);}
+#footer a{color:#fff;}
+#footer a:hover{text-decoration:underline;}
+#content {padding-left:10px;padding-top:10px;padding-bottom:10px;}
+#content a {color: #004c93;}
+#content a.menu {font-weight: bold;color:brown;font-size:14px;margin-top:10px;display:block;}
+#content a:hover{color:red;}
+a.catmenu {color:#666;}
+a.catmenu:hover{color:red;}
+#foothead {width:998px;margin:auto;padding-bottom:10px;text-align:left;}
+#foothead a {margin-right:15px;color:#eee;text-decoration: none;}
+#foothead a:hover, #footer .language a.active {color:yellow;}
+.introItem {height:35px;font-size:15px;color:#000;padding-left:55px;padding-top:5px;}
+.tab {padding:5px;padding-right:10px;float:left;color:#333;cursor:pointer;font-weight:bold;font-size:13px;}
+.selected {color:#fff;background:#666;}
+.tabover {color:#fff;background:#ccc;}
+.moduletitle {font-size:14px;font-weight:bold;}
+.waiting { cursor: wait !important; }
+.alert_ico_box{
+	position: fixed;
+	bottom:10px;
+	left:10px;
+	overflow: hidden;
+	height: 0px;
+	width: 0px;
+}
+.alert_ico_box.openx{
+	box-sizing: border-box;
+	padding:28px;
+	border:1px solid #b6b6b6;
+	height: 600px;
+	width: 300px;
+	background: #ffffff;
+	border-radius: 28px; 
+}
+.alert_ico{
+	background: url('http://www.myiconfinder.com/uploads/iconsets/256-256-4f53b04209aa8cbaf06c277467e0ab1e-bell.png');
+	position: fixed;
+	bottom:15px;
+	left:15px;
+	width: 50px;
+    height: 50px;
+    background-size: 100%;
+    z-index: 2;
+}
+.ite_alert{
+	color: #d95141;
+	padding-bottom: 10px;
+}
+
+.ite_alert.text_danger{
+	color: red;
+}
+
+.ite_alert.text_warning{
+	color: #bf8212;
+}

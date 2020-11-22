@@ -1,0 +1,39 @@
+/*
+author: Manes;
+createdate: 28/11/2018;
+description: config;
+*/
+
+// declare variables
+	// --background color
+	$background-mainlight: rgba(145,234,254,0.5);
+	// --colors
+	$color-brightblue: #3366ff;
+	$color-50perblue: #0696ee;
+	$color-mainlight: #91eafe;
+	$color-secondary: #55CBE5;
+	$color-lightgreen: (158,216,90); // #9ed85a
+	// gradients
+	$gra-default: linear-gradient(to right, #757F9A 0%, #D7DDE8 51%, #757F9A 100%);
+	$gra-brightblue: linear-gradient( 89.8deg,  rgba(39,115,255,1) 4.3%, rgba(62,211,232,1) 101.4% );
+	$gra-blue: linear-gradient( 206.8deg,  rgba(73,168,255,1) 19.1%, rgba(0,48,249,1) 109.8% );
+	$gra-tech: linear-gradient(to left, #314755 0%, #26a0da 51%, #314755 100%);
+	$gra-inset: linear-gradient(0deg, rgba(182,182,182,1) 0%, rgba(213,213,213,1) 51%, rgba(182,182,182,1) 100%);
+	$gra-maldives: linear-gradient(to right, #b2fefa, #0ed2f7);
+// Config
+	$font-color: #000;
+	$break-md: 1000px;
+
+// main paletes
+	$primary-color: #4c6c8b;
+	$second-color: #0B4660;
+	$second-background: rgba(11,70,96,0.5);
+	$third-color: #337AB7;
+	$third-background: rgba(51,122,183,0.2);
+	$primary-background: #EEEEEE;
+	$fourth-color: #27ABCF;
+	$info-color: #000;
+	$focus-color: rgba(81, 203, 238, 1);
+	$background-color: #e9ebee!important;
+
+// ------------mixin

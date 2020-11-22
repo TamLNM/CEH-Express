@@ -1,0 +1,534 @@
+ 	<html>
+    <head>
+        <!---->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<link href="assets/css/custom.datatables.css" rel="stylesheet" type="text/css"/>
+        <link href="assets/css/main.min.css" rel="stylesheet" type="text/css"/>
+        <link href="assets/css/ro2.css" rel="stylesheet" type="text/css"/>
+        <script src="assets/vendors/jquery/dist/jquery2-1-4.min.js"></script>
+        <link href="assets/vendors/dataTables/datatables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/scroller.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/css/custom.datatables.css" rel="stylesheet" />
+        <link href="assets/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+        <link href="assets/vendors/line-awesome/css/line-awesome.min.css" rel="stylesheet" />
+        <link href="assets/vendors/themify-icons/css/themify-icons.css" rel="stylesheet" />
+        <script src="assets/js/tablefilter/tablefilter.js"></script>
+        <script src="assets/js/datatables.ext.js"></script>
+        <script src="assets/vendors/dataTables/datatables.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.default.min.css" rel="stylesheet" />
+
+        <link href="assets/vendors/dataTables/datatables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/scroller.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/css/custom.datatables.css" rel="stylesheet" />
+        <link href="assets/vendors/toastr/toastr.min.css" rel="stylesheet" type="text/css" />
+        <script src="assets/js/datatables.ext.js"></script>
+        <script src="assets/vendors/dataTables/dataTables.scroller.min.js"></script>
+
+        <!-- Datetime picker -->
+        <link href="assets/vendors/datetimepicker/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+        <script type="text/javascript" src="assets/vendors/datetimepicker/jquery-ui-timepicker-addon.js"></script>
+
+        <!--    TABLES SCROLL-->
+        <script src="assets/vendors/dataTables/dataTables.scroller.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/key_table.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/mindmup-editabletable.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/numeric-input-example.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/autofill.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/scroller.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/select.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/buttons.min.js"></script>
+        <style>
+			@media only screen and (max-width: 768px) {
+				#contenttable_list tbody tr td:before{
+					min-width: 80px;
+					display: inline-block;
+				}
+
+				.button-bar-group{
+					text-align: right;
+				}
+				.button-bar-group .btn{
+					margin-bottom:5px;
+					margin-top:5px;
+					max-width: 33px;
+				}	
+				.button-bar-group .btn .fa{
+					padding-right: 50px;
+				}
+				.button-bar-group .btn:hover{
+					max-width: inherit !important;
+					width: auto;
+					min-width: auto;
+				}
+				.button-bar-group .btn:hover .fa{
+					padding-right: 5px;
+				}
+				.datatable-header{
+					margin-top:5px;
+				}
+		        table.mobile_tbl{
+		            display:block;
+		        }
+		        table.mobile_tbl *{
+		            box-sizing: border-box;
+		        }
+		        table.mobile_tbl .dataTables_scrollBody{
+		            overflow: unset;
+		        }
+		        table.mobile_tbl thead{
+		            display: none !important;
+		        }
+		        table.mobile_tbl tbody{
+		            display:block;
+		        }
+		        table.mobile_tbl tbody tr{
+		            display:block;
+		            position: relative;
+		            white-space: normal;
+		            border-bottom: 1px solid #dedede;
+		        }
+		        table.mobile_tbl tbody tr:nth-child(odd){
+		            background-color: #b6b6b6;
+
+		        }
+		        table.mobile_tbl tbody tr td{
+		            display:inline-block;
+		            border:none !important;
+		            box-sizing: border-box;
+		            min-width: 49%;
+		            text-align: left !important;
+		        }
+			}
+			.btn-group-sm .btn-icon-only, .btn-icon-only.btn-sm {
+				height: 25px;
+    			width: 25px;
+    			margin-top: 2px;
+			}
+			.btn-group-sm .btn-icon-only [class*=la-], .btn-icon-only.btn-sm [class*=la-] {
+				font-size: 1rem;
+			}
+			::placeholder{
+				font-style: italic;
+				color: #004c93;
+			}
+			
+			#table-wrapper {
+  				position:relative;
+			}
+			#table-scroll {
+			  	height: 300px;
+			  	overflow: auto;  
+			  	margin-right: 10px;
+			}
+			#table-wrapper table {
+			  	width: 100%;
+
+			}
+			#table-wrapper table * {
+			  	color:black;
+			}
+			#table-wrapper table thead th .text {
+			  	position:absolute;   
+			  	top:-20px;
+			  	z-index:2;
+			  	height:20px;
+			  	width:35%;
+			  	border:1px solid red;
+			}
+		</style>
+	</head>
+	<body>
+		<div style="width: 100%; background-color: white;">
+			<div style="height: 20px; padding-top: 5px;">
+				<label style="padding-left: 10px; height: 10px; font-style: italic; font-weight: bold">Express Transport Center</label>
+			</div>
+			<div style="height: 20px;">
+				<label style="padding-left: 10px; height: 10px; font-style: italic;">Số order: <span id="order_code" style="font-weight: bold"></span></label>
+			</div>
+			<div style="height: 20px;">
+				<label style="padding-left: 10px; height: 10px; font-style: italic;">Trạng thái <span id="status" style="font-weight: bold"></span></label>
+			</div>
+			<div style="height: 20px;">
+				<label style="padding-left: 10px; height: 10px; font-style: italic;">Thời gian <span id="type"></span>: <span id="time" style="font-weight: bold"></span></label>
+			</div>
+		</div>
+		<div style="width: 100%; background-color: white; color: #207b99; font-size: 18px; font-weight: bolder;" align="center">
+			<div style="height: 20px;"></div>
+			<label style="vertical-align: center; font-size: 18px;">THÔNG TIN ĐƠN HÀNG</label>
+			<div style="height: 5px;"></div>
+		</div>
+		<div id="contenttable_div">
+			<div style="font-size: 12px; padding-left: 5px; padding-top: 10px; width: 100%; max-width: 1345px; height: 25px; background-color: white;">
+				<div style="width: 150px; float: left;">
+					<label style="font-weight: bold">* Thông tin người gửi:</label>
+				</div>
+				<div style="width: 250px; float: left;">
+					<label id="sender_name">Nguyễn Văn A</label>
+				</div>
+				<div style="width: 350px; float: left;">
+					<label><span style="font-weight: bold">Địa chỉ:</span> <span id="sender_address">1234 Huỳnh Tấn Phát, Q7, TP. HCM</span></label>
+				</div>
+				<div style="width: 250px; float: left;">
+					<label><span style="font-weight: bold">Số điện thoại:</span> <span id="sender_tel">0912345678</span></label>
+				</div>
+				<div style="width: 340px; float: left;">
+					<label><span style="font-weight: bold">Email:</span> <span id="sender_email">nva@gmail.com</span></label>
+				</div>
+			</div>
+			<div style="font-size: 12px; padding-left: 5px; padding-top: 10px; width: 100%; max-width: 1345px; height: 25px; background-color: white;">
+				<div style="width: 150px; float: left;">
+					<label style="font-weight: bold">* Thông tin người nhận:</label>
+				</div>
+				<div style="width: 250px; float: left;">
+					<label id="receiver_name">Nguyễn Văn A</label>
+				</div>
+				<div style="width: 350px; float: left;">
+					<label><span style="font-weight: bold">Địa chỉ:</span> <span id="receiver_address">1234 Huỳnh Tấn Phát, Q7, TP. HCM</label>
+				</div>
+				<div style="width: 250px; float: left;">
+					<label><span style="font-weight: bold">Số điện thoại:</span> <span id="receiver_tel">0912345678</span></label>
+				</div>
+				<div style="width: 340px; float: left;">
+					<label><span style="font-weight: bold">Email:</span> <span id="receiver_email">nva@gmail.com</span></label>
+				</div>
+			</div>
+			<div style="font-size: 12px; padding-left: 5px; padding-top: 10px; width: 1345px; background-color: white; overflow-x: auto;">
+				<span style="font-weight: bolder">* Chi tiết đơn hàng:</span>
+				<div id="table-wrapper">
+  					<div id="table-scroll">
+						<table id="contenttable" cellspacing="0" style="font-size: 13px; max-width: 1340px; overflow-x: auto; background-color: white; margin-top: 5px; border: solid 1px #207b99">
+							<thead>
+								<tr style="background-color: #207b99; color: white">
+									<th class="editor-cancel" col-name="STT" style="width: 5%; color: white">STT</th>
+									<th col-name="stock_type_name" style="min-width: 150px; color: white">Loại hàng</th>
+									<th col-name="stock_type_details" style="min-width: 100px; color: white">Diễn giải</th>
+									<th col-name="numeric" style="min-width: 25px; color: white">Số lượng</th>
+									<th col-name="stock_weight" style="min-width: 75px; color: white">Tổng trọng lượng (kg)</th>
+									<th col-name="unit_name" style="min-width: 50px; color: white">Đơn vị tính</th>
+									<th col-name="price" style="min-width: 50px; color: white">Giá trị sản phẩm</th>
+									<th col-name="expense_type" style="min-width: 50px; color: white">Loại phụ phí</th>
+									<th col-name="currency_name" style="min-width: 50px; color: white">Loại tiền</th>
+									<th col-name="rates" style="min-width: 75px; color: white">Cước vận chuyển</th>
+									<th col-name="expense" style="min-width: 50px; color: white">Phụ phí</th>
+									<th col-name="shipping_cost" style="min-width: 50px; color: white">Tổng tiền</th>
+									<th col-name="remark" style="max-width: 100px; color: white">Ghi chú</th>
+								</tr>
+							</thead>
+							<tbody id='tbody_contenttable'></tbody>
+						</table>
+					</div>
+				</div>
+				<div style="height: 20px"></div>
+			</div>
+		</div>
+	</body>
+</html>
+
+<script src="assets/vendors/jquery-ui/jquery-ui.js"></script>
+<script src="assets/vendors/datetimepicker/jquery-ui-timepicker-addon.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var tbl 			= $('#contenttable'),
+			_columns 		= ['STT', 'stock_type_details', 'numeric', 'stock_weight', 'unit_name', 'price', 'expense_type', 'currency_name','rates',  'expense', 'shipping_cost', 'remark'];
+
+
+		$('.dataTables_info').hide();
+		$('.dataTables_empty').html('------------ Không có dữ liệu hiển thị ------------');
+
+		var order_code = window.location.href.substring(parseInt(window.location.href.lastIndexOf('=')) + 1, window.location.href.length);
+
+		<?php $tariff_list 	 		= get_data("select * from ord_tariff order by ord_trf_code"); ?>
+		<?php $tariff_details_list 	= get_data("select * from ord_tariff_details order by ord_trf_code"); ?>
+console.log(order_code);
+		/**/
+        $('#order_code').html(order_code);
+		<?php for ($i = 0; $i < count($tariff_list); $i++) { ?>
+        	if (order_code == <?="'".$tariff_list[$i]['ord_trf_code']."'";?>){
+        		$('#sender_name').html(<?="'".$tariff_list[$i]['sender_name']."'";?>);
+        		$('#sender_tel').html(<?="'".$tariff_list[$i]['sender_tel']."'";?>);
+        		$('#sender_address').html(<?="'".$tariff_list[$i]['sender_address']."'";?>);
+        		$('#sender_email').html(<?="'".$tariff_list[$i]['sender_email']."'";?>);
+        		$('#receiver_name').html(<?="'".$tariff_list[$i]['receiver_name']."'";?>);
+        		$('#receiver_tel').html(<?="'".$tariff_list[$i]['receiver_tel']."'";?>);
+        		$('#receiver_email').html(<?="'".$tariff_list[$i]['receiver_email']."'";?>);
+        		$('#receiver_address').html(<?="'".$tariff_list[$i]['receiver_address']."'";?>);
+        		
+        		switch(<?="'".$tariff_list[$i]['status']."'";?>){
+        			case 'KT':   
+        				$('#status').html('Khởi tạo');
+        				$('#type').html('khởi tạo');
+        				$('#time').html(covertToDatetimeShow(<?="'".$tariff_list[$i]['order_time']."'";?>));
+					    break;
+					case 'NK':
+        				$('#status').html('Nhập kho gửi');   		
+        				$('#type').html('nhập kho');
+        				$('#time').html(covertToDatetimeShow(<?="'".$tariff_list[$i]['confirm_order_time']."'";?>));			
+						break;
+					case 'CK':
+        				$('#status').html('Chuyển kho');   
+        				$('#type').html('nhập kho');
+        				$('#time').html(covertToDatetimeShow(<?="'".$tariff_list[$i]['trs_internal_warehouse_time']."'";?>));
+						break;
+					case 'NKN':
+        				$('#status').html('Nhập kho nhận');    
+        				$('#type').html('nhập kho');
+        				$('#time').html(covertToDatetimeShow(<?="'".$tariff_list[$i]['release_time']."'";?>));  					
+						break;   				
+					case "GH":
+						$('#status').html('Giao hàng');   
+						$('#type').html('nhập kho');
+        				$('#time').html(covertToDatetimeShow(<?="'".$tariff_list[$i]['shipping_time']."'";?>));     					
+						break;
+					case "HT":
+						$('#status').html('Hoàn tất');   
+						$('#type').html('hoàn tất');
+        				$('#time').html(covertToDatetimeShow(<?="'".$tariff_list[$i]['complete_time']."'";?>));
+						break;
+					default:
+						break;
+				}
+        	}
+		<?php } ?>
+
+        var final_total_money 	= 0,
+            src 				= '',
+            index 				= 1;
+        <?php for ($i = 0; $i < count($tariff_details_list); $i++) { ?>
+        	var row = [];
+        	if (order_code == <?="'".$tariff_details_list[$i]['ord_trf_code']."'";?>){
+        		src += '<tr style="height: 30px!important;">';
+	    			src += '<td align="center" style="width: 5%;">' + index++ + '</td>';
+	    			src += '<td align="left"   style="min-width: 150px;">' + <?="'".$tariff_details_list[$i]['stock_type_name'] 	  ."'";?> + '</td>';
+	    			src += '<td align="center" style="min-width: 100px;">' + <?="'".$tariff_details_list[$i]['stock_type_details']  ."'";?> + '</td>';
+	    			src += '<td align="center" style="min-width: 25px;">' + <?="'".$tariff_details_list[$i]['numeric']  		  	  ."'";?> + '</td>';
+	    			src += '<td align="center" style="min-width: 75px;">' + <?="'".$tariff_details_list[$i]['stock_weight']  	  ."'";?> + '</td>';
+	    			src += '<td align="center" style="min-width: 50px;">' + <?="'".$tariff_details_list[$i]['unit_name']  		  ."'";?> + '</td>';
+	    			src += '<td align="center" style="min-width: 50px;">' + <?="'".$tariff_details_list[$i]['price']  			  ."'";?> + '</td>';
+	    			src += '<td align="center" style="min-width: 50px;">' + <?="'".$tariff_details_list[$i]['expense_type']  	  ."'";?> + '</td>';
+	    			src += '<td align="center" style="min-width: 50px;">' + <?="'".$tariff_details_list[$i]['currency_name']  	  ."'";?> + '</td>';
+	    			src += '<td align="center" style="min-width: 75px;">' + <?="'".$tariff_details_list[$i]['rates']  			  ."'";?> + '</td>';
+	    			src += '<td align="center" style="min-width: 50px;">' + <?="'".$tariff_details_list[$i]['expense']  		  	  ."'";?> + '</td>';
+	    			src += '<td align="center" style="min-width: 50px;">' + <?="'".$tariff_details_list[$i]['total_money']  	  	  ."'";?> + '</td>';
+	    			src += '<td align="center">' + <?="'".$tariff_details_list[$i]['remark']  			  ."'";?> + '</td>';
+        		src += '</tr>';
+
+				final_total_money += parseFloat(<?="'".$tariff_details_list[$i]['total_money']."'";?>);
+	    	}
+	    <?php } ?>
+
+	    src += ('<tr style="height: 30px;"><td colspan="11" style="text-align: right; color: red; font-weight: bold; padding-right: 10px; border-top: solid 1px #207b99">TỔNG CỘNG</td><td style="text-align: center; color: red; font-weight: bold; border-top: solid 1px #207b99">' + final_total_money + '</td><td style="border-top: solid 1px #207b99"></td></tr>');
+		if(src != ''){
+			$('#tbody_contenttable').append(src);
+		}
+
+		function getDateTimeFormatString(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        return (year + '-' + fillMonth + month + '-' + fillDay + day + " " + fillHour + hour + ':' + fillMin + min + ':' + fillSec + sec);
+	    }
+
+	    function getDefaultTime(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        return (fillDay + day + '/' + fillMonth + month + '/' + year + ' ' + fillHour + hour + ':' + fillMin + min + ':' + fillSec + sec);
+	    }
+
+	    function getDefaultStartTime(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        return ('01/' + fillMonth + month + '/' + year + " 00:00:00");
+	    }
+
+	    function getSQLDefaultStartTime(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        return (year + '-' + fillMonth + month + '-01' + " 00:00:00");
+	    }
+
+
+	    function getDefaultFinishTime(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        switch(month){
+	            case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+	                day = 31;
+	                break;
+	            case 2:
+	                if (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0)){
+	                    day = 29;
+	                }
+	                else{
+	                    day = 28;
+	                }
+	                break;
+	            default:
+	                day = 30;
+	                break;
+	        }
+	        return (day + '/' + fillMonth + month + '/' + year + " 23:59:59");
+	    }
+
+	    function getSQLDefaultFinishTime(d){
+	        year    = d.getFullYear();
+	        month   = d.getMonth() + 1;
+	        day     = d.getDate();
+	        hour    = d.getHours(),
+	        min     = d.getMinutes(),
+	        sec     = d.getSeconds(),
+	        fillMonth = '',
+	        fillDay   = '',
+	        fillHour  = '',
+	        fillMin   = '',
+	        fillSec   = '';
+	            
+	        if (month < 10)
+	            fillMonth = '0';
+	        if (day < 10)
+	            fillDay = '0';
+	        if (hour < 10)
+	            fillHour = '0';
+	        if (min < 10)
+	            fillMin = '0';
+	        if (sec < 10)
+	            fillSec = '0';
+
+	        switch(month){
+	            case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+	                day = 31;
+	                break;
+	            case 2:
+	                if (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0)){
+	                    day = 29;
+	                }
+	                else{
+	                    day = 28;
+	                }
+	                break;
+	            default:
+	                day = 30;
+	                break;
+	        }
+	        return (year + '-' + fillMonth + month + '-' + day + " 23:59:59");
+	    }
+
+	    function covertToSQLDefaultFinishTime(d){
+	        return (d.substring(6,10) + '-' + d.substring(3,5) + '-' + d.substring(0, 2) + d.substring(10, d.length));
+	    }
+
+	    function covertToDatetimeShow(d){
+	    	if (d != '')
+	        	return (d.substring(8, 10) + '/' + d.substring(5, 7) +  '/' + d.substring(0, 4) + d.substring(10, d.length));
+	        else
+	        	return '';
+	    }
+    });
+</script>

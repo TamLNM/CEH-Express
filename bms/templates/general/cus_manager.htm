@@ -1,0 +1,371 @@
+<?php $data             = get_data("select * from customer order by cus_code, cus_name"); ?>
+<?php $cus_type_list    = get_data("select * from customer_type order by cus_type_code, cus_type_name"); ?>
+<?php $nation_list      = get_data("select * from nation order by nation_code, nation_id"); ?>
+<?php $city_list        = get_data("select * from city order by city_code, city_name"); ?>
+<?php $district_list    = get_data("select * from district order by district_code, district_name"); ?>
+
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/contacts.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Quản lý Khách hàng</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+
+<div style="margin: 10px;" id="div_contenttable">
+    <input hidden id="table_name" value="customer">
+    <input hidden id="address_idx" value="17" type="number">
+    <input hidden id="address_type" value="">
+    <div style="width: 978px;">
+        <table id="contenttable" class="table table-striped display nowrap" cellspacing="0" style="width: 99.5%">
+            <thead>
+                <tr>
+                    <th class="editor-cancel" col-name="STT" width="10%">STT</th>
+                    <th col-name="cus_id"></th>
+                    <th col-name="cus_type_name" style="min-width: 200px;">Loại khách</th>
+                    <th col-name="cus_type_id">Loại khách</th>
+                    <th col-name="cus_type_code">Loại khách</th>
+                    <th col-name="cus_code">Mã khách hàng</th>
+                    <th col-name="cus_name">Tên khách hàng</th>
+                    <th col-name="tel">Số điện thoại</th>
+                    <th col-name="email">Email</th>
+                    <th class="editor-cancel" col-name="nation_name" style="min-width: 150px;">Quốc gia</th>
+                    <th col-name="nation_id"></th>
+                    <th col-name="nation_code"></th>
+                    <th class="editor-cancel" col-name="city_name" style="min-width: 200px;">Tỉnh/ Thành phố</th>
+                    <th col-name="city_id"></th>
+                    <th col-name="city_code"></th>
+                    <th class="editor-cancel" col-name="district_name" style="min-width: 150px;">Quận/ Huyện</th>
+                    <th col-name="district_id"></th>
+                    <th col-name="district_code"></th>
+                    <th class="editor-cancel data-type-address" col-name="address_show">Địa chỉ</th>
+                    <th col-name="address"></th>
+                    <th class="editor-cancel data-type-shipping-address" col-name="shipping_address_show">Địa chỉ nhận hàng</th>
+                    <th col-name="shipping_address"></th>
+                    <th col-name="tax_no">Mã số thuế</th>
+                    <th col-name="fax">Fax</th>
+                    <th col-name="bank_acc">Số tài khoản</th>
+                    <th col-name="bank_name">Ngân hàng</th>
+                    <th col-name="representative">Người đại diện</th>
+                    <th col-name="representative_position">Chức vụ đại diện</th>
+                    <th col-name="representative_tel">SĐT người đại diện</th>
+                    <th col-name="debt">Dư nợ đầu kỳ</th>
+                    <th col-name="max_debt">Hạn mức nợ</th>
+                    <th col-name="remark" style="min-width: 200px;">Ghi chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php $index = 1; 
+                    for($i=0; $i < count($data); $i++){?>   
+                    <tr>
+                        <td contenteditable="true" align="center"><?=$index++;?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['cus_id'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['cus_type_name'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['cus_type_id'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['cus_type_code'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['cus_code'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['cus_name'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['tel'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['email'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['nation_name'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['nation_id'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['nation_code'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['city_name'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['city_id'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['city_code'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['district_name'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['district_id'];?></td>
+                        <td contenteditable='true' align='center'><?=$data[$i]['district_code'];?></td>
+                        <td contenteditable="true" align="center">
+                            <?=$data[$i]['address'];?>
+                            <button style="font-size: 11px; background-color: transparent; margin-right: 3px; font-style: italic; color: red; font-weight: bold; border: none;" value="Chỉnh sửa địa chỉ" name="" class="addAddress"><u>(Chỉnh sửa địa chỉ)</u></button>
+                        </td>
+                        <td contenteditable="true" align="center"><?=$data[$i]['address'];?></td>
+                        <td contenteditable="true" align="center">
+                            <?=$data[$i]['shipping_address'];?>
+                            <button style="font-size: 11px; background-color: transparent; margin-right: 3px; font-style: italic; color: red; font-weight: bold; border: none;" value="Chỉnh sửa địa chỉ" name="" class="addAddress"><u>(Chỉnh sửa địa chỉ)</u></button>
+                        </td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['shipping_address'];?></td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['tax_no'];?></td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['fax'];?></td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['bank_acc'];?></td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['bank_name'];?></td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['representative'];?></td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['representative_position'];?></td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['representative_tel'];?></td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['debt'];?></td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['max_debt'];?></td>
+                            <td contenteditable='true' align='center'><?=$data[$i]['remark'];?></td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<?php
+    include("bms/templates/add_row_popup.htm");
+    include("bms/templates/add_address_popup.htm");
+?>
+
+<input id="editor-input" hidden="">
+
+<div id="cell-context" class="btn-group" style="padding-top: 12px;">
+    <ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<div id="cell-context-2" class="btn-group" style="padding-top: 12px;">
+    <ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<div id="cell-context-3" class="btn-group" style="padding-top: 12px;">
+    <ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<div id="cell-context-4" class="btn-group" style="padding-top: 12px;">
+    <ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<div id="cell-context-5" class="btn-group" style="padding-top: 12px;">
+    <ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var tbl             = $('#contenttable'),
+            _columns        = ['STT', 'cus_id', 'cus_type_name', 'cus_type_id', 'cus_type_code', 'cus_code', 'cus_name', 'tel', 'email', 'nation_name', 'nation_id', 'nation_code', 'city_name', 'city_id', 'city_code', 'district_name', 'district_id', 'district_code', 'address_show', 'address', 'shipping_address_show', 'shipping_address', 'tax_no', 'fax', 'bank_acc', 'bank_name', 'representative', 'representative_position', 'representative_tel', 'debt', 'max_debt', 'remark'];
+
+        var dataTbl = tbl.newDataTable({
+            scrollY: '55vh',
+            columnDefs: [
+                { type: "num", className: "text-center", targets: _columns.indexOf('STT') },
+                { className: "text-center", targets: _columns.getIndexs(['cus_type_name', 'cus_code', 'cus_name', 'tel', 'nation_name', 'city_name', 'district_name', 'address_show', 'shipping_address_show', 'tax_no', 'fax', 'bank_acc', 'bank_name', 'representative', 'representative_position', 'representative_tel', 'debt', 'max_debt', 'remark', 'email'])},
+                { className: "hiden-input", targets: _columns.getIndexs(['cus_id', 'cus_type_id', 'cus_type_code', 'nation_id', 'nation_code', 'city_id', 'city_code', 'district_id', 'district_code', 'address', 'shipping_address'])},
+            ],
+            order: [[ _columns.indexOf('STT'), 'asc' ]],
+            paging: false,
+            keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            arrayColumns: _columns,
+        });
+        tbl.editableTableWidget();
+        tbl.initComplete({
+            ADD: 'ADD',
+            SAVE: 'SAVE',
+            DELETE: 'DELETE'
+        });
+
+        var nationList          = [],
+            customerTypeList    = [],
+            nation_name         = '',
+            nation_id           = '',
+            city_name           = '', 
+            city_id             = '',
+            district_name       = '',
+            district_id         = '';
+
+        <?php for($i = 0; $i < count($nation_list); $i++){ ?>
+            nationList.push({
+                'nation_code': <?="'".$nation_list[$i]['nation_code']."'";?>,
+                'nation_name': <?="'".$nation_list[$i]['nation_name']."'";?>,
+                'nation_id'  : <?="'".$nation_list[$i]['nation_id']."'";?>,
+            });
+        <?php } ?>
+
+        <?php for($i = 0; $i < count($cus_type_list); $i++){ ?>
+            customerTypeList.push({
+                'cus_type_code': <?="'".$cus_type_list[$i]['cus_type_code']."'";?>,
+                'cus_type_name': <?="'".$cus_type_list[$i]['cus_type_name']."'";?>,
+                'cus_type_id'  : <?="'".$cus_type_list[$i]['cus_type_id']."'";?>,
+            });
+        <?php } ?>
+
+        tbl.setExtendDropdown({
+            target: "#cell-context-2",
+            source: nationList,
+            colIndex: _columns.indexOf("nation_name"), 
+            onSelected: function(cell, value){ 
+                for (i = 0; i < nationList.length; i++){
+                    if (nationList[i].nation_code == value){
+                        nation_name = nationList[i].nation_name;
+                        nation_id   = nationList[i].nation_id;
+                        i           = nationList.length;
+                    }
+                }
+
+                var tempCell = cell;
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("nation_name");
+                tbl.DataTable().cell(tempCell).data(nation_name).draw(false);
+
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("nation_code");
+                tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("nation_id");
+                tbl.DataTable().cell(tempCell).data(nation_id).draw(false);
+
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_name");
+                tbl.DataTable().cell(tempCell).data('').draw(false);
+
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_code");
+                tbl.DataTable().cell(tempCell).data('').draw(false);
+
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_id");
+                tbl.DataTable().cell(tempCell).data('').draw(false);
+
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_name");
+                tbl.DataTable().cell(tempCell).data('').draw(false);
+
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_code");
+                tbl.DataTable().cell(tempCell).data('').draw(false);
+
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_id");
+                tbl.DataTable().cell(tempCell).data('').draw(false);
+
+                var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+                if(!crRow.hasClass("addnew")){
+                    tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+                }
+
+                var cityList = [];
+                <?php for($i = 0; $i < count($city_list); $i++){ ?>
+                    if (nation_id == <?=$city_list[$i]['nation_id'];?>){
+                        cityList.push({
+                            'city_code': <?="'".$city_list[$i]['city_code']."'";?>,
+                            'city_name': <?="'".$city_list[$i]['city_name']."'";?>,
+                            'city_id'  : <?="'".$city_list[$i]['city_id']."'";?>,
+                        });
+                    }
+                <?php } ?>
+
+
+                tbl.setExtendDropdown({
+                    target: "#cell-context-3",
+                    source: cityList,
+                    colIndex: _columns.indexOf("city_name"), 
+                    onSelected: function(cell, value){ 
+                        for (i = 0; i < cityList.length; i++){
+                            if (cityList[i].city_code == value){
+                                city_name = cityList[i].city_name;
+                                city_id   = cityList[i].city_id;
+                                i         = cityList.length;
+                            }
+                        }
+
+                        var tempCell = cell;
+                        tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_name");
+                        tbl.DataTable().cell(tempCell).data(city_name).draw(false);
+
+                        tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_code");
+                        tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+                        tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_id");
+                        tbl.DataTable().cell(tempCell).data(city_id).draw(false);
+
+                        tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_name");
+                        tbl.DataTable().cell(tempCell).data('').draw(false);
+
+                        tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_code");
+                        tbl.DataTable().cell(tempCell).data('').draw(false);
+
+                        tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_id");
+                        tbl.DataTable().cell(tempCell).data('').draw(false);
+
+                        var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+                        if(!crRow.hasClass("addnew")){
+                            tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+                        }
+
+                        var districtList      = [];
+                        <?php for($i = 0; $i < count($district_list); $i++){ ?>
+                            if (city_id == <?=$district_list[$i]['city_id'];?>){
+                                districtList.push({
+                                    'district_code': <?="'".$district_list[$i]['district_code']."'";?>,
+                                    'district_name': <?="'".$district_list[$i]['district_name']."'";?>,
+                                    'district_id'  : <?="'".$district_list[$i]['district_id']."'";?>,
+                                });
+                            }
+                        <?php } ?>
+
+                        tbl.setExtendDropdown({
+                            target: "#cell-context-4",
+                            source: districtList,
+                            colIndex: _columns.indexOf("district_name"), 
+                            onSelected: function(cell, value){ 
+                                var district_name = '', district_id = '';
+                                for (i = 0; i < districtList.length; i++){
+                                    if (districtList[i].district_code == value){
+                                        district_name = districtList[i].district_name;
+                                        district_id   = districtList[i].district_id;
+                                        i             = districtList.length;
+                                    }
+                                }
+
+                                var tempCell = cell;
+                                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_name");
+                                tbl.DataTable().cell(tempCell).data(district_name).draw(false);
+
+                                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_code");
+                                tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+                                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_id");
+                                tbl.DataTable().cell(tempCell).data(district_id).draw(false);
+
+
+                                var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+                                if(!crRow.hasClass("addnew")){
+                                    tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+                                }   
+                            }
+                        });     
+                    }
+                }); 
+            }
+        }); 
+    
+
+        tbl.setExtendDropdown({
+            target: "#cell-context-5",
+            source: customerTypeList,
+            colIndex: _columns.indexOf("cus_type_name"), 
+            onSelected: function(cell, value){ 
+                for (i = 0; i < customerTypeList.length; i++){
+                    if (customerTypeList[i].cus_type_code == value){
+                        cus_type_name = customerTypeList[i].cus_type_name;
+                        cus_type_id   = customerTypeList[i].cus_type_id;
+                        i             = customerTypeList.length;
+                    }
+                }
+
+                var tempCell = cell;
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("cus_type_name");
+                tbl.DataTable().cell(tempCell).data(cus_type_name).draw(false);
+
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("cus_type_code");
+                tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+                tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("cus_type_id");
+                tbl.DataTable().cell(tempCell).data(cus_type_id).draw(false);
+            },
+        });
+
+        $(document).on('click', '.addAddress', function(){
+            $('#address_type').val('Address');
+        });
+
+        $(document).on('click', '.addShippingAddress', function(){
+            $('#address_type').val('ShippingAddress');
+        });
+
+        $('#address_idx').val(_columns.indexOf('address_show'));
+    });
+</script>

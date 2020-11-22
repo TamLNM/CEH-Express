@@ -1,0 +1,85 @@
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/additionalmoney.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Khai báo Thu/Chi</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">      	
+<form  name="frmadmin" method="post" action="?eda_act=<?=md5('general')?>&eda_code=<?= md5('item_type_sm')?>" style="margin:0px">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td width="80" height="25" align="left"><b>Tên khoản</b></td>       
+              <td width="190"><input  style="width:180px;" class="catbg" name="item_name" type="text" value="" /></td>   
+              <td width="80" height="25" align="left""><b>Loại khoản</b></td>
+              <td width="120" height="25" align="left"">
+              <select onchange="change_budget(this.value);" style="width:100px;" class="catbg" name="item_type">
+              <option value="0">Khoản thu</option>
+              <option value="1">Khoản chi</option>
+              </select>
+              </td>                 
+              <td><input  class="button" name="submit" type="submit" value="Lưu khoản mới" /></td>     
+            </tr>
+       </table>   
+</form>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=10><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=10></td>
+	      </tr>
+	</table>
+	<table width="100%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td align="center" bgcolor="#afd7ff" height="25"><b>Tên khoản</b></td>
+		<td width="100" align="center" bgcolor="#afd7ff" height="25"><b>Thu/Chi</b></td>
+		<td width="40" align="center" bgcolor="#afd7ff"><b>Sửa</b></td>
+		<td width="40"  align="center" bgcolor="#afd7ff"><b>Xoá</b></td>
+		</tr>
+<?php
+	$item=get_data("select * from item_type order by item_type, item_name");
+	for($i=0;$i<count($item);$i++)
+	{
+	    echo '<tr><td style="padding-left:10px;" height="22">'.$item[$i]["item_name"].'</td>';
+	    echo '<td align="center" height="22">'.($item[$i]["item_type"]==0?'Thu':'Chi').'</td>';	
+		echo '<td align="center">';
+		echo '<img style="cursor:pointer;" onclick="window.location=\'?eda_act='.md5('general').'&eda_code='.md5('edit_item_type').'&eda_id='.$item[$i]['item_id'].'\';" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="'.ROOT_URL.'/bms/images/icon/edit_f2.png" width="16" border="0">';
+		echo '<td align="center">';
+		if(empty($item[$i]['budget_type']))
+			echo '<img style="cursor:pointer;" onclick="if(confirm(\'Bạn có chắc chắn muốn xoá không?\'))window.location=\'?eda_act='.md5('general').'&eda_code='.md5('del_item_type').'&eda_id='.$item[$i]['item_id'].'\';"  onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="'.ROOT_URL.'/bms/images/icon/cancel_f2.png" width="16" border="0">';
+		echo '</td>';
+		echo '</tr>';
+	}
+?>	
+	</table>
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 	
+     </td></tr>
+ </table>                
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>   
+<script language="javascript">
+	function change_budget(v)
+	{
+		if(v==0)
+		{
+			document.getElementById('budget_type').style.display='';
+			document.getElementById('budget_type2').style.display='none';
+		}
+		else
+		{
+			document.getElementById('budget_type2').style.display='';
+			document.getElementById('budget_type').style.display='none';
+		}		
+	}
+</script>        

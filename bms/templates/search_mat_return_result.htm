@@ -1,0 +1,118 @@
+<?php
+	$stock_where="";
+	if($return_val['mat_return_type']=='EMP') {
+		$stock_where=" smm.stock_id='".$return_val['emp_stock_id']."' and ";
+	} else  if($return_val['mat_return_type']=='SUP') {
+		$chk_mainstock=get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='".$sessions->get_session("user_id")."' or ugp.group_id='".$sessions->get_session("group_id")."') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+		if(count($chk_mainstock)>0) {
+			$stock_where=" smm.stock_id in (select stock_id from stocks where user_id is null) and ";
+		}	
+	} else {
+		$chk_mainstock=get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='".$sessions->get_session("user_id")."' or ugp.group_id='".$sessions->get_session("group_id")."') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+		$chk_empstock=get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='".$sessions->get_session("user_id")."' or ugp.group_id='".$sessions->get_session("group_id")."') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+		if(count($chk_mainstock)>0 && count($chk_empstock)>0) {
+			$stock_where=" smm.stock_id in (select stock_id from stocks) and ";
+		} else if(count($chk_mainstock)>0) {
+			$stock_where=" smm.stock_id in (select stock_id where user_id is null or user_id='".$sessions->get_session('user_id')."') and ";
+		} else {
+			$dt=get_data("select stock_id from stocks  where concat(',',user_list,',') like concat('%,',".$sessions->get_session('user_id').",',%')");
+			$stocklist="0";
+			for($i=0;$i<count($dt);$i++) {
+				$stocklist.=','.$dt[$i]['stock_id'];	
+			}
+			$stock_where=" smm.stock_id in (select stock.stock_id from stocks stock where (stock.user_id='".$sessions->get_session('user_id')."' or stock.stock_id in (".$stocklist."))) and";
+			//echo $stock_where;
+		}
+	}
+	if($return_val['mat_return_type']=='CUS') {
+		$mat=get_data("select mat.mat_name, inv.inv_code, mat.mat_id, smm.smm_id, smm.stock_id, mms.mms_id, msu.msu_id, msu.msu_name, mat.mat_model, invd.amount/invd.mat_quantity price, cat.cat_name from materials mat, categories cat, mat_msu mms, stock_mat_msu smm, out_invoice_details invd, out_invoices inv, meansure msu  ".(!empty($_GET['mfa_id'])?", mfa_mat mma":"")." where ".(!empty($_GET['stock_id'])?" smm.stock_id='".$_GET['stock_id']."' and ":$stock_where)." smm.smm_id=invd.smm_id and invd.inv_id=inv.inv_id and inv.inv_type=0 and inv.cus_id='".$return_val['cus_id']."' and cat.cat_id=mat.cat_id ".(!empty($_GET['mat_name'])?" and mat.mat_name like '%".$_GET['mat_name']."%'":"")." ".(!empty($_GET['cat_id'])?" and mat.cat_id = '".$_GET['cat_id']."'":"").(!empty($_GET['search_inv_code'])?" and inv.inv_code like '%".$_GET['search_inv_code']."%'":"")." and mat.mat_id=mms.mat_id and mms.mms_id=smm.mms_id and mms.msu_id=msu.msu_id order by mat.mat_name  limit ".(14*($action->eda_page-1)).",14");
+		$mat_count=get_data("select count(*) from materials mat, categories cat, mat_msu mms, stock_mat_msu smm, out_invoice_details invd, out_invoices inv, meansure msu ".(!empty($_GET['mfa_id'])?", mfa_mat mma":"")." where ".(!empty($_GET['stock_id'])?" smm.stock_id='".$_GET['stock_id']."' and ":$stock_where)." smm.smm_id=invd.smm_id and invd.inv_id=inv.inv_id and inv.inv_type=0 and inv.cus_id='".$return_val['cus_id']."' and cat.cat_id=mat.cat_id ".(!empty($_GET['mat_name'])?" and mat.mat_name like '%".$_GET['mat_name']."%'":"")." ".(!empty($_GET['cat_id'])?" and mat.cat_id = '".$_GET['cat_id']."'":"").(!empty($_GET['search_inv_code'])?" and inv.inv_code like '%".$_GET['search_inv_code']."%'":"").'  and mat.mat_id=mms.mat_id and mms.mms_id=smm.mms_id and mms.msu_id=msu.msu_id');
+		$mat_count=$mat_count[0][0];		
+	} else if($return_val['mat_return_type']=='EMP') {
+		$mat=get_data("select mat.mat_name, mat.mat_id, smm.smm_id, smm.stock_id, mms.mms_id, msu.msu_id, msu.msu_name, mat.mat_model, 0 price, 1 quantity, cat.cat_name from materials mat, categories cat, mat_msu mms, stock_mat_msu smm,  meansure msu  ".(!empty($_GET['mfa_id'])?", mfa_mat mma":"")." where smm.stock_id='".$return_val['emp_stock_id']."' and cat.cat_id=mat.cat_id ".(!empty($_GET['mat_name'])?" and mat.mat_name like '%".$_GET['mat_name']."%'":"")." ".(!empty($_GET['cat_id'])?" and mat.cat_id = '".$_GET['cat_id']."'":"").(!empty($_GET['search_inv_code'])?" and inv.inv_code like '%".$_GET['search_inv_code']."%'":"")." and mat.mat_id=mms.mat_id and mms.mms_id=smm.mms_id and mms.msu_id=msu.msu_id order by mat.mat_name  limit ".(14*($action->eda_page-1)).",14");
+		$mat_count=get_data("select  count(*) from materials mat, categories cat, mat_msu mms, stock_mat_msu smm, meansure msu  ".(!empty($_GET['mfa_id'])?", mfa_mat mma":"")." where smm.stock_id='".$return_val['emp_stock_id']."' and cat.cat_id=mat.cat_id ".(!empty($_GET['mat_name'])?" and mat.mat_name like '%".$_GET['mat_name']."%'":"")." ".(!empty($_GET['cat_id'])?" and mat.cat_id = '".$_GET['cat_id']."'":"").(!empty($_GET['search_inv_code'])?" and inv.inv_code like '%".$_GET['search_inv_code']."%'":"")." and mat.mat_id=mms.mat_id and mms.mms_id=smm.mms_id and mms.msu_id=msu.msu_id");
+		$mat_count=$mat_count[0][0];	
+	} else {
+		$mat=get_data("select mat.mat_name, inv.inv_code, stock.stock_name, mat.mat_id, smm.smm_id, smm.stock_id, mms.mms_id, invd.amount/invd.mat_quantity price, msu.msu_id, msu.msu_name, cat.cat_name from materials mat, categories cat, mat_msu mms, stock_mat_msu smm, stocks stock, invoice_details invd, invoices inv, meansure msu  ".(!empty($_GET['mfa_id'])?", mfa_mat mma":"")." where ".(!empty($_GET['stock_id'])?" smm.stock_id='".$_GET['stock_id']."' and ":$stock_where)." mms.mms_id=invd.mms_id and invd.inv_id=inv.inv_id and inv.inv_type=1 and inv.sup_id='".$return_val['sup_id']."' and cat.cat_id=mat.cat_id ".(!empty($_GET['mat_name'])?" and mat.mat_name like '%".$_GET['mat_name']."%'":"")." ".(!empty($_GET['cat_id'])?" and mat.cat_id = '".$_GET['cat_id']."'":"").(!empty($_GET['search_inv_code'])?" and inv.inv_code like '%".$_GET['search_inv_code']."%'":"")." and mat.mat_id=mms.mat_id and mms.mms_id=smm.mms_id and mms.msu_id=msu.msu_id and smm.stock_id=stock.stock_id  order by mat.mat_name  limit ".(14*($action->eda_page-1)).",14");
+		$mat_count=get_data("select count(*) from materials mat, categories cat, mat_msu mms, stock_mat_msu smm, invoice_details invd, invoices inv, meansure msu ".(!empty($_GET['mfa_id'])?", mfa_mat mma":"")." where ".(!empty($_GET['stock_id'])?" smm.stock_id='".$_GET['stock_id']."' and ":$stock_where)." mms.mms_id=invd.mms_id and invd.inv_id=inv.inv_id and inv.inv_type=1 and inv.sup_id='".$return_val['sup_id']."' and cat.cat_id=mat.cat_id ".(!empty($_GET['mat_name'])?" and mat.mat_name like '%".$_GET['mat_name']."%'":"")." ".(!empty($_GET['cat_id'])?" and mat.cat_id = '".$_GET['cat_id']."'":"").(!empty($_GET['search_inv_code'])?" and inv.inv_code like '%".$_GET['search_inv_code']."%'":"").'  and mat.mat_id=mms.mat_id and mms.mms_id=smm.mms_id and mms.msu_id=msu.msu_id');
+		$mat_count=$mat_count[0][0];
+	}
+?>
+	<table width="100%"  border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="8%" align="center" bgcolor="#afd7ff"><b>Chọn</b></td>
+		<td width="42%" align="center" bgcolor="#afd7ff" height="25"><b>Tên sản phẩm</b></td>
+		<td width="30%" align="center" bgcolor="#afd7ff"><b>Chủng loại</b></td>
+		<td width="20%" align="center" bgcolor="#afd7ff"><b>Đơn vị</b></td>
+		</tr>
+<?php
+	if(count($mat)>0)
+	for($i=0;$i<count($mat);$i++)
+	{
+?>				
+		<tr ondblclick="cur_mat_name='<?= $mat[$i]['mat_name']?>';cur_mms_id='<?= $mat[$i]['mms_id']?>';cur_smm_id='<?= $mat[$i]['smm_id']?>';cur_price='<?= $mat[$i]['price']?>';cur_msu_name='<?= $mat[$i]['msu_name']?>';selectmat();" style="cursor:pointer;" onclick="document.getElementById('select_mat_<?= $i?>').checked=true;cur_mms_id='<?= $mat[$i]['mms_id']?>';cur_smm_id='<?= $mat[$i]['smm_id']?>';cur_msu_name='<?= $mat[$i]['msu_name']?>';cur_price='<?= $mat[$i]['price']?>';cur_mat_name='<?= $mat[$i]['mat_name']?>';" onmouseover="this.style.backgroundColor='yellow';" onmouseout="this.style.backgroundColor='';">
+		<td align="center" height="25"><input name="select_mat" id="select_mat_<?= $i?>" type="radio" value="<?= $mat[$i]['mat_id']?>"/></td>
+		<td style="padding-left:5px;"><?= $mat[$i]['mat_name'].(isset($mat[$i]['inv_code'])?" (".$mat[$i]['inv_code'].")":"").(isset($mat[$i]['stock_name'])?" (".$mat[$i]['stock_name'].")":"")?></td>
+		<td style="padding-left:5px;"><?= $mat[$i]['cat_name']?></td>
+		<td align="center"><?= $mat[$i]['msu_name']?></td>
+	    </tr>
+<?php		    
+	}
+?>	    
+	</table>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0"  style="border-collapse:collapse">
+	    <tr><td height="25" align="center">	
+<?php	
+			if($mat_count>0)
+			{
+				if(!isset($page_dis))
+					$page_dis=false;
+			 	if($page_dis==false)
+			 	{
+					echo '<b>Trang: </b>';
+					$page=ceil($mat_count/14);
+					$start_page=$action->eda_page-10;
+					echo ' <a class="cart_payment" href="javascript:load_mat_page(1);">';
+					if($action->eda_page==1)
+						echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+					echo "1";
+					if($action->eda_page==1)
+					echo "</b></font>";
+					echo '</a> ';							
+					if($start_page<2)
+						$start_page=1;
+					else
+						echo " ... ";
+					$end_page=$action->eda_page+9;
+					if($end_page>$page)
+						$end_page=$page-1;						
+					for($i=$start_page;$i<$end_page;$i++)
+					{
+						echo ' <a class="cart_payment" href="javascript:load_mat_page('.($i+1).');">';
+						if($action->eda_page==$i+1)
+							echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+						echo ($i+1);
+						if($action->eda_page==$i+1)
+						echo "</b></font>";
+						echo '</a> ';
+					}
+					if($action->eda_page+10<$page)
+						echo " ... ";
+					if($page>1)
+					{
+						echo ' <a class="cart_payment" href="javascript:load_mat_page('.$page.');">';
+						if($action->eda_page==$page)
+							echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+						echo ($page);
+						if($action->eda_page==$page)
+						echo "</b></font>";
+						echo '</a> ';							
+					}
+				}
+			}
+			else
+				echo '<table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td>Không có sản phẩm nào được tìm thấy</td></tr></table>';	
+?>	
+	</td></tr>
+	</table>				
+		

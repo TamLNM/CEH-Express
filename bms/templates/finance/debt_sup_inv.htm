@@ -1,0 +1,265 @@
+<?php
+global $head;
+if (isset($return_val["datefrom"])) {
+    $sdate = explode("/", $return_val["datefrom"]);
+    if ($sdate[0] > 0 && $sdate[0] <= 31 && $sdate[1] > 0 && $sdate[1] <= 12 && $sdate[2] <= date('Y')) {
+        $sdate = mktime(0, 0, 0, $sdate[1], $sdate[0], $sdate[2]);
+    }
+}
+if (!isset($sdate)) {
+    if (date('m') > 1)
+        $sdate = mktime(0, 0, 0, date('m') - 1, date('d'), date('Y'));
+    else
+        $sdate = mktime(0, 0, 0, 12, date('d'), date(Y) - 1);
+    $return_val["datefrom"] = date('d/m/Y', $sdate);
+}
+if (isset($return_val["dateto"])) {
+    $edate = explode("/", $return_val["dateto"]);
+    if ($edate[0] > 0 && $edate[0] <= 31 && $edate[1] > 0 && $edate[1] <= 12 && $edate[2] <= date('Y')) {
+        $edate = mktime(23, 59, 59, $edate[1], $edate[0], $edate[2]);
+    }
+}
+if (!isset($edate)) {
+    $edate = mktime(23, 59, 59, date('m'), date('d'), date('Y'));
+}
+?>
+<?php
+if ($action->eda_code == md5('view_report')) {
+    $sup = get_data("select sup_name from supliers where sup_id='" . $action->eda_id . "'");
+    if (count($sup) > 0) {
+        ?>
+        <table align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td width="60" height="30"><b>Từ ngày</b></td>
+                <td width="70">
+                    <?= !empty($return_val['datefrom']) ? $return_val['datefrom'] : 'Tất cả' ?>
+                </td>
+                <td width="70" style="padding-right:15px;" align="right"><b>Đến ngày</b></td>
+                <td width="70">
+                    <?= !empty($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>
+                </td>
+                <td style="padding-left:20px;"> 		
+                    <b>Tên nhà cung cấp: <?= $sup[0][0] ?></b></td>
+            </tr>
+        </table>
+        <?php
+    }
+}
+?>
+<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <tr>
+        <td align="center" bgcolor="#afd7ff" height="25"><b>Tên sản phẩm</b></td>
+        <td width="10%" align="center" bgcolor="#afd7ff"><b>Số lượng</b></td>
+        <td width="10%" align="center" bgcolor="#afd7ff"><b>Đơn giá</b></td>
+        <?php
+        if(@empty($head["novat_output"])) {
+            echo '<td width="5%" align="center" bgcolor="#afd7ff"><b>VAT(%)</b></td>';
+         }
+        ?>       
+        <td width="12%" align="center" bgcolor="#afd7ff"><b>Tổng tiền</b></td>
+        <td width="13%" align="center" bgcolor="#afd7ff"><b>Đã thanh toán</b></td>
+        <td width="12%" align="center" bgcolor="#afd7ff"><b>Còn nợ</b></td>
+    </tr>
+
+    <?php
+    $total = 0;
+    $payment = 0;
+    $sum = 0;
+    $inv = get_data("select inv.* from invoices inv where inv_type=1 and inv.sup_id='" . (isset($return_val['sup_id']) ? $return_val['sup_id'] : $action->eda_id) . "' and inv.created_date between " . $sdate . " and " . $edate . " order by created_date desc");
+    for ($i = 0; $i < count($inv); $i++) {
+        ?>	
+        <tr  style="cursor:pointer;font-weight:bold;background-Color:#eeeeee;" <?php if ($action->eda_code != md5('view_report')) echo 'onmouseover="this.style.backgroundColor=\'yellow\';" onmouseout="this.style.backgroundColor=\'#eeeeee\';" onclick="window.open(\'?eda_code=' . md5('view_report') . '&eda_module=sell/view_input_mat&eda_type=ajax&eda_id=' . $inv[$i]['inv_id'] . '\');"' ?> >
+            <td style="padding-left:5px;" height="25">Ngày <?= date('d/m/Y H:i', $inv[$i]['created_date']) ?> (Mã phiếu <?= $inv[$i]['inv_code'] ?>)<?= !empty($inv[$i]['comment']) ? '<br/><span style="font-weight:normal;"><i>' . $inv[$i]['comment'] . '</i></span>' : '' ?></td>
+            <td align="center"></td>
+            <td align="center"></td>
+        <?php
+        if(@empty($head["novat_output"])) {            
+            echo '<td align="center"></td>';
+        }
+        ?>             
+            <td align="center"><?= number_format($inv[$i]['total'], 0, ",", " ") ?></td>	
+            <td align="center"><?= number_format($inv[$i]['payment'], 0, ",", " ") ?></td>	
+            <td align="center"><?= number_format($inv[$i]['total'] - $inv[$i]['payment'], 0, ",", " ") ?></td>	
+        </tr>
+
+        <?php
+        $total+=$inv[$i]['total'] - $inv[$i]['payment'];
+        $payment+=$inv[$i]['payment'];
+        $sum+=$inv[$i]['total'];
+        $invd = get_data("select mat.mat_name, invd.mat_quantity, invd.vat,invd.amount, msu.msu_name from invoice_details invd, mat_msu mms, materials mat, meansure msu where invd.inv_id='" . $inv[$i]['inv_id'] . "' and invd.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id");
+        for ($j = 0; $j < count($invd); $j++) {
+            ?>
+            <tr>
+                <td style="padding-left:5px;" height="25"><?= $invd[$j]['mat_name'] ?></td>
+                <td align="center"><?= $invd[$j]['mat_quantity'] . ' ' . $invd[$j]['msu_name'] ?></td>
+                <td align="center"><?= number_format(100*$invd[$j]['amount'] / $invd[$j]['mat_quantity']/(100+$invd[$j]['vat']), 0, ",", " ") ?></td>
+        <?php
+        if(@empty($head["novat_output"])) {            
+            echo '<td align="center">'. number_format($invd[$j]['vat'], 0, '', ' ') .'%</td>';
+        }
+        ?>                    
+                <td align="center"><?= number_format($invd[$j]['amount'], 0, ",", " ") ?></td>	                    
+                <td align="center"></td>
+                <td align="center"></td>	
+            </tr>
+            <?php
+        }
+    }
+    ?>	
+    <tr>
+        <td colspan="<?=@empty($head["novat_output"])?4:3?>" height="25" align="center"><b>Tổng cộng</b></td>
+        <td align="center"><b><?= number_format($sum, 0, ",", " ") ?></b></td>
+        <td align="center"><b><?= number_format($payment, 0, ",", " ") ?></b></td>
+        <td align="center"><b><?= number_format($total, 0, ",", " ") ?></b></td>	
+    </tr>
+</table>
+<table align="center" width="98%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+    <tr>
+        <td height="10">
+            <img src="<?=ROOT_URL?>bms/images/spacer.gif" height="10"/>
+        </td>        
+    </tr>
+</table>
+<?php
+$back_total = 0;
+$return_total = 0;
+$inv = get_data("select inv.* from mat_return_invoices inv where inv.sup_id='" . (isset($return_val['cus_id']) ? $return_val['cus_id'] : $action->eda_id) . "' and inv.created_date between " . $sdate . " and " . $edate . " order by created_date");
+if (count($inv) > 0) {
+    ?>      
+    <table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+        <tr>
+            <td width="40%" align="center" bgcolor="#afd7ff" height="25"><b>Hàng trả lại</b></td>
+            <td width="13%" align="center" bgcolor="#afd7ff"><b>Hình thức trả</b></td>
+            <td width="10%" align="center" bgcolor="#afd7ff"><b>Số lượng</b></td>
+            <td width="13%" align="center" bgcolor="#afd7ff"><b>Đơn giá</b></td>
+            <td width="13%" align="center" bgcolor="#afd7ff"><b>Tổng tiền</b></td>
+            <td width="12%" align="center" bgcolor="#afd7ff"><b>Trừ công nợ</b></td>
+        </tr>
+        <?php
+        for ($i = 0; $i < count($inv); $i++) {
+            ?>	
+            <tr  style="cursor:pointer;font-weight:bold;background-Color:#eeeeee;" <?php if ($action->eda_code != md5('view_report')) echo 'onmouseover="this.style.backgroundColor=\'yellow\';" onmouseout="this.style.backgroundColor=\'#eeeeee\';" onclick="window.open(\'?eda_code=' . md5('view_report') . '&eda_module=sell/view_mat_return&eda_type=ajax&eda_id=' . $inv[$i]['inv_id'] . '\');"' ?> >
+                <td style="padding-left:5px;" height="25">Ngày <?= date('d/m/Y H:i', $inv[$i]['created_date']) ?> (Mã phiếu <?= $inv[$i]['inv_code'] ?>)</td>
+                <td align="center"><?= $inv[$i]['paid_type'] == 1 ? 'Khấu trừ công nợ' : 'Hoàn lại tiền' ?></td>
+                <td align="center"></td>
+                <td align="center"></td>
+                <td align="center"><?= number_format($inv[$i]['total'], 0, ",", " ") ?></td>
+                <td align="center"><?= $inv[$i]['paid_type'] == 1 ? number_format($inv[$i]['total'], 0, ",", " ") : 0 ?></td>
+            </tr>
+
+            <?php
+            if ($inv[$i]['paid_type'] == 1) {
+                $back_total+=$inv[$i]['total'];
+            }
+            $return_total+=$inv[$i]['total'];
+            $invd = get_data("select mat.mat_name, invd.mat_quantity, invd.serials, invd.invd_id, invd.amount, msu.msu_name from mat_return_invoice_details invd, stock_mat_msu smm, mat_msu mms, materials mat,  meansure msu where invd.inv_id='" . $inv[$i]['inv_id'] . "' and invd.smm_id=smm.smm_id and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id");
+            for ($j = 0; $j < count($invd); $j++) {
+                ?>
+                <tr>
+                    <td style="padding-left:5px;" height="25">
+                        <?= $invd[$j]['mat_name'] . (empty($invd[$j]['serials']) ? "" : " (Serials: " . $invd[$j]['serials'] . ")") ?>		
+                    </td>
+                    <td align="center"></td>
+                    <td align="center"><?= $invd[$j]['mat_quantity'] . ' ' . $invd[$j]['msu_name'] ?></td>
+                    <td align="center"><?= number_format($invd[$j]['amount'] / $invd[$j]['mat_quantity'], 0, ",", " ") ?></td>
+                    <td align="center"><?= number_format($invd[$j]['amount'], 0, ",", " ") ?></td>	
+                    <td align="center"></td>
+                </tr>
+                <?php
+            }
+        }
+        ?>	
+        <tr style="background-Color:#eeeeee;font-weight:bold;">
+            <td colspan="4" height="25" align="center">Tổng cộng</td>
+            <td align="center"><?= number_format($return_total, 0, ",", " ") ?></td>			
+            <td align="center"><?= number_format($back_total, 0, ",", " ") ?></td>			
+        </tr>
+    </table>
+    <table align="center" width="98%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+        <tr>
+            <td height="10">
+                <img src="<?=ROOT_URL?>bms/images/spacer.gif" height="10"/>
+            </td>        
+        </tr>
+    </table>            
+    <?php
+}
+$bin = get_data("select bin.*, usr.full_name, itt.item_name from budget_invoices bin, item_type itt, users usr where ((bin.bin_type=0 and bin.item_id=itt.item_id and itt.item_type=0 and itt.budget_type='VAY')  or (bin.bin_type=1 and bin.item_id=itt.item_id and itt.item_type=1 and itt.budget_type='CN') or (bin.bin_type=3 and bin.item_id=itt.item_id and itt.item_type=0 and itt.budget_type='CN' )) and bin.sup_id='" . (isset($return_val['sup_id']) ? $return_val['sup_id'] : $action->eda_id) . "' and bin.created_date between " . $sdate . " and " . $edate . " and bin.user_id=usr.user_id and bin.item_id=itt.item_id order by bin.bin_type, bin.created_date desc");
+?>      
+<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <tr>
+        <td width="40%" align="center" bgcolor="#afd7ff" height="25"><b>Lịch sử thanh toán</b></td>
+        <td width="18%" align="center" bgcolor="#afd7ff"><b>Người thực hiện</b></td>
+        <td width="30%" align="center" bgcolor="#afd7ff"><b>Nội dung</b></td>
+        <td  align="center" bgcolor="#afd7ff"><b>Số tiền</b></td>
+    </tr>
+    <?php
+    $amount_in = 0;
+    for ($i = 0; $i < count($bin); $i++) {
+        ?>		
+        <tr  <?= $action->eda_code != md5('view_report') ? ' style="cursor:pointer;" onmouseover="this.style.backgroundColor=\'yellow\';" onmouseout="this.style.backgroundColor=\'\';" onclick="window.open(\'?eda_act=' . md5('finance') . '&eda_code=' . md5('view_budget_' . ($bin[$i]['bin_type'] == 0 ? 'input' : 'output')) . '&eda_id=' . $bin[$i]['bin_id'] . '\');"' : '' ?>>
+            <td align="center" height="25">Ngày <?= date('d/m/Y H:i', $bin[$i]['created_date']) ?> (Mã phiếu <?= $bin[$i]['bin_code'] ?>)</td>
+            <td align="center"  style="padding-top:5px;padding-bottom:5px;"><?= $bin[$i]['full_name'] ?></td>
+            <td style="padding-left:5px;"><?= $bin[$i]['comment'] ?></td>		
+            <td align="center"><?= ($bin[$i]['bin_type']==0?'-':'').number_format($bin[$i]['amount'], 0, ",", " ") ?></td>
+        </tr>
+
+        <?php
+        if($bin[$i]['bin_type']==0) {
+            $amount_in-=$bin[$i]['amount'];
+        } else {
+            $amount_in+=$bin[$i]['amount'];
+        }
+    }
+    $supid = (isset($return_val['sup_id']) ? $return_val['sup_id'] : $action->eda_id);
+    $debt = $this->get_sup_debt($supid);
+    $month = date('m', $sdate) . "/" . date('Y', $sdate);
+    $m = mktime(0, 0, 0, date('m', $sdate), 1, date('Y', $sdate));
+    $debt_month = $this->get_sup_debt($supid, $m);
+    $debt_edate = $this->get_sup_debt($supid, $edate);
+    ?>	
+    <tr style="background-Color:#eeeeee;font-weight:bold;">
+        <td colspan="3" align="center" height="25">Tổng thanh toán</td>
+        <td align="center"><?= number_format($amount_in, 0, ",", " ") ?></td>
+    </tr>
+</table>
+<table align="center" width="98%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+    <tr>
+        <td height="50" align="right">
+            <b>Nợ trong kỳ: <font color="red"><?= number_format($sum - $back_total - $amount_in, 0, ",", " ") ?></font></b>
+        </td>        
+    </tr>
+    <?php
+    $dauky = get_data("select debt from supliers where sup_id='" . $action->eda_id . "'");
+    if (count($dauky) > 0) {
+        $dauky = $dauky[0][0];
+    } else {
+        $dauky = 0;
+    }
+    ?>
+    <tr>
+        <td height="22"><b>Công nợ đến đầu tháng <?= $month ?>: <font color="red"><?= number_format($debt_month + $dauky, 0, ",", " ") ?> đ</font></b></td>   
+    </tr>   
+    <?php
+    if (date('d', $sdate) != 1) {
+        $debt_sdate = $this->get_sup_debt($action->eda_id, $sdate);
+        ?>
+        <tr>
+            <td height="22"><b>Công nợ đến đầu ngày <?= date('d/m/Y', $sdate) ?>: <font color="red"><?= number_format($debt_sdate + $dauky, 0, ",", " ") ?> đ</font></b></td>   
+        </tr>
+        <?php
+    }
+    ?>
+    <tr>
+        <td height="22"><b>Công nợ đến cuối ngày <?= date('d/m/Y', $edate) ?>: <font color="red"><?= number_format($debt_edate + $dauky, 0, ",", " ") ?> đ</font></b></td>   
+    </tr>    
+    <tr  style="border-top:1px solid #ccc;">
+        <td height="22"><b>Công nợ đầu kỳ: <font color="red"><?= number_format($dauky, 0, ",", " ") ?> đ</font></b></td>   
+    </tr>
+    <tr>
+        <td height="22"><b>Tổng công nợ phát sinh: <font color="red"><?= number_format($debt, 0, ",", " ") ?> đ</font></b></td>   
+    </tr>		
+    <tr>
+        <td height="22"><b>Tổng công nợ hiện tại: <font color="red"><?= number_format($debt + $dauky, 0, ",", " ") ?> đ</font></b></td>   
+    </tr>
+</table>		

@@ -1,0 +1,70 @@
+<?php
+global $head;
+?>
+<div id="footer">
+            <div id="foothead">            
+                Phần mềm phát triển bởi <a href="http://cehsoft.com//" target="_blank" style="margin-right:0px">Công ty TNHH Dịch vụ Tin học CEH</a>
+            </div>
+            <div style="margin:auto;width:998px;text-align:left;margin-top:10px;">
+                    <?=$head["head_title"]?>
+            </div>
+        <script src="assets/vendors/jquery-ui/jquery-ui.js"></script>
+        <script src="assets/vendors/datetimepicker/jquery-ui-timepicker-addon.js"></script>
+            <script  language="javascript">
+                $('#footer p').css('color','#fff');
+                $('#footer span').css('color','#fff');
+            </script>
+        </script>
+        <script>
+            var resizefunc = [];
+
+            $.extend( true, $.fn.dataTable.defaults, {
+                language: {
+                    info: "Số dòng: _TOTAL_",
+                    emptyTable: "------------ Không có dữ liệu hiển thị ------------",
+                    infoFiltered: "(trên _MAX_ dòng)",
+                    infoEmpty: "Số dòng: 0",
+                    search: '<span>Tìm:</span> _INPUT_',
+                    zeroRecords:    "------------ Không có dữ liệu được tìm thấy ------------",
+                    sThousands: ",",
+                    sDecimal: ".",
+                    // autoFill: {
+                    //     // fillHorizontal: 'Đổ dữ liệu theo dòng',
+                    //     // fillVertical: 'Đổ dữ liệu theo cột',
+                    //     // fill: b[0][0].label,
+                    //     // increment: 'Thay đổi tất cả các ô theo giá trị: <input type="number" value="1">',
+                    //     // cancel: 'Hủy bỏ',
+                    //     // button:'Go!'
+                    // },
+                    select: {
+                        rows: {
+                            _: "Đã chọn %d dòng",
+                            0: ""
+                        }
+                    }
+                },
+                search: {
+                    regex: true
+                },
+                info: true,
+                orderClasses: false,
+                paging: false,
+                scrollY: 419,
+                scrollX: true,
+                lengthChange: false,
+                scrollCollapse: false,
+                deferRender: true,
+                processing: true,
+                autoWidth: true,
+                dom: '<"datatable-header"fl<"datatable-info-right"Bip>><"datatable-scroll-wrap"t>',
+                buttons: [
+                    {extend: 'selectAll', text: 'Chọn tất cả', className: 'btn btn-xs btn-default'},
+                    {extend: 'selectNone', text: 'Bỏ chọn', className: 'btn btn-xs btn-default'}
+                ],
+                destroy: true
+            });
+        </script>
+</div>
+
+    </body>
+</html>

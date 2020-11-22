@@ -1,0 +1,99 @@
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/stock.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Khai báo Kho</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>        
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td height="40" style="padding-left:20px;"><input type="button" value="Tạo kho mới" onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('stock_add')?>';" name="add" class="button"></td>
+      </tr>
+	</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center">	
+<div id="cusid">
+<?php
+	$stock=get_data("select * from stocks order by stock_name");
+?>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center">	
+<div id="empid">
+	<table width="100%" id="user_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td height="25" width="30%" align="center" bgcolor="#afd7ff"><b>Tên kho</b></td>
+		<td  align="center" bgcolor="#afd7ff"><b>Địa điểm</b></td>
+		<td width="20%" align="center" bgcolor="#afd7ff"><b>Của nhân viên</b></td>
+		<td width="5%" align="center" bgcolor="#afd7ff"><b>Sửa</b></td>
+		<td width="5%" align="center" bgcolor="#afd7ff"><b>Xoá</b></td>		
+		</tr>
+<?php
+	if(count($stock)>0)
+	for($i=0;$i<count($stock);$i++)
+	{
+?>		
+		<tr>
+		<td height="25" style="padding-left:5px;"><?= $stock[$i]['stock_name']?></td>
+		<td style="padding-left:5px;"><?= $stock[$i]['address']?></td>
+		<td align="center">
+		<?php
+		 if(empty($stock[$i]['user_id'])) {
+		 	echo 'Kho chính';
+		 } else {
+		 	$usr=get_data("select full_name from users where user_id='".$stock[$i]['user_id']."'");
+		 	if(count($usr)>0) {
+		 		echo $usr[0][0];
+		 	} else {
+		 		echo 'Không tồn tại';
+		 	}
+		 }
+		 ?></td>	
+		<td align="center">
+		<a href="?eda_act=<?=md5('general')?>&eda_code=<?= md5('stock_edit')?>&eda_id=<?= $stock[$i]['stock_id']?>" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" width="16" border="0"></a>
+		</td>
+		<td align="center" height="25">
+		<a href="javascript:void()" onclick="if(confirm('Bạn có chắc chắn muốn xoá kho này không?'))window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('stock_del')?>&eda_id=<?= $stock[$i]['stock_id']?>';" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="16" border="0"></a>
+		</td>
+	    </tr>
+<?php
+	}
+?>	    
+	</table>
+</div>
+	</td></tr>
+</table>		
+
+</div>
+	</td></tr>
+</table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>   	
+<script language="javascript">
+	var cur_page=1;
+	var cur_cus_id='';
+	var cur_cus_name='';
+	function load_page(p)
+	{
+		load('?eda_type=ajax&eda_act=<?=md5("general")?>&eda_code=<?= md5("search_emp_man")?>&dept_id='+document.getElementById('dept_id').value+'&full_name='+document.getElementById('full_name').value+'&eda_page='+p,'cusid','html','GET',null,'in');
+		cur_page=p;
+	}
+</script>

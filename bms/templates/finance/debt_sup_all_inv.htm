@@ -1,0 +1,150 @@
+<?php
+global $head;
+if (isset($return_val["datefrom"])) {
+    $sdate = explode("/", $return_val["datefrom"]);
+    if ($sdate[0] > 0 && $sdate[0] <= 31 && $sdate[1] > 0 && $sdate[1] <= 12 && $sdate[2] <= date('Y')) {
+        $sdate = mktime(0, 0, 0, $sdate[1], $sdate[0], $sdate[2]);
+    }
+}
+if (!isset($sdate)) {
+    if (date('m') > 1)
+        $sdate = mktime(0, 0, 0, date('m') - 1, date('d'), date('Y'));
+    else
+        $sdate = mktime(0, 0, 0, 12, date('d'), date(Y) - 1);
+    $return_val["datefrom"] = date('d/m/Y', $sdate);
+}
+if (isset($return_val["dateto"])) {
+    $edate = explode("/", $return_val["dateto"]);
+    if ($edate[0] > 0 && $edate[0] <= 31 && $edate[1] > 0 && $edate[1] <= 12 && $edate[2] <= date('Y')) {
+        $edate = mktime(23, 59, 59, $edate[1], $edate[0], $edate[2]);
+    }
+}
+if (!isset($edate)) {
+    $edate = mktime(23, 59, 59, date('m'), date('d'), date('Y'));
+}
+?>
+<?php
+if ($action->eda_code == md5('view_report')) {
+    
+        ?>
+        <table align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td colspan="7" align=center style="padding-right: 20px;">
+                    <b>Từ ngày : </b><?= !empty($return_val['datefrom']) ? $return_val['datefrom'] : 'Tất cả' ?> &nbsp;&nbsp;&nbsp;
+                    <b>Đến ngày : </b><?= !empty($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>	
+                </td>
+            </tr>
+            <tr>
+                <td colspan="7" align=right style="padding-right: 20px;">Đơn vị tính : đồng việt nam</td>
+            </tr>
+        </table>
+        <?php
+    
+}
+
+
+
+
+
+
+$gettk=get_data("select sup.*,sum(inv.payment) tongtra,sum(inv.total) tongtien from supliers sup left join invoices inv on inv.sup_id=sup.sup_id and inv.created_date between " . $sdate . " and " . $edate . " group by sup.sup_id order by sup.sup_id asc");
+$getdk=get_data("select sup.*,sum(inv.payment) tongtra,sum(inv.total) tongtien from supliers sup left join invoices inv on inv.sup_id=sup.sup_id and inv.created_date < " . $sdate . " group by sup.sup_id order by sup.sup_id asc");
+$getbin=get_data("select sup.*,sum(bin.amount) tongtra from supliers sup left join budget_invoices bin on bin.sup_id=sup.sup_id and bin.bin_type=1 and bin.inv_id is null and bin.oinv_id is null and bin.created_date between " . $sdate . " and " . $edate . " group by sup.sup_id order by sup.sup_id asc");
+$getbindk=get_data("select sup.*,sum(bin.amount) tongtra from supliers sup left join budget_invoices bin on bin.sup_id=sup.sup_id and bin.bin_type=1 and bin.inv_id is null and bin.oinv_id is null and bin.created_date < " . $sdate . " group by sup.sup_id order by sup.sup_id asc");
+//print_r("select sup.*,sum(inv.payment) tongtra,sum(inv.total) tongtien from supliers sup left join invoices inv on inv.sup_id=sup.sup_id and inv.created_date < " . $sdate . " group by sup.sup_id order by sup.sup_id asc");
+
+
+?>
+<br>
+<table align="center" width="98%" border="1" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <tr>
+        <td rowspan="2" width="5%" align="center" bgcolor="#afd7ff" height="25"><b>STT</b></td>
+        <td rowspan="2" width="10%" align="center" bgcolor="#afd7ff" height="25"><b>MÃ KHÁCH</b></td>
+        <td rowspan="2" width="20%" align="center" bgcolor="#afd7ff" height="25"><b>TÊN KHÁCH</b></td>
+        <td align="center" bgcolor="#afd7ff" colspan=2 height="25"><b>SỐ DƯ ĐẦU KỲ</b></td>
+        <td align="center" bgcolor="#afd7ff" colspan=2 height="25"><b>SỐ PHÁT SINH TRONG KỲ</b></td>    
+        <td align="center" bgcolor="#afd7ff" colspan=2 height="25"><b>SỐ DƯ CUỐI KỲ</b></td>
+    </tr>
+    <tr>
+        <td align="center" bgcolor="#afd7ff" height="25"><b>NỢ</b></td>
+        <td align="center" bgcolor="#afd7ff" height="25"><b>CÓ</b></td>
+        <td align="center" bgcolor="#afd7ff" height="25"><b>NỢ</b></td>
+        <td align="center" bgcolor="#afd7ff" height="25"><b>CÓ</b></td>
+        <td align="center" bgcolor="#afd7ff" height="25"><b>NỢ</b></td>
+        <td align="center" bgcolor="#afd7ff" height="25"><b>CÓ</b></td>
+    </tr>
+<?php
+$stt=0;
+    $tno1=0;
+    $tco1=0;
+    $tno2=0;
+    $tco2=0;
+    $tno3=0;
+    $tco3=0;
+foreach ($gettk as $key => $value) {
+
+
+    $stt++;
+// $getdk[$key]['tongtra']+=floatval($getbindk[$key]['tongtra']);
+// $gettk[$key]['tongtra']+=floatval($getbin[$key]['tongtra']);
+
+
+
+    $co1=($getdk[$key]['tongtien']-$getdk[$key]['tongtra'])+intval($getbindk[$key]['tongtra'])+$gettk[$key]['duco'];
+    $no1=($getdk[$key]['tongtra'])+$gettk[$key]['duno'];
+    $co2=($gettk[$key]['tongtien']-$gettk[$key]['tongtra'])+intval($getbin[$key]['tongtra']);
+    $no2=($gettk[$key]['tongtra']);
+
+$tongx=($no1+$no2)-($co1+$co2);
+if($tongx<0){
+    $co3=abs($tongx);
+    $no3=0;
+}
+else{
+    $no3=abs($tongx);
+    $co3=0;
+}
+// $no3=($no1+$no2)-($co1+$co2);
+// $co3=($co1+$co2)-($no1+$no2);
+    // $no3=($getdk[$key]['tongtien']-$getdk[$key]['tongtra'])+($value['tongtien']-$value['tongtra']);
+    // $co3=($getdk[$key]['tongtra'])+($value['tongtra']);
+
+
+    $tno1+=$no1;
+    $tco1+=$co1;
+    $tno2+=$no2;
+    $tco2+=$co2;
+    $tno3+=$no3;
+    $tco3+=$co3;
+
+    echo '<tr>
+    <td>'.$stt.'</td>
+    <td>'.$value['sup_code'].'</td>
+    <td>'.$value['sup_name'].'</td>
+    <td class="td_price">'.numF($no1).'</td>
+    <td class="td_price">'.numF($co1).'</td>
+    <td class="td_price">'.numF($no2).'</td>
+    <td class="td_price">'.numF($co2).'</td>
+    <td class="td_price">'.numF($no3).'</td>
+    <td class="td_price">'.numF($co3).'</td>
+    </tr>';
+}
+echo '<tr style="font-weight:bold;">
+    <td colspan=3 align=center>TỔNG CỘNG : </td>
+    <td class="td_price">'.numF($tno1).'</td>
+    <td class="td_price">'.numF($tco1).'</td>
+    <td class="td_price">'.numF($tno2).'</td>
+    <td class="td_price">'.numF($tco2).'</td>
+    <td class="td_price">'.numF($tno3).'</td>
+    <td class="td_price">'.numF($tco3).'</td>
+    </tr>';
+?>
+
+
+</table>	
+<style>
+    .td_price{
+        text-align:right;
+        padding: 0px 5px;
+    }
+</style>

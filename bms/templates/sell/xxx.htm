@@ -1,0 +1,510 @@
+<?php $stock_type_list = get_data("select * from stock_type order by stock_type_code, stock_type_name"); ?>
+<?php $warehouse_list  = get_data("select * from warehouse order by warehouse_code, warehouse_name"); ?>
+<?php $tariff_list 	 		= get_data("select * from ord_tariff order by ord_trf_code"); ?>
+<?php $tariff_details_list 	= get_data("select * from ord_tariff_details order by ord_trf_code"); ?>
+
+<style type="text/css">
+	#tblOrderList_wrapper .datatable-header #tblOrderList_filter label{
+		font-size: 12px;
+		padding-left: 5px;
+	}
+	#tblOrderList_wrapper .datatable-header #tblOrderList_filter .input-xs{
+		width: 150px!important;
+		height: 25px;
+	}
+</style>
+
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/import_report.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Báo cáo nhập kho</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+	
+<table style="height: 35px;" width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<label style="width: 10%"><b style="margin-left: 10px; margin-top: 5px;">Thời gian</label>
+
+			<input style="width:125px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="start_time" type="text" placeholder="Thời gian bắt đầu"/>                      
+			<input style="width:125px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="finish_time" type="text" placeholder="Thời gian kết thúc"/>
+
+			<label style="width: 8%"><b style="margin-left: 30px; margin-top: 5px;">Kho hàng</label>
+			<select id="warehouse_id" name="warehouse_id" data-placeholder="Chọn Kho" class="select" style="font-weight: normal; width: 125px; background-color: white" class="catbg mdb-select colorful-select dropdown-primary md-form" multiple searchable="Search here.." multiple>
+			    <?php $index = 1;
+				for($i=0; $i < count($warehouse_list); $i++){ ?>
+		      		<option value="<?=$warehouse_list[$i]['warehouse_id']?>" attrX="<?=$warehouse_list[$i]['warehouse_code']?>" attrY="<?=$warehouse_list[$i]['warehouse_name']?>"><?=$warehouse_list[$i]['warehouse_name']?></option>
+				<?php } ?>
+			</select>
+
+			<label style="width: 8%"><b style="margin-left: 30px; margin-top: 5px;">Trạng thái</label>
+			<select id="status" name="status" data-placeholder="Chọn trạng thái" class="select" style="width: 125px; background-color: white" class="catbg mdb-select colorful-select dropdown-primary md-form" multiple searchable="Search here.." multiple>
+			        <option value="KT">Khởi tạo</option>
+			        <option value="NK">Nhập kho gửi</option>
+			        <option value="CK">Chuyển kho</option>
+			        <option value="NKN">Nhập kho nhận</option>
+			        <option value="GH">Giao hàng</option>
+			        <option value="HT">Hoàn tất</option>
+			</select>	
+		</td>
+	</tr>
+</table>
+
+<div style="margin-top: 10px; margin-left: 10px; margin-right: 10px;">
+	<div style="width: 978px;">
+		<table id="tblOrderList" style="width: 100%;" class="table table-striped display nowrap" cellspacing="0">
+			<thead>
+				<tr>
+					<th col-name="order_id">Mã order</th>
+					<th col-name="total_price">Tổng tiền</th>
+					<th col-name="sender_name">Người gửi</th>
+					<th col-name="receiver_name">Người nhận</th>
+					<th col-name="total_stock_weight">Tổng trọng lượng</th>
+					<th col-name="release_time">Thời gian nhập kho</th>
+					<th col-name="shipping_time">Thời gian vận chuyển</th>
+					<th col-name="complete_time">Thời gian hoàn tất</th>
+					<th col-name="status">Trạng thái</th>
+				</tr>
+			</thead>
+			<tbody id="tbody_tblOrderList" style="text-align: center;"></tbody>
+		</table>
+	</div>
+</div>
+
+<div style="margin-top: 20px; margin-left: 10px; margin-right: 10px; border-top: 1px solid #eee" id="div_contenttable" hidden>
+	<div style="margin-top: 5px!important;">
+		<b style="color: red;">CHI TIẾT ORDER <span id="order_code"></span></b>
+		<button style="float: right; background-color: transparent; border: none;" id="minimize"><i style="color: red; font-size: 12px;"><b>(-) Thu gọn</b><i></button>
+	</div>
+	<!--<div style="border-bottom: solid 1px red; width: 200px;"></div>-->
+	<div style="width: 978px; margin-top: 10px;">
+		<table id="contenttable" class="table table-striped display nowrap" cellspacing="0">
+			<thead>
+				<tr>
+					<th class="editor-cancel" col-name="STT" width="10%">STT</th>
+					<th col-name="ord_trf_details_id"></th>
+					<th col-name="ord_trf_code"></th>
+					<th col-name="stock_type_id"></th>
+					<th col-name="stock_type_code"></th>
+					<th class="autocomplete" select-source='<?=$stock_type_list;?>' col-name="stock_type_name" style="min-width: 150px;">Loại hàng</th>
+					<th col-name="stock_type_details">Diễn giải</th>
+					<th col-name="numeric">Số lượng</th>
+					<th col-name="stock_weight">Tổng trọng lượng (kg)</th>
+					<th col-name="unit_id"></th>
+					<th col-name="unit_code"></th>
+					<th col-name="unit_name">ĐVT</th>
+					<th col-name="price">Giá trị sản phẩm</th>
+					<th col-name="expense_type" style="min-width: 100px!important;">Loại phụ phí</th>
+					<th col-name="currency_id"></th>
+					<th col-name="currency_code"></th>
+					<th col-name="currency_name">Loại tiền</th>
+					<th col-name="rates">Cước vận chuyển</th>
+					<th col-name="expense">Phụ phí</th>
+					<th col-name="shipping_cost">Tổng tiền</th>
+					<th col-name="remark">Ghi chú</th>
+				</tr>
+			</thead>
+			<tbody id="tbody_contenttable" style="text-align: center;"></tbody>
+		</table>
+	</div>
+</div>
+
+<?php
+	include("bms/templates/add_row_popup.htm");
+	include("bms/templates/add_address_popup.htm");
+?>
+
+<script type="text/javascript">
+	$(document).ready(function () {	
+		var tblOrderList 		= $('#tblOrderList'),
+			tblDetails 			= $('#contenttable'),
+			_orderListColumns 	= ['order_id', 'total_price', 'sender_name', 'receiver_name', 'total_stock_weight', 'status'],
+			_detailsColumns 	= ['STT', 'ord_trf_details_id', 'ord_trf_code', 'stock_type_id', 'stock_type_code', 'stock_type_name', 'stock_type_details', 'numeric', 'stock_weight', 'unit_id', 'unit_code', 'unit_name', 'price', 'expense_type', 'currency_id', 'currency_code', 'currency_name','rates',  'expense', 'shipping_cost', 'remark'],
+			dataByWarehouseID 	= [],
+			xxx 				= 1;
+
+		tblOrderList.newDataTable({
+			scrollY: '30vh',
+			columnDefs: [
+				{ className: "text-center", targets: _orderListColumns.getIndexs(['order_id', 'total_price', 'sender_name', 'receiver_name', 'total_stock_weight', 'status'])},
+			],
+			paging: false,
+			keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            paging: false,
+            info: false,
+            buttons: [],
+            arrayColumns: _orderListColumns,
+		});
+
+		tblDetails.newDataTable({
+			scrollY: '45vh',
+			columnDefs: [
+				{ type: "num", className: "text-center", targets: _detailsColumns.indexOf('STT') },
+				{ className: "text-center", targets: _detailsColumns.getIndexs(['stock_type_name', 'expense_type', 'currency_name', 'expense', 'shipping_cost', 'stock_weight', 'price'])},
+				{ className: "hiden-input", targets: _detailsColumns.getIndexs(['trf_id', 'stock_type_id', 'stock_type_code', 'currency_id', 'currency_code', 'unit_code', 'unit_id', 'ord_trf_details_id', 'ord_trf_code'])},
+			],
+			order: [[ _detailsColumns.indexOf('STT'), 'asc' ]],
+			paging: false,
+			keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            paging: false,
+            info: false,
+            buttons: [],
+            arrayColumns: _detailsColumns,
+		});		
+
+		$('#warehouse_id').multiSelect({
+			// Custom templates
+			'containerHTML': '<div class="multi-select-container">',
+			'menuHTML': '<div class="multi-select-menu">',
+			'buttonHTML': '<span class="multi-select-button">',
+			'menuItemsHTML': '<div class="multi-select-menuitems">',
+			'menuItemHTML': '<label class="multi-select-menuitem">',
+			'presetsHTML': '<div class="multi-select-presets">',
+			'modalHTML': undefined,
+			
+			// Active CSS class
+			'activeClass': 'multi-select-container--open',
+			'noneText': '-- Chọn Kho --',
+			'allText': undefined,
+			'presets': undefined,
+			'positionedMenuClass': 'multi-select-container--positioned',
+			'positionMenuWithin': undefined,
+			'viewportBottomGutter': 20,
+			'menuMinHeight': 200	  
+		});
+		$('#status').multiSelect({
+			// Custom templates
+			'containerHTML': '<div class="multi-select-container">',
+			'menuHTML': '<div class="multi-select-menu">',
+			'buttonHTML': '<span class="multi-select-button">',
+			'menuItemsHTML': '<div class="multi-select-menuitems">',
+			'menuItemHTML': '<label class="multi-select-menuitem">',
+			'presetsHTML': '<div class="multi-select-presets">',
+			'modalHTML': undefined,
+			
+			// Active CSS class
+			'activeClass': 'multi-select-container--open',
+			'noneText': '-- Chọn Trạng thái --',
+			'allText': undefined,
+			'presets': undefined,
+			'positionedMenuClass': 'multi-select-container--positioned',
+			'positionMenuWithin': undefined,
+			'viewportBottomGutter': 20,
+			'menuMinHeight': 200,
+		});
+
+		for (idx = 0; idx < <?=count($warehouse_list);?>; idx++){
+			$('#warehouse_id_' + idx).trigger('click');
+		}
+		$('#warehouse_id_chooseAll').on('click', function(){
+			for (idx = 0; idx < <?=count($warehouse_list);?>; idx++){
+				if (!($('#warehouse_id_' + idx).is(':checked'))){
+					$('#warehouse_id_' + idx).trigger('click');
+				}
+			}
+
+			var d = new Date();
+			getOrderData(getSQLDefaultStartTime(d), getSQLDefaultFinishTime(d));
+		});	
+
+		$('#status_chooseAll').on('click', function(){
+			for (idx = 0; idx < 6; idx++){
+				if (!($('#status_' + idx).is(':checked'))){
+					$('#status_' + idx).trigger('click');
+				}
+			}
+
+			var d = new Date();
+			getOrderData(getSQLDefaultStartTime(d), getSQLDefaultFinishTime(d));
+		});
+		$('#status_chooseAll').trigger('click');
+
+		$('#warehouse_id_unchoose').on('click', function(){
+			for (idx = 0; idx < <?=count($warehouse_list);?>; idx++){
+				if (($('#warehouse_id_' + idx).is(':checked'))){
+					$('#warehouse_id_' + idx).trigger('click');
+				}
+			}
+
+			$('#tbody_tblOrderList').html('');
+			$('#tbody_tblOrderList').append('<tr><td colspan="9" style="font-style: italic; text-align: center;">' + 'Không tồn tại dữ liệu' + '</td></tr>');
+        	$('#div_contenttable').hide();
+		});	
+
+		$('#status_unchoose').on('click', function(){
+			for (idx = 0; idx < 6; idx++){
+				if (($('#status_' + idx).is(':checked'))){
+					$('#status_' + idx).trigger('click');
+				}
+			}
+
+			var d = new Date();
+			getOrderData(getSQLDefaultStartTime(d), getSQLDefaultFinishTime(d));
+		});
+
+		var warehouseIDList = '#warehouse_id_0',
+			statusList      = '#status_0';
+		for (i = 1; i < <?="'".count($warehouse_list)."'"?>; i++){
+			warehouseIDList += (', #warehouse_id_' + i);			
+			statusList 		+= (', #status_0' + i);			
+		}
+
+		$(warehouseIDList).on('change', function(){
+			var chkAll 		= true,
+				chkValue 	= 0;
+
+			if ($('#warehouse_id_0').is(':checked')){
+				chkValue = 1;
+			}
+
+			for (k = 1; k < <?="'".count($warehouse_list)."'"?>; k++){
+				if ($('#warehouse_id_' + k).is(':checked') != chkValue){
+					chkAll 	= false;
+					k 		= <?="'".count($warehouse_list)."'"?>;
+				}
+			}
+
+			if (chkAll){
+				if (chkValue == 1){
+					$('#warehouse_id_chooseAll').trigger('click');
+				}
+				else{
+					$('#warehouse_id_unchoose').trigger('click');
+				}
+				return;
+			}
+
+			$('#tbody_tblOrderList').html('');
+        	$('#div_contenttable').hide();
+
+        	var chk = true;
+			for (z = 0; z < dataByWarehouseID.length; z++){
+				if ($("#warehouse_id [value='" + dataByWarehouseID[z].warehouse_id +"']").is(':checked')){
+					$('#tbody_tblOrderList').append(dataByWarehouseID[z].src); 
+					chk = false;
+				}
+			}
+
+			if (chk){
+				$('#tbody_tblOrderList').append('<tr><td colspan="9" style="font-style: italic; text-align: center;">' + 'Không tồn tại dữ liệu' + '</td></tr>');
+			}	
+		});
+
+
+		$(statusList).on('change', function(){
+			var d = new Date();
+			getOrderData(getSQLDefaultStartTime(d), getSQLDefaultFinishTime(d));
+		});
+
+		function getOrderData(start_time, finish_time){
+			var dataSrc = '';
+			<?php for ($k = 0; $k < count($warehouse_list); $k++){?>
+				var countChk = 0,
+					tempSrc  = '',
+					sumTotalMoney = 0,
+					currencyName;
+				<?php for ($i = 0; $i < count($tariff_list); $i++) 
+					if ($tariff_list[$i]['status'] == 'NKN'
+							|| $tariff_list[$i]['status'] == 'GH'
+							|| $tariff_list[$i]['status'] == 'HT'
+						){?>
+						var sumEachCode = 0,
+							sumWeightEachCode = 0,
+							chkExist = false;
+						<?php for ($j = 0; $j < count($tariff_details_list); $j++) {
+							/*
+							if ($tariff_list[$i]['status'] == 'KT'
+								|| $tariff_list[$i]['status'] == 'NK'
+								|| $tariff_list[$i]['status'] == 'CK'
+							){
+								$tariff_id = $tariff_list[$i]['warehouse_id_dep'];
+							}
+							else{
+								$tariff_id = $tariff_list[$i]['warehouse_id_des'];	
+							}
+							*/
+
+							$tariff_id = $tariff_list[$i]['warehouse_id_des'];
+
+							if ($warehouse_list[$k]['warehouse_id'] == $tariff_id
+								&& $tariff_list[$i]['ord_trf_code'] == $tariff_details_list[$j]['ord_trf_code']){
+							?>	
+								if (start_time < <?="'".$tariff_details_list[$j]['update_time']."'"?> 
+								&& <?="'".$tariff_details_list[$j]['update_time']."'"?> < finish_time
+								&& $("#status [value='" + <?="'".$tariff_list[$i]['status']."'"?> +"']").is(':checked')){
+									countChk++;
+									sumEachCode 		+= parseFloat(<?="'".$tariff_details_list[$j]['total_money']."'"?>);
+									sumTotalMoney 		+= parseFloat(<?="'".$tariff_details_list[$j]['total_money']."'"?>);
+									sumWeightEachCode   += parseFloat(<?="'".$tariff_details_list[$j]['stock_weight']."'"?>);
+									currencyName = <?="'".$tariff_details_list[$j]['currency_name']."'"?>;
+									chkExist = true;
+								}
+							<?php } 
+						} ?>
+						if (chkExist){
+							chkExist = false;
+							tempSrc += ('<tr class="orderRow" attrX="' + <?="'".$tariff_list[$i]['ord_trf_code']."'"?> + '"><td>' + <?="'".$tariff_list[$i]['ord_trf_code']."'"?> + '</td>');
+								tempSrc += ('<td>' + sumEachCode + ' ' + currencyName + '</td>');
+								tempSrc += ('<td>' + <?="'".$tariff_list[$i]['sender_name']."'"?> + '</td>');
+								tempSrc += ('<td>' + <?="'".$tariff_list[$i]['receiver_name']."'"?> + '</td>');
+								tempSrc += ('<td>' + sumWeightEachCode + ' (kg)' + '</td>');
+								tempSrc += ('<td>' + ((<?="'".($tariff_list[$i]['release_time'] != '0000-00-00 00:00:00' ? $tariff_list[$i]['release_time'] : '')."'"?>) != '' ? getDateTime(<?="'".($tariff_list[$i]['release_time']."'");?>) : '') + '</td>');
+								tempSrc += ('<td>' + ((<?="'".($tariff_list[$i]['shipping_time'] != '0000-00-00 00:00:00' ? $tariff_list[$i]['shipping_time'] : '')."'"?>) != '' ? getDateTime(<?="'".($tariff_list[$i]['shipping_time']."'");?>) : '') + '</td>');
+								tempSrc += ('<td>' + ((<?="'".($tariff_list[$i]['complete_time'] != '0000-00-00 00:00:00' ? $tariff_list[$i]['complete_time'] : '')."'"?>) != '' ? getDateTime(<?="'".($tariff_list[$i]['release_time']."'");?>) : '') + '</td>');
+								tempSrc += '<td>';
+									switch(<?="'".$tariff_list[$i]['status']."'"?>){
+										case 'KT': 
+											tempSrc += 'Khởi tạo';
+											break;
+										case 'NK':
+											tempSrc += 'Nhập kho gửi';
+											break;
+										case 'CK':
+											tempSrc += 'Chuyển kho';
+											break;
+										case 'NKN':
+											tempSrc += 'Nhập kho nhận';
+											break;
+										case 'GH':
+											tempSrc += 'Giao hàng';
+											break;
+										case 'HT':
+											tempSrc += 'Hoàn tất';
+											break;
+
+										default:
+											break;
+									}
+								tempSrc += '</td>';							
+							tempSrc += '</tr>';
+						}
+						<?php }?>
+						if (countChk > 0){
+						dataSrc += ('<tr><td colspan="9" style="text-align: left; font-weight: bolder; color: red;">' + <?="'".$warehouse_list[$k]['warehouse_name']."'"?> + ' (Tổng tiền: ' +  sumTotalMoney + ' ' + currencyName + ')</td></tr>' + tempSrc);
+
+						if (xxx == 1){
+							dataByWarehouseID.push({warehouse_id: <?="'".$warehouse_list[$k]['warehouse_id']."'"?>, warehouse_code: <?="'".$warehouse_list[$k]['warehouse_code']."'"?>, warehouse_name: <?="'".$warehouse_list[$k]['warehouse_name']."'"?>, src: '<tr><td colspan="9" style="text-align: left; font-weight: bolder; color: red;">' + <?="'".$warehouse_list[$k]['warehouse_name']."'"?> + ' (Tổng tiền: ' +  sumTotalMoney + ' ' + currencyName + ')</td></tr>' + tempSrc});
+							xxx++;
+						}
+					}
+			<?php }?>
+
+			$('#tbody_tblOrderList').html('');
+			if (dataSrc != ''){
+				$('#tbody_tblOrderList').append(dataSrc);
+			}
+			else{
+				$('#tbody_tblOrderList').append('<tr><td colspan="9" style="font-style: italic; text-align: center;">' + 'Không tồn tại dữ liệu' + '</td></tr>');
+        		$('#div_contenttable').hide();
+			}
+		}
+
+		$('#start_time, #finish_time').datetimepicker({
+            controlType: 'select',
+            oneLine: true,
+            dateFormat: 'dd/mm/yy',
+            timeFormat: 'HH:mm:00',
+            timeInput: true,
+            onSelect: function () {
+                /* Do nothing */
+            }   
+        });
+
+        $(document).on('click', '.orderRow', function(){
+        	$('#div_contenttable').show();
+
+        	var final_total_money 	= 0,
+        		order_code 			= $(this).attr('attrX'),
+        		rows			 	= [],
+        		index 				= 1;
+
+        	$('#order_code').html(order_code);
+
+        	<?php for ($i = 0; $i < count($tariff_details_list); $i++) { ?>
+        		var row = [];
+	        	if (order_code == <?="'".$tariff_details_list[$i]['ord_trf_code']."'";?>){
+        			row.push(index++);
+        			row.push(<?="'".$tariff_details_list[$i]['ord_trf_details_id']."'";?>);
+        			row.push(<?="'".$tariff_details_list[$i]['ord_trf_code']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['stock_type_id']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['stock_type_code']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['stock_type_name']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['stock_type_details']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['numeric']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['stock_weight']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['unit_id']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['unit_code']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['unit_name']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['price']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['expense_type']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['currency_id']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['currency_code']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['currency_name']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['rates']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['expense']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['total_money']."'";?>);
+					row.push(<?="'".$tariff_details_list[$i]['remark']."'";?>);
+					rows.push(row);
+
+					final_total_money += parseFloat(<?="'".$tariff_details_list[$i]['total_money']."'";?>);
+	        	}
+	        <?php } ?>
+
+	        tblDetails.dataTable().fnClearTable();
+		    if(rows.length > 0){
+				tblDetails.dataTable().fnAddData(rows);
+			}
+
+			var src = '<tr><td colspan="11" style="font-weight: bold; color: red; text-align: right">TỔNG CỘNG</td><td style="text-align: center; color: red; font-weight: bold;">' + final_total_money + '</td><td></td></tr>';
+			$('#tbody_contenttable').append(src);
+        });
+
+        $('#minimize').on('click', function(){
+        	$('#div_contenttable').hide();
+        });
+        
+
+        var d = new Date();
+        $('#start_time').val(getDefaultStartTime(d));
+        $('#finish_time').val(getDefaultFinishTime(d));
+
+        $('#start_time').on('change', function(){
+        	var start_time = covertToSQLDefaultFinishTime($('#start_time').val()),
+        		finish_time = covertToSQLDefaultFinishTime($('#finish_time').val());
+
+        	if (start_time > finish_time){
+        		alert('Thời gian kết thúc phải lớn hơn thời gian bắt đầu!');
+        		$('#finish_time').val('');
+        		return;
+        	}
+
+        	getOrderData(start_time, finish_time);
+        });
+        
+        $('#finish_time').on('change', function(){
+        	var start_time = covertToSQLDefaultFinishTime($('#start_time').val()),
+        		finish_time = covertToSQLDefaultFinishTime($('#finish_time').val());
+
+        	if (start_time > finish_time){
+        		alert('Thời gian kết thúc phải lớn hơn thời gian bắt đầu!');
+        		$('#finish_time').val('');
+        		return;
+        	}
+
+        	getOrderData(start_time, finish_time);
+        });
+	});
+</script>

@@ -1,0 +1,1955 @@
+<Script type="text/javascript" src="bms/common/CalendarPopup.js"></Script>
+<script language="javaScript" id="jscal1x">
+    var cal = new CalendarPopup("calendarpopup");
+    cal.setTodayText("Hôm nay");
+    cal.showNavigationDropdowns();
+    cal.setYearSelectStartOffset(20);
+    cal.setMonthNames("Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12");
+    cal.setDayHeaders("CN","T2","T3","T4","T5","T6","T7");
+</script>
+<style type="text/css">
+    .ser_select:hover{
+        background: #e3e3e3;
+    }
+    .ser_select{
+        cursor: pointer;
+        padding: 3px 5px;
+    }
+    #serial_list{
+        overflow-x: hidden;
+        max-height: 200px;
+    }
+    #mat_tbl tr td:nth-child(5){
+        display: none;
+    }
+    .thieu{
+        background: #ff5722;
+    }
+</style>
+<SCRIPT LANGUAGE="JavaScript">document.write(getCalendarStyles());</SCRIPT>
+<DIV ID="calendarpopup" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></DIV>
+<form onkeypress="return tabOnEnter(document.activeElement, event);" name="frmadmin" method="post" action="?eda_act=<?= md5('sell') ?>&eda_code=<?= md5('output_sm') ?>" style="margin:0px">
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td width="30" align="center">
+                <img style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/cart.png" width="18" height="18"/>        
+            </td>
+            <td  height="25"><b>Lập phiếu bán hàng</b></td>
+            <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>
+    <?php
+    global $head;
+    $action->eda_module = 'emp';
+    
+    if (!isset($return_val['full_name'])) {
+        $usr = get_data("select full_name from users where user_id='" . $sessions->get_session('user_id') . "'");
+        if (count($usr) > 0) {
+            $return_val['full_name'] = $usr[0][0];
+            $return_val['user_id'] = $sessions->get_session('user_id');
+        }
+    }
+    ?>        
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr><td style="padding:10px;">   
+                <table border="0" width="100%" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="360">                
+                            <table width="340" border="0" cellspacing="0" cellpadding="0" style="border-right:1px dashed #ddd;">
+                                <tr>
+                                    <td height="25" width="120" align="left"><b>(*) Người bán</b></td>
+                                    <td width="200">
+                                        <input  value="<?= isset($return_val['user_id']) ? $return_val['user_id'] : '' ?>"  name="user_id" type="hidden" id="user_id" size="25" />
+                                        <input readonly value="<?= isset($return_val['full_name']) ? $return_val['full_name'] : '' ?>" style="width:<?= $sessions->get_session('group_id') == 1 || true ? 165 : 200 ?>px;" class="catbg" name="full_name" type="text" id="full_name" size="25" />             
+                                        <?php
+                                        //if($sessions->get_session('group_id')==1)
+//	{
+                                        ?>
+                                        <input type="button" style="width:30px;" class="button" onclick="browse_emp();" name="browser" id="browser" value="...">              
+                                        <?php
+//	}
+                                        ?>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="25" align="left"><b>Thời gian lập</b></td>
+                                    <td>
+                                        <table  border="0" cellspacing="0" cellpadding="0">
+                                            <tr><td>
+                                                    <input readonly  style="width:90px;" class="catbg"  onclick="cal.select(document.getElementById('date'),'anchor1','dd/MM/yyyy');if(document.getElementById('date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())};  return false;" class="textbox" value="<?= isset($return_val['date']) ? $return_val['date'] : gmdate('d/m/Y', time() + 7 * 3600) ?>" onBlur="check_date(this);" name="date" id="date" type="text" />
+                                                </td><td>
+                                                    <A href="javascript:void()" onclick="cal.select(document.getElementById('date'),'anchor1','dd/MM/yyyy'); if(document.getElementById('date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor1" ID="anchor1" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+                                                </td><td>
+                                                    <select onchange="date_change();" style="width:40px;" class="catbg" name="hour" id="hour" type="text">
+                                                        <?php
+                                                        for ($i = 0; $i < 24; $i++)
+                                                            echo '<option  ' . (isset($return_val['date']) ? ($return_val['hour'] == $i ? 'selected' : '') : ($i == gmdate('H', time() + 7 * 3600) ? 'selected' : '')) . ' value="' . $i . '">' . str_pad($i, 2, '0', STR_PAD_LEFT) . '</option>';
+                                                        ?>              
+                                                    </select>
+                                                </td><td><b>&nbsp;:&nbsp;</b></td>
+                                                <td><select  onchange="date_change();" style="width:40px;" class="catbg" name="minute" id="minute" type="text">
+                                                        <?php
+                                                        for ($i = 0; $i < 60; $i++)
+                                                            echo '<option ' . (isset($return_val['date']) ? ($return_val['minute'] == $i ? 'selected' : '') : ($i == gmdate('i', time() + 7 * 3600) ? 'selected' : '')) . ' value="' . $i . '">' . str_pad($i, 2, '0', STR_PAD_LEFT) . '</option>';
+                                                        ?>              
+                                                    </select>
+                                                </td></tr>
+                                        </table>
+                                    </td>
+                                </tr>                          
+                                <tr>
+                                    <td height="25" align="left"><b>(*) Số chứng từ</b></td>
+                                    <td>
+                                        <table  border="0" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td>
+                                                    <input <?= isset($return_val['put_vat']) ? ($return_val['put_vat'] == 1 ? 'onfocus="this.select();"' : 'readonly') : 'readonly' ?> value="<?= isset($return_val['inv_code']) ? $return_val['inv_code'] : '' ?>" style="width:85px;" class="catbg" name="inv_code" type="text" id="inv_code" size="25" />
+                                                </td>                
+                                                <td>
+                                                    <input name="put_vat" <?= isset($return_val['put_vat']) ? ($return_val['put_vat'] == 1 ? 'checked' : '') : '' ?> onclick="check_invcode();" type="checkbox" value="1">
+                                                </td>
+                                                <td>Xuất hoá đơn VAT</td>
+                                            </tr>
+                                        </table>
+                                    </td>             
+                                </tr>
+                                <tr>
+                                    <td height="25" align="left"><b>Vat Thanh toán</b></td>
+                                    <td>
+                                        <table  border="0" cellspacing="0" cellpadding="0">
+                                            <tr>
+                                                <td>
+                                                    <input value="<?= intval(@$return_val['vat_price'])?>" style="width:85px;" class="catbg" name="vat_price" type="number" id="vat_price" size="25" />
+                                                </td>
+                                                <td>Vat %</td>            
+                                                <td>
+                                                    <input value="<?= intval(@$return_val['vat_per']) ?>" style="width:85px;" class="catbg" name="vat_per" type="number" id="vat_per" size="25" />
+                                                </td>
+                                                
+                                            </tr>
+                                        </table>
+                                    </td>             
+                                </tr>
+                                           
+                                <tr>
+                                    <td height="25" align="left"><b>Kho hàng xuất</b></td>
+                                    <td>
+                                        <?php
+                                        $chk_mainstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+                                        $chk_empstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+                                        if ($action->eda_module == 'emp') {
+                                            if (count($chk_mainstock) > 0 && count($chk_empstock) > 0) {
+                                                $stocks = get_data("select stock_id, stock_name, user_id from stocks order by stock_name");
+                                            } else if (count($chk_mainstock) > 0) {
+                                                $stocks = get_data("select stock_id, stock_name, user_id from stocks where user_id is null or user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+                                            } else {
+                                                $dt = get_data("select stock_id from stocks  where concat(',',user_list,',') like concat('%,'," . $sessions->get_session('user_id') . ",',%')");
+                                                $stocklist = "0";
+                                                for ($i = 0; $i < count($dt); $i++) {
+                                                    $stocklist.=',' . $dt[$i]['stock_id'];
+                                                }
+                                                $stocks = get_data("select stock_id, stock_name, user_id from stocks where (user_id='" . $sessions->get_session('user_id') . "' or stock_id in(" . $stocklist . "))  order by stock_name");
+                                            }
+                                        } else {
+                                            if (count($chk_mainstock) > 0) {
+                                                $stocks = get_data("select stock_id, stock_name, user_id from stocks where user_id is null order by stock_name");
+                                            } else {
+                                                $stocks = array();
+                                            }
+                                        }
+                                        if (!isset($return_val['stock_id'])) {
+                                            $st = get_data("select stock_id from stocks where stock_name like '%kho chính%' limit 1");
+                                            if (count($st) > 0) {
+                                                $return_val['stock_id'] = $st[0]['stock_id'];
+                                            }
+                                        }
+                                        ?>
+                                        <select onchange="load_page(1);" class="catbg" style="width:200px;" name="stock_id" id="search_stock_id">
+                                            <?php
+                                            for ($i = 0; $i < count($stocks); $i++)
+                                                echo '<option ' . (@$return_val['stock_id'] == $stocks[$i]['stock_id'] ? 'selected' : '') . ' value="' . $stocks[$i]['stock_id'] . '">' . $stocks[$i]['stock_name'] . '</option>';
+                                            ?>	
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="25" align="left">  <b>(*) Quỹ/Tài khoản</b></td>
+                                    <td>
+                                        <select style="width:200px;" class="catbg" name="fund_id" id="fund_id">
+                                            <?php
+                                            if (!isset($return_val['fund_id'])) {
+                                                $fund = get_data("select fund_id from fund where fund_name like '%tiền mặt%' limit 1");
+                                                if (count($fund) > 0) {
+                                                    $return_val['fund_id'] = $fund[0]['fund_id'];
+                                                }
+                                            }
+                                            $fund_general = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='fund_general'");
+                                            $fund_all = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='fund_all'");
+                                            if (count($fund_all) > 0) {
+                                                $fund_id = get_data("select * from fund order by fund_name");
+                                            } else if (count($fund_general) > 0) {
+                                                $fund_id = get_data("select * from fund  where user_id is null or user_id='" . $sessions->get_session('user_id') . "' order by fund_name");
+                                            } else {
+                                                $fund_id = get_data("select * from fund  where user_id='" . $sessions->get_session('user_id') . "' order by fund_name");
+                                            }
+                                            for ($i = 0; $i < count($fund_id); $i++)
+                                            {
+                                                if($fund_id[$i]['acc_no']!="")$fund_id[$i]['acc_no']=" (".$fund_id[$i]['acc_no'].")";
+                                                echo '<option ' . (isset($return_val['fund_id']) ? ($return_val['fund_id'] == $fund_id[$i]['fund_id'] ? 'selected' : '') : ($fund_id[$i]['user_id'] == $sessions->get_session('user_id') ? ' selected ' : '')) . ' value="' . $fund_id[$i]['fund_id'] . '">' . $fund_id[$i]['fund_name'] . $fund_id[$i]['acc_no'] .'</option>';
+                                            }
+                                            ?>              
+                                        </select>  			
+                                    </td>             
+                                </tr> 
+                                <tr>
+                                    <td height="25" align="left"><b>Thanh toán</b></td>
+                                    <td>
+                                        <input  onkeyup="format(this);change_payment();" style="width:90px;" value="<?= isset($return_val['payment']) ? $return_val['payment'] : '0' ?>"  class="catbg" name="payment" type="text" id="payment" size="25" />
+                                        <b>Nợ </b><input readonly value="<?= isset($return_val['debt']) ? $return_val['debt'] : '0' ?>"  style="width:90px;" class="catbg" name="debt" type="text" id="debt" size="25" />
+                                    </td>             
+                                </tr>
+                                <tr>
+                                    <td height="25" align="left"><b>Hạn thanh toán</b></td>
+                                    <td>
+                                        <table  border="0" cellspacing="0" cellpadding="0">
+                                            <tr><td>
+                                                    <input readonly  style="width:90px;" class="catbg"  onclick="cal.select(document.getElementById('max_date'),'anchor1','dd/MM/yyyy');if(document.getElementById('max_date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())};  return false;" class="textbox" value="<?= isset($return_val['max_date']) ? $return_val['max_date'] : gmdate('d/m/Y', time() + 7 * 3600) ?>" onBlur="check_date(this);" name="max_date" id="max_date" type="text" />
+                                                </td><td>
+                                                    <A href="javascript:void()" onclick="cal.select(document.getElementById('max_date'),'anchor1','dd/MM/yyyy'); if(document.getElementById('date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor1" ID="anchor1" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+                                                </td><td>
+                                                    <select onchange="date_change();" style="width:40px;" class="catbg" name="max_hour" id="hour" type="text">
+                                                        <?php
+                                                        for ($i = 0; $i < 24; $i++)
+                                                            echo '<option  ' . (isset($return_val['max_date']) ? ($return_val['max_hour'] == $i ? 'selected' : '') : ($i == gmdate('H', time() + 7 * 3600) ? 'selected' : '')) . ' value="' . $i . '">' . str_pad($i, 2, '0', STR_PAD_LEFT) . '</option>';
+                                                        ?>              
+                                                    </select>
+                                                </td><td><b>&nbsp;:&nbsp;</b></td>
+                                                <td><select  onchange="date_change();" style="width:40px;" class="catbg" name="max_minute" id="minute" type="text">
+                                                        <?php
+                                                        for ($i = 0; $i < 60; $i++)
+                                                            echo '<option ' . (isset($return_val['max_date']) ? ($return_val['max_minute'] == $i ? 'selected' : '') : ($i == gmdate('i', time() + 7 * 3600) ? 'selected' : '')) . ' value="' . $i . '">' . str_pad($i, 2, '0', STR_PAD_LEFT) . '</option>';
+                                                        ?>              
+                                                    </select>
+                                                </td></tr>
+                                        </table>
+                                    </td>
+                                </tr>                                
+                                <tr>
+                                    <td height="25" align="left"><b>Ghi chú</b></td>
+                                    <td ><textarea  style="width:205px;" class="catbg" name="comment" type="text" id="comment" cols="80" rows="4" /><?= isset($return_val['comment']) ? $return_val['comment'] : '' ?></textarea></td>
+                                </tr> 
+                            </table>
+                        </td>
+                        <td id="cuscontent" valign=top>
+                            <?php
+                            if (!isset($return_val ['cus_code'])) {
+                                $max_cus = get_data("select max(cus_id) from customers");
+                                $return_val ['cus_code'] = 'KH' . str_pad($max_cus [0] [0] + 1, 8, '0', STR_PAD_LEFT);
+                            }
+                            ?>
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">                               
+                                <tr>
+                                    <td height="25" width="120" align="left"><b>(*) Tên khách hàng</b></td>
+                                    <td width="180">
+                                        <input value="<?= isset($return_val['cus_id']) ? $return_val['cus_id'] : '' ?>"  name="cus_id" type="hidden" class="catbg" id="cus_id" size="25" />
+                                        <input value="<?= isset($return_val['cus_name']) ? $return_val['cus_name'] : '' ?>" style="width:110px;" class="catbg" name="cus_name" type="text" id="cus_name" size="25" />
+                                        <input type="button" style="width:30px;" class="button" onclick="resetCus();" id="resetbrowser"  value="+">
+                                        <input type="button" style="width:30px;" class="button" onclick="browse_cus();" name="browse" value="...">             
+                                    </td>
+                                    <td height="25" width="110" align="left" style="padding-left:20px;"><b>(*) Mã khách hàng</b></td>
+                                    <td>
+                                        <input style="width:160px;" class="catbg" class="textbox" value="<?= isset($return_val['cus_code']) ? $return_val['cus_code'] : '' ?>" name="cus_code" id="cus_code" type="text" />                          
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td height="25" align="left"><b>Nhóm khách hàng</b></td>
+                                    <td>
+                                        <select style="width:176px;" class="catbg" name="cus_type" id="cus_type">
+                                            <?php
+                                            include("bms/modules/cus_type.php");
+                                            while (list($key, $val) = each($cus_type)) {
+                                                echo '<option ' . (isset($return_val['cus_type']) ? ($return_val['cus_type'] == $key ? 'selected' : '') : '') . ' value="' . $key . '">' . $val . '</option>';
+                                            }
+                                            ?>              
+                                        </select>
+                                    </td>
+                                    <td height="25" align="left" style="padding-left:20px;"><b>Điện thoại</b></td>
+                                    <td>
+                                        <input style="width:160px;" class="catbg" name="tel" id="tel" type="text" value="<?= isset($return_val['tel']) ? $return_val['tel'] : '' ?>" />
+                                    </td>             
+                                </tr>
+                                <tr>
+                                    <td height="25" align="left"><b>Email</b></td>
+                                    <td>
+                                        <input style="width:176px;" class="catbg" name="email" id="email" type="text" value="<?= isset($return_val['email']) ? $return_val['email'] : '' ?>" />
+                                    </td>
+                                    <td height="25" align="left" style="padding-left:20px;"><b>Website</b></td>
+                                    <td>
+                                        <input style="width:160px;" class="catbg" class="textbox" value="<?= isset($return_val['website']) ? $return_val['website'] : '' ?>" name="website" id="website" type="text" />
+                                    </td>             
+                                </tr>
+                                <tr>
+                                    <td height="25" align="left"><b>Mã số thuế</b></td>
+                                    <td>
+                                        <input style="width:176px;" class="catbg" name="tax_no" id="tax_no" type="text" value="<?= isset($return_val['tax_no']) ? $return_val['tax_no'] : '' ?>" />
+                                    </td>
+                                    <td height="25" align="left" style="padding-left:20px;"><b>Số ĐKKD</b></td>
+                                    <td>
+                                        <input style="width:160px;" class="catbg" class="textbox" value="<?= isset($return_val['reg_no']) ? $return_val['reg_no'] : '' ?>" name="reg_no" id="reg_no" type="text" />
+                                    </td>             
+                                </tr>   
+                                <tr>
+                                    <td height="25" align="left"><b>Số tài khoản</b></td>
+                                    <td>
+                                        <input style="width:176px;" class="catbg" name="bank_acc" id="bank_acc" type="text" value="<?= isset($return_val['bank_acc']) ? $return_val['bank_acc'] : '' ?>" />
+                                    </td>
+                                    <td height="25" align="left" style="padding-left:20px;"><b>Tại ngân hàng</b></td>
+                                    <td>
+                                        <input style="width:160px;" class="catbg" class="textbox" value="<?= isset($return_val['bank_name']) ? $return_val['bank_name'] : '' ?>" name="bank_name" id="bank_name" type="text" />
+                                    </td>             
+                                </tr>   
+                                <tr>
+                                    <td height="25" align="left"><b>Địa chỉ</b></td>
+                                    <td>
+                                        <input style="width:176px;" class="catbg" class="textbox" value="<?= isset($return_val['address']) ? $return_val['address'] : '' ?>" name="address" id="address" type="text" />
+                                    </td>            
+                                    <td height="25" align="left" style="padding-left:20px;"><b>Dư nợ đầu kỳ</b></td>
+                                    <td>
+                                        <input style="width:160px;" class="catbg" onkeyup="format(this);" class="textbox" value="<?= isset($return_val['cus_debt']) ? $return_val['cus_debt'] : '' ?>" name="cus_debt" id="cus_debt" type="text" />
+                                    </td>     
+                                </tr>                              
+                                <tr>
+                                    <td height="25" align="left"><b>Thông tin thêm</b></td>
+                                    <td colspan="3"><textarea  style="width:470px;" class="catbg" name="description" type="text" id="description" cols="80" rows="4"><?= isset($return_val['description']) ? $return_val['description'] : '' ?></textarea></td>             
+                                </tr>                                    
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                <?= !empty($err_msg) ? '<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>' . $err_msg . '</b><br></font></td></tr></table>' : '' ?> 
+
+
+
+<div id="phuphibox" style="padding:10px 0px;">
+                    <table width="950" id="pp_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+                    <thead>
+                        <tr>
+                            <td width="215" align="center" bgcolor="#afd7ff"><b>Tên phụ phí</b></td>
+                            <td width="215" align="center" bgcolor="#afd7ff"><b>Kiểu thanh toán</b></td>
+                            <td width="90" align="center" bgcolor="#afd7ff" height="25"><b>Tiền thanh toán</b></td>
+                            <td width="90" align="center" bgcolor="#afd7ff" height="25"><b>Hiện trong phiếu</b></td>
+                            <td width="30" align="center" bgcolor="#afd7ff"><input type="button" class="button add_pp" value="+"></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        if (isset($return_val['pp_name']))
+                            for ($i = 0; $i < count($return_val['pp_name']); $i++)
+                                if (!empty($return_val['pp_name'][$i]) && intval(@$return_val['pp_price'][$i])>0) {
+                                    ?>
+                                    <tr class="phuphi"><td width="90" align="center"><input name="pp_name[]" style="width:95%;" value="<?php echo $return_val['pp_name'][$i];?>" class="catbg pp_name"></td><td><select class="catbg pp_slc" name="pp_type[]"><option value=0>Tiền Thu</option><option value=1>Tiền Trả khách</option></select></td><td width="215" align="center" height="25"><input name="pp_price[]" style="width:95%;" value="<?php echo $return_val['pp_price'][$i];?>" class="catbg pp_price"></td><td><input name="pp_show[]" type="number" value="<?php echo intval($return_val['pp_show'][$i]);?>"><input type="checkbox" name="pp_show_chk[]" value=1 <?php echo ($return_val['pp_show'][$i]?"checked":"");?>></td><td width="30" align="center"><input type="button" class="button rmv_pp" name="add_mat" value="-"></td></tr>
+                                    
+                                    <?php
+                                }
+
+                        ?>
+                        <tr class="phuphi"><td width="90" align="center"><input name="pp_name[]" style="width:95%;" value="Phí ..." class="catbg pp_name"></td><td><select class="catbg pp_slc" name="pp_type[]"><option value=0>Tiền Thu</option><option value=1>Tiền Trả khách</option></select></td><td width="215" align="center" height="25"><input name="pp_price[]" style="width:95%;" value="0" class="catbg pp_price"></td><td><input name="pp_show[]" type="number" value="0"><input type="checkbox" name="pp_show_chk[]" value=1></td><td width="30" align="center"><input type="button" class="button rmv_pp" name="add_mat" value="-"></td></tr>
+                    </tbody>
+                </table>
+                </div>
+
+                <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td height="40" width="240"><b>DANH SÁCH HÀNG HOÁ XUẤT BÁN</b></td>
+                        <td width="400">
+                            <input value="dealer" <?= isset($return_val['price_type']) ? ($return_val['price_type'] == 'dealer' ? 'checked' : '') : '' ?>  class="catbg" name="price_type" type="radio" id="price_type_1"/> Giá đại lý cấp 1
+                            <input value="dealer2" <?= isset($return_val['price_type']) ? ($return_val['price_type'] == 'dealer2' ? 'checked' : '') : '' ?>  class="catbg" name="price_type" type="radio" id="price_type_2"/> Giá đại lý cấp 2
+                            <input value="enduser" <?= isset($return_val['price_type']) ? ($return_val['price_type'] == 'enduser' ? 'checked' : '') : 'checked' ?>  class="catbg" name="price_type" type="radio" id="price_type_3"/> Giá bán
+                        </td>
+                        <td width="200"><b>Đọc mã vạch:</b> <input type="text" onblur="getMatfromBarcode(this.value);" name="barcode" id="barcode" class="textbox" style="width:100px;" value=""></td>
+                        <td><input type="button" class="button" onclick="excel();" value="Nhập vào từ Excel"></td>
+                    </tr>
+                </table>
+                <table width="950" id="mat_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+                    <tbody>
+                        <tr>
+                            <td width="90" align="center" bgcolor="#afd7ff"><b>Mã SP</b></td>
+                            <td width="215" align="center" bgcolor="#afd7ff" height="25"><b>Sản phẩm</b></td>
+                            <td width="90" align="center" bgcolor="#afd7ff"><b>Đơn vị tính</b></td>
+                            <td width="70" align="center" bgcolor="#afd7ff"><b>Số lượng</b></td>
+                            <td width="70" align="center" bgcolor="#afd7ff"><b>Kho</b></td>
+                            <td width="140" align="center" bgcolor="#afd7ff"><b>Serials</b></td>
+                            <td width="140" align="center" bgcolor="#afd7ff"><b>Giá nhập</b></td>
+                            <td width="70" align="center" bgcolor="#afd7ff"><b>CK</b></td>
+                            <td width="80" align="center" bgcolor="#afd7ff"><b>Đơn giá xuất</b></td>
+                            <td width="50" align="center" bgcolor="#afd7ff"><b>VAT(%)</b></td>
+                            <td width="100" align="center" bgcolor="#afd7ff"><b>Thành tiền</b></td>
+                            <td align="center" bgcolor="#afd7ff"><input type="button" style="width:25px;" onclick="addrow();" class="button" name="add_mat" id="add_mat" value="+"></td>
+                        </tr>
+                        <?php
+                        if (isset($return_val['smm_id']))
+                            for ($i = 0; $i < count($return_val['smm_id']); $i++)
+                                if (!empty($return_val['smm_id'][$i])) {
+                                    ?>	
+                                    <tr>
+                                        <td align="center"><input onblur="getMatfromModel(this.value,<?= $i ?>);" style="width:50px;" value="<?= $return_val['mat_model'][$i] ?>"  class="catbg" name="mat_model[]" type="text" id="mat_model_<?= $i ?>" size="25" /></td>
+                                        <td align="center" height="25"><input  value="<?= $return_val['smm_id'][$i] ?>"  name="smm_id[]" type="hidden" id="smm_id_<?= $i ?>" size="25" />
+                                            <input readonly style="width:90px;" value="<?= $return_val['mat_name'][$i] ?>"  class="catbg" name="mat_name[]" type="text" id="mat_name_<?= $i ?>" size="25" /><input type="button" style="width:30px;" class="button" id="<?= $i ?>" onclick="browse_mat(<?= $i ?>)" name="browse_mat[]" value="...">
+                                        </td>
+                                        
+                                        <td align="center">
+                                            <!--
+                                            <input type="text" readonly name="msu_name[]" class="catbg" id="msu_name_id_<?= $i ?>" style="width:80px;" value="<?= $return_val['msu_name'][$i] ?>">
+                                            -->
+                                            <select onchange="get_price_from_mms(this.id.substring(7),this.value);" class="catbg" name="mms_id[]" id="mms_id_<?= $i ?>" style="width:80px;">
+                                                <?php
+                                                $matid = get_data("select mat_id from mat_msu where mms_id='" . $return_val['mms_id'][$i] . "'");
+                                                $matid = $matid[0][0];
+                                                $mms = get_data("select mms.mms_id, mms.price, msu.msu_name from mat_msu mms, meansure msu where mms.mat_id='" . $matid . "' and mms.msu_id=msu.msu_id order by msu.msu_name");
+                                                for ($j = 0; $j < count($mms); $j++) {
+                                                    echo '<option ' . ($mms[$j]['mms_id'] == $return_val['mms_id'][$i] ? 'selected' : '') . ' value="' . $mms[$j]['mms_id'] . '">' . $mms[$j]['msu_name'] . '</option>';
+                                                }
+                                                ?>		
+                                            </select>                                            
+                                        </td>
+                                        <td align="center"><input   onkeyup="format(this);sum_mat(this.id.substring(9));" style="width:60px;" value="<?= $return_val['quantity'][$i] ?>"  class="catbg" name="quantity[]" type="text" id="quantity_<?= $i ?>" size="25" /></td>
+                                        <td align="center" height="25">
+                                            <input readonly style="width:90px;" value="<?= @$return_val['stock_name'][$i] ?>"  class="catbg" name="stock_name[]" type="text" id="stock_name_<?= $i ?>" size="25" />
+                                        </td>
+                                        <td align="center">
+                                            <table width="100%"><tr><td width="100" align="right"><input readonly style="width:100px;" value="<?= $return_val['serials'][$i] ?>"  class="catbg" name="serials[]" type="text" id="serials_<?= $i ?>" size="25" /></td><td><input type="button" style="width:30px;" class="button" onclick="browse_serials(<?= $i ?>)" name="browse_serials[]" value=">>"></td></tr></table>
+                                        </td>
+                                        <td align="center"><input  readonly="true" style="width:60px;" value="<?= $return_val['inamount'][$i] ?>"  class="catbg" name="inamount[]" type="text" id="inamount_<?= $i ?>" size="25" />
+<input readonly="true" style="width:60px;" value="0"  class="catbg" name="inprice[]" type="text" id="inprice_<?= $i ?>" size="25" />
+<input readonly="true" style="width:60px;" value="0"  class="catbg" name="inv[]" type="text" id="inv_<?= $i ?>" size="25" />
+                                        </td>
+                                        <td align="center"><input   onkeyup="discount_change(this.id.substring(9));" style="width:60px;" value="<?= $return_val['discount'][$i] ?>"  class="catbg" name="discount[]" type="text" id="discount_<?= $i ?>" size="25" /></td>
+                                        <td align="center">
+                                            <input  onkeyup="format(this);price_change(this.id.substring(6));" style="width:70px;" value="<?= $return_val['price'][$i] ?>"  class="catbg" name="price[]" type="text" id="price_<?= $i ?>" size="25" />
+                                            <input type="hidden" value="<?= $return_val['mat_price'][$i] ?>"  class="catbg" name="mat_price[]" type="text" id="mat_price_<?= $i ?>" size="25" />
+                                        </td>
+                                        <td align="center"><input   onkeyup="sum_mat(this.id.substring(4));" style="width:40px;" value="<?= $return_val['vat'][$i] ?>"  class="catbg" name="vat[]" type="text" id="vat_<?= $i ?>" size="25" /></td>
+                                        <td align="center"><input style="width:90px;" value="<?= $return_val['sum'][$i] ?>"  class="catbg" name="sum[]" type="text" id="sum_<?= $i ?>" size="25" /></td>
+                                        <td align="center"><input type="button" style="width:25px;" class="button" onclick="delRow(this);" name="del_user[]" value="-"></td>
+                                    </tr>
+                                    <?php
+                                }
+                        ?>
+                        <tr>
+                            <td align="center"><input onblur="getMatfromModel(this.value,<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>);" style="width:50px;" value=""  class="catbg" name="mat_model[]" type="text" id="mat_model_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" /></td>
+                            <td align="center" height="25"><input  value=""  name="smm_id[]" type="hidden" id="smm_id_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" />
+                                <input readonly style="width:90px;" value=""  class="catbg" name="mat_name[]" type="text" id="mat_name_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" /><input type="button" style="width:30px;" class="button" id="<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" onclick="browse_mat(<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>)" name="browse_mat[]" value="...">
+                            </td>
+                            <td align="center">	
+                                <select  class="catbg" onchange="get_price_from_mms(this.id.substring(7),this.value);" name="mms_id[]" id="mms_id_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" style="width:80px;"></select>
+                                <!--
+                                <input readonly type="text" class="catbg" name="msu_name[]" id="msu_name_id_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" style="width:80px;">
+                                -->
+                            </td>
+                            <td align="center"><input  onkeyup="format(this);sum_mat(this.id.substring(9));" style="width:60px;" value=""  class="catbg" name="quantity[]" type="text" id="quantity_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" /></td>
+                            <td align="center" height="25">
+                                            <input readonly style="width:90px;" value="<?= @$return_val['stock_name'][$i] ?>"  class="catbg" name="stock_name[]" type="text" id="stock_name_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" />
+                                        </td>
+                            <td>
+                                <table width="100%"><tr><td width="100" align="right"><input type="text" readonly style="width:100px;"  class="catbg" name="serials[]" id="serials_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" value="" ></td><td><input type="button" style="width:30px;" class="button" onclick="browse_serials(<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>)" name="browse_serials[]" value=">>"></td></tr></table>
+                            </td>
+                            
+                            <td align="center"><input readonly="true" onkeyup="discount_change(this.id.substring(9));" style="width:60px;" value="0"  class="catbg" name="inamount[]" type="text" id="inamount_<?= isset($return_val['inamount']) ? count($return_val['inamount']) : 0 ?>" size="25" />
+                                <input readonly="true" style="width:60px;" value="0"  class="catbg" name="inprice[]" type="text" id="inprice_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" />
+<input readonly="true" style="width:60px;" value="0"  class="catbg" name="inv[]" type="text" id="inv_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" />
+                            </td>
+                            <td align="center"><input   onkeyup="discount_change(this.id.substring(9));" style="width:60px;" value="0"  class="catbg" name="discount[]" type="text" id="discount_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" /></td>
+                            <td align="center">
+                                <input  onkeyup="format(this);price_change(this.id.substring(6));" style="width:70px;" value="0"  class="catbg" name="price[]" type="text" id="price_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" />
+                                <input type="hidden" value="0"  class="catbg" name="mat_price[]" type="text" id="mat_price_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" />
+                            </td>
+                            <td align="center"><input   onkeyup="sum_mat(this.id.substring(4));" style="width:40px;" value="0"  class="catbg" name="vat[]" type="text" id="vat_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" /></td>
+                            <td align="center"><input readonly  style="width:90px;" value=""  class="catbg" name="sum[]" type="text" id="sum_<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>" size="25" /></td>
+                            <td align="center"><input type="button" style="width:25px;" class="button" onclick="delRow(this);" name="del_user[]" value="-"></td>
+                        </tr>	
+                    </tbody>
+                </table>
+                <input type="hidden" name="total" id="total" value="<?= isset($return_val['total']) ? $return_val['total'] : '' ?>"/>
+                <table width="100%"  border="0" cellpadding="0" cellspacing="0" style="margin-top:5px;">
+                    <tr>
+<td align="left">
+    <span id="totalreal" style="font-weight:bold;"><b>Giá gốc: </b><?= isset($return_val['total']) ? $return_val['total'] . ' đ' : '0 đ' ?></span></td>
+</td>
+                        <td  height="20" align="right" style="padding-right:10px;">
+<span id="totaldiv_f" style="font-weight:bold;"><b>Tiền thực thu : </b><?= isset($return_val['total']) ? $return_val['total'] . ' đ' : '0 đ' ?></span><br>
+<span id="totaldiv" style="font-weight:bold;"><b>Tổng cộng : </b><?= isset($return_val['total']) ? $return_val['total'] . ' đ' : '0 đ' ?></span> <br>
+                            (<span id="docsoid"><?= isset($return_val['total']) ? doc_so(str_replace(',', '', $return_val['total'])) : 'không' ?></span>  đồng)</td></tr>
+                </table>               
+            </td></tr>
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=5></td>
+        </tr>
+        <tr>
+            <td style="padding-left:10px;"><b>Lưu ý:</b> Chiết khấu (CK) sẽ tự động tính theo đơn vị % và tính thành tiền nếu nhập vào giá trị >=100.</td>
+        </tr>
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=5></td>
+        </tr>            
+    </table>    
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td  height="30" style="padding-left:5px;">
+                <input style="font-weight:bold;cursor:pointer;"  class="button" type="submit" name="sm" value="Lưu phiếu" />
+                <input <?=@$return_val['draft']==1?'checked':''?> name="draft" type="checkbox" value="1" style="margin-left:20px;"> Lưu bản nháp
+            </td>
+            <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>          
+</form>
+<style>
+    #searchcusdiv,#searchmatdiv, #searchempdiv, #serialdiv, #exceldiv{
+        position:absolute;
+        left:0px;
+        top:20px;
+        width:650px;
+        height:450px;
+        z-index:21;
+    }
+    #searchcusiframe,#searchmatiframe, #searchempiframe, #serialiframe, #exceliframe {
+        position:absolute;
+        left:0px;
+        top:20px;
+        width:646px;
+        height:446px;
+        z-index:21;
+        border:0px;
+    }
+    #serialdiv {
+        width:550px;
+    }
+    #serialiframe {
+        width:546px;
+    }
+    #exceldiv {
+        height:auto;
+    }
+</style>
+<iframe id="searchcusiframe" style="visibility:hidden;"></iframe>
+<div  id="searchcusdiv" style="visibility:hidden;">
+    <table  bgcolor="#ffffff" width="650" border="0" height="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height="25" valign=top align=center width="100%">
+                <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+                    <tr>
+                        <td width="94%" height="25" id="searchcushead" background="<?=ROOT_URL?>bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('searchcus',event);" style="color:white;"><b>&nbsp;&nbsp;Danh sách khách hàng</b></td>
+                        <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif">
+                            <img onmouseover="this.style.cursor='pointer'; this.src='bms/images/minimize2.gif';" onmouseout=" this.src='bms/images/minimize.gif';" src="<?=ROOT_URL?>bms/images/minimize.gif" width="21" height="21" onclick="hidediv('searchcus');" /></td>
+                        <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif" style="padding-right:2px;"><img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>bms/images/close.gif" width="21" height="21" onclick="this.src='bms/images/close.gif';closediv('searchcus');"></td>
+                    </tr>
+                </table>
+            </td></tr>
+        <tr>
+            <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+                <div id="searchcusid">
+                    <?php
+                    include("bms/templates/search_cus.htm");
+                    ?>        
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>      
+<iframe id="searchmatiframe" style="visibility:hidden;"></iframe>
+<div  id="searchmatdiv" style="visibility:hidden;">
+    <table  bgcolor="#ffffff" width="650" border="0" height="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height="25" valign=top align=center width="100%">
+                <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+                    <tr>
+                        <td width="94%" height="25" id="searchmathead" background="<?=ROOT_URL?>bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('searchmat',event);" style="color:white;"><b>&nbsp;&nbsp;Danh sách sản phẩm</b></td>
+                        <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif">
+                            <img onmouseover="this.style.cursor='pointer'; this.src='bms/images/minimize2.gif';" onmouseout=" this.src='bms/images/minimize.gif';" src="<?=ROOT_URL?>bms/images/minimize.gif" width="21" height="21" onclick="hidediv('searchmat');" /></td>
+                        <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif" style="padding-right:2px;"><img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>bms/images/close.gif" width="21" height="21" onclick="this.src='bms/images/close.gif';closediv('searchmat');"></td>
+                    </tr>
+                </table>
+            </td></tr>
+        <tr>
+            <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+                <div id="searchmatid">
+                    <?php
+                    include("bms/templates/search_mat_stock.htm");
+                    ?>        
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>     
+<iframe id="searchempiframe" style="visibility:hidden;"></iframe>
+<div  id="searchempdiv" style="visibility:hidden;">
+    <table  bgcolor="#ffffff" width="650" border="0" height="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height="25" valign=top align=center width="100%">
+                <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+                    <tr>
+                        <td width="94%" height="25" id="searchuserhead" background="<?=ROOT_URL?>bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('searchemp',event);" style="color:white;"><b>&nbsp;&nbsp;Danh sách nhân viên</b></td>
+                        <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif">
+                            <img onmouseover="this.style.cursor='pointer'; this.src='bms/images/minimize2.gif';" onmouseout=" this.src='bms/images/minimize.gif';" src="<?=ROOT_URL?>bms/images/minimize.gif" width="21" height="21" onclick="hidediv('searchuser');" /></td>
+                        <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif" style="padding-right:2px;"><img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>bms/images/close.gif" width="21" height="21" onclick="this.src='bms/images/close.gif';closediv('searchemp');"></td>
+                    </tr>
+                </table>
+            </td></tr>
+        <tr>
+            <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+                <div id="searchempid">
+                    <?php
+                    include("bms/templates/search_emp.htm");
+                    ?>        
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>     
+<iframe id="serialiframe" style="visibility:hidden;height:260px;"></iframe>
+<div  id="serialdiv" style="visibility:hidden;height:256px;">
+    <table  bgcolor="#ffffff" width="550" border="0" height="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height="25" valign=top align=center width="100%">
+                <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+                    <tr>
+                        <td width="94%" height="25"  background="<?=ROOT_URL?>bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('serial',event);" style="color:white;"><b>&nbsp;&nbsp;Nhập serials</b></td>
+                        <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif">
+                            <img onmouseover="this.style.cursor='pointer'; this.src='bms/images/minimize2.gif';" onmouseout=" this.src='bms/images/minimize.gif';" src="<?=ROOT_URL?>bms/images/minimize.gif" width="21" height="21" onclick="hidediv('serial');" /></td>
+                        <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif" style="padding-right:2px;"><img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>bms/images/close.gif" width="21" height="21" onclick="this.src='bms/images/close.gif';closediv('serial');"></td>
+                    </tr>
+                </table>
+            </td></tr>
+        <tr>
+            <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+                <table  height="200" width="100%" border="0"  cellpadding="0" cellspacing="0">
+                    <tr>
+                        <td height="40" width="80" style="padding-left:10px;"><b>Số serial (từ)</b></td>
+                        <td width="140">
+                            <input onkeypress="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) document.getElementById('serial_end').focus();" value="" style="width:130px;" class="catbg" name="serial_start" type="text" id="serial_start" size="25" />             
+                        </td>
+                        <td width="100" style="padding-left:10px;"><b>Đến serial</b></td>
+                        <td width="140">
+                            <input onkeypress="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) document.getElementById('add').focus();" value="" style="width:130px;" class="catbg" name="serial_end" type="text" id="serial_end" size="25" />             
+                        </td>
+                        <td>
+                            <input type="button" style="width:50px;"  class="button" onclick="add_serial();" name="add" id="add" value="Thêm">              
+                        </td>
+                    </tr>
+                    <tr><td align="right"><input type="checkbox" value="1" name="chk_serial" id="chk_serial"></td>
+                        <td style="padding-left:10px;" colspan="4"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('chk_serial').checked=!document.getElementById('chk_serial').checked;"><b>Không kiểm tra serial xuất kho với serial trong kho hàng xuất</b></a></td>
+                    </tr>
+                    <tr><td height="30" style="padding-left:10px;" colspan="5"><b>DANH SÁCH SERIALS</b></td></tr>
+                    <tr><td height="30" style="padding-left:10px;" colspan="5"><div id="serial_list"></div></td></tr>
+                    <tr><td height="30" style="padding-left:10px;" colspan="5"><b>DANH SÁCH SERIALS ĐÃ NHẬP</b></td></tr>
+                    <tr><td style="padding-left:10px;padding-right:10px;" colspan="5">
+                            <table bgcolor="#dddddd" width="100%" border="0"  cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td height="25" width="35%" align="center"><b>Số serial (từ)</b></td>
+                                    <td width="35%" align="center"><b>Đến serial</b></td>
+                                    <td width="20%" align="center"><b>Số lượng</b></td>
+                                    <td width="10%"><b>Xoá</b></td>
+                                </tr>
+                            </table>
+                            <div id="tblscr" style="height:130px;background-Color:#eeeeee;overflow:auto;padding-bottom:10px;padding-left:10px;padding-right:10px;">
+                                <table  width="100%" border="0"  cellpadding="0" cellspacing="0">
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                                <div id="tbl"></div>
+                            </div>
+                        </td></tr>
+                </table>		
+                <table  width="100%" border="0"  cellpadding="0" cellspacing="0">
+                    <tr><td height="30" style="padding-left:10px;"><b>Lưu ý:</b> Chỉ nhập <b>Đến serial</b> khi là dải serials</td><td align="right" style="padding-right:10px;"><input type="button" value="Đóng"  onclick="hidediv('serial');" class="button"></td></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+<iframe id="exceliframe" style="visibility:hidden;"></iframe>
+<div max="min" id="exceldiv" style="visibility:hidden;">
+    <table  bgcolor="#ffffff" width="100%" border="0" height="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height="25" valign=top align=center width="100%">
+                <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+                    <tr>
+                        <td height="25" id="excelhead" background="<?=ROOT_URL?>bms/images/head_bg.gif"  onmouseover="this.style.cursor = 'move';"  onmousedown="divclick('excel', event);" style="color:white;"><b>&nbsp;&nbsp;Nhập dữ liệu từ file Excel</b></td>
+                        <td width="22" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif">
+                            <img onmouseover="this.style.cursor = 'pointer';this.src = 'bms/images/minimize2.gif';" onmouseout=" this.src = 'bms/images/minimize.gif';" src="<?=ROOT_URL?>bms/images/minimize.gif" width="21" height="21" onclick="hidediv('excel');" />
+                        </td>
+                        <td width="22" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif">
+                            <img onmouseover="this.style.cursor = 'pointer';this.src = 'bms/images/max_over.gif';" onmouseout=" this.src = 'bms/images/max.gif';" src="<?=ROOT_URL?>bms/images/max.gif" width="21" height="21" onclick="maxdiv('excel');" />
+                        </td>
+                        <td width="22" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif" style="padding-right:2px;">
+                            <img onmouseover="this.style.cursor = 'pointer';this.src = 'bms/images/close2.gif';" onmouseout=" this.src = 'bms/images/close.gif';" src="<?=ROOT_URL?>bms/images/close.gif" width="21" height="21" onclick="this.src = 'bms/images/close.gif'; closediv('excel');">
+                        </td>
+                    </tr>
+                </table>
+            </td></tr>
+        <tr>
+            <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+                <div id="excelid">
+                    <?php
+                    include("bms/templates/read_excel.htm");
+                    ?>        
+                </div>
+            </td>
+        </tr>
+    </table>
+</div> 
+<script language="javascript" type="text/javascript">
+    var payment_init=<?= isset($head['payment_init']) ? $head['payment_init'] : 0 ?>;
+    var cur_index=<?= isset($return_val['smm_id']) ? count($return_val['smm_id']) : 0 ?>;
+    var select_id=0;
+    var cur_id=0;
+    var cotheno=0;
+    function loadCusForm(cusid) {
+        $.getJSON("?eda_code=<?= md5('getCus') ?>&eda_id="+cusid+"&eda_type=ajax", function(data){
+            if(data[0]) {
+                data=data[0];
+                $('#email').val(data.email);
+                $('#address').val(data.address);
+                $('#description').val(data.comment);
+                $('#address').val(data.address);
+                $('#tel').val(data.tel);
+                $('#tax_no').val(data.tax_no);
+                $('#cus_id').val(data.cus_id);
+                $('#cus_name').val(data.cus_name);
+                $('#reg_no').val(data.reg_no);
+                $('#bank_acc').val(data.bank_acc);
+                $('#bank_name').val(data.bank_name);
+                $('#cus_debt').val(data.debt);
+                format(document.getElementById("cus_debt"));
+                $('#cus_type').val(data.cus_type);
+                $('#cus_code').val(data.cus_code);
+                $('#website').val(data.website);
+                $('#cuscontent .catbg').attr('readonly',true);
+                $('#cus_type').attr('disabled','disabled');
+                if(typeof data.debt_info.debt_final != "undefined"){
+                    cotheno=data.debt_info.debt_limit-data.debt_info.debt_final;
+                    $(".cotheno").remove();
+                    if(cotheno>0)
+                    $("#cuscontent").append("<div class=cotheno style='padding-top:10px'>Khách hàng ["+data.cus_name+"] chỉ có thể nợ "+numF(cotheno)+"</div>");
+                    else
+                    $("#cuscontent").append("<div class=cotheno style='padding-top:10px'>Khách hàng ["+data.cus_name+"] đã nợ quá "+numF( Math.abs(cotheno) )+"</div>");
+                }
+            }
+        });      
+    }
+    function resetCus() {
+        $('#cuscontent .catbg').removeAttr('readonly');
+        $('#cus_type').removeAttr('disabled');
+        $('#cuscontent .catbg').val('');
+        $('#cus_name').focus();
+        $.getJSON("?eda_code=<?= md5('getCusCode') ?>&eda_type=ajax", function(data){
+            if(data[0]) {
+                data=data[0];
+                $('#cus_code').val(data.cus_code);
+            }
+        });
+    }    
+    if('<?= @!empty($return_val['cus_id']) ? 1 : 0 ?>'=='1') {
+        $('#cuscontent .catbg').attr('readonly',true);
+    } else if('<?= isset($_POST['cus_name']) ? 1 : 0 ?>'=='0') {
+        loadCusForm('0');
+    }
+    function addrow() {
+        var doc=document;
+        var tbl = doc.getElementById('mat_tbl').getElementsByTagName('tbody')[0];
+        //create a new row
+        var newrow = doc.createElement("TR");
+        var newcol , newinput;
+        cur_index++;
+					
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newcol.style.height="25";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="mat_model_"+cur_index;
+        newinput.name="mat_model[]";
+        newinput.className='catbg';
+        newinput.style.width="50px";
+        newinput.onblur=function(){getMatfromModel(this.value, this.id.substring(10));};
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="hidden";
+        newinput.id="smm_id_"+cur_index;
+        newinput.name="smm_id[]";
+        newcol.appendChild(newinput);		
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="mat_name_"+cur_index;
+        newinput.name="mat_name[]";
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="90px";
+        newcol.appendChild(newinput);
+        newinput = doc.createElement("input");
+        newinput.type="button";
+        newinput.id=cur_index;
+        newinput.name="browse_mat[]";
+        newinput.value="...";
+        newinput.style.width="30px";
+        newinput.onclick=function(){browse_mat(this.id);};
+        newinput.className='button';
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+
+
+		
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("select");
+        newinput.id="mms_id_"+cur_index;
+        newinput.name="mms_id[]";
+        newinput.onchange=function() {get_price_from_mms(this.id.substring(7),this.value);}
+        //newinput.options[0] = new Option("Đơn vị tính", "", false, false);
+        //newinput.options[0].disabled=true;
+        newinput.className='catbg';
+        newinput.style.width="80px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        
+		
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="quantity_"+cur_index;
+        newinput.name="quantity[]";
+        newinput.onkeyup=function(){format(this);sum_mat(this.id.substring(9));}		
+        newinput.className='catbg';
+        newinput.style.width="60px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="stock_name_"+cur_index;
+        newinput.name="stock_name[]";
+        newinput.onkeyup=function(){format(this);sum_mat(this.id.substring(9));}        
+        newinput.className='catbg';
+        newinput.style.width="90px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        var table=doc.createElement("TABLE");
+        table.style.width="100%";
+        var tr=doc.createElement("TR");
+        var td=doc.createElement("TD");
+        td.style.align="right";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="serials_"+cur_index;
+        newinput.name="serials[]";
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="100px";
+        td.appendChild(newinput);
+        tr.appendChild(td);
+        var td=doc.createElement("TD");
+        newinput = doc.createElement("input");
+        newinput.type="button";
+        newinput.id='brserials_'+cur_index;
+        newinput.name="browse_serials[]";
+        newinput.value=">>";
+        newinput.style.width="30px";
+        newinput.onclick=function(){browse_serials(this.id.substring(10));};
+        newinput.className='button';
+        td.appendChild(newinput);
+        tr.appendChild(td);		
+        table.appendChild(tr);
+        newcol.appendChild(table);
+        newrow.appendChild(newcol);
+
+
+
+    newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="inamount_"+cur_index;
+        newinput.name="inamount[]";
+        newinput.value=0;
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="60px";
+        newcol.appendChild(newinput);
+
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="inprice_"+cur_index;
+        newinput.name="inprice[]";
+        newinput.value=0;
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="60px";
+        newcol.appendChild(newinput);
+
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="inv_"+cur_index;
+        newinput.name="inv[]";
+        newinput.value=0;
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="60px";
+        newcol.appendChild(newinput);
+
+        newrow.appendChild(newcol);
+
+
+
+
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="discount_"+cur_index;
+        newinput.name="discount[]";
+        newinput.value=0;
+        newinput.onkeyup=function(){discount_change(this.id.substring(9));}		
+        newinput.className='catbg';
+        newinput.style.width="60px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);        
+                
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="price_"+cur_index;
+        newinput.name="price[]";
+        newinput.onkeyup=function(){format(this);price_change(this.id.substring(6));}			
+        newinput.value=0;
+        newinput.className='catbg';
+        newinput.style.width="70px";
+        newcol.appendChild(newinput);
+        newcol.appendChild(newinput);
+        newinput = doc.createElement("input");
+        newinput.type="hidden";
+        newinput.id="mat_price_"+cur_index;
+        newinput.name="mat_price[]";
+        newcol.appendChild(newinput);                 
+        newrow.appendChild(newcol);
+        
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="vat_"+cur_index;
+        newinput.name="vat[]";
+        newinput.value=0;
+        newinput.onkeyup=function(){sum_mat(this.id.substring(4));}		
+        newinput.className='catbg';
+        newinput.style.width="40px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);        
+		
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="sum_"+cur_index;
+        newinput.name="sum[]";
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="90px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="button";
+        newinput.id="del_mat_"+cur_index;
+        newinput.name="del_mat[]";
+        newinput.value="-";
+        newinput.style.width="25px";
+        newinput.onclick=function(){delRow(this);};
+        newinput.className='button';
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+		
+        tbl.appendChild(newrow);
+    }
+
+    function delRow(a) { 
+        var row = a.parentNode.parentNode; 
+        var tbody = document.getElementById('mat_tbl').getElementsByTagName('tbody')[0]; 
+        tbody.removeChild(row); 
+        change_number();
+    }
+    var readnum=false;
+
+    function change_number() {
+        var sum=sum_all();
+        var sumf=sum;
+        $(".phuphi").each(function(){
+            if($(this).find("input[type='checkbox']").prop("checked")){
+                if($(this).find(".pp_slc").val()+""=="0"){
+                    sum+=strtoint($(this).find(".pp_price").val());
+                }
+                else{
+                    sum-=strtoint($(this).find(".pp_price").val());
+                }
+            }
+        });
+
+$(".phuphi").each(function(){
+                if($(this).find(".pp_slc").val()+""=="0"){
+                    sumf+=strtoint($(this).find(".pp_price").val());
+                }
+                else{
+                    sumf-=strtoint($(this).find(".pp_price").val());
+                }
+            
+        });
+
+        var sum_r=sum_real();
+        document.getElementById("totaldiv_f").innerHTML='<b>Tiền thực thu : </b>'+formatnumber(sumf,",",0)+' đ';
+        document.getElementById("totaldiv").innerHTML='<b>Tổng cộng : </b>'+formatnumber(sum,",",0)+' đ';
+
+        document.getElementById("total").value=sum;
+        
+        if(payment_init==0||payment_init==2) {
+            if(payment_init==0) {
+                document.getElementById("debt").value=sum;
+            } else {
+                document.getElementById("debt").value=0;
+            }
+            format(document.getElementById("payment"));
+            format(document.getElementById("total"));
+            change_payment();
+            if(readnum) {
+                ajax_abort(readnum);
+            }
+            readnum=load("?eda_type=ajax&eda_code=<?= md5('doc_so') ?>&eda_module="+sum,"docsoid","html","GET",null,"no");                
+            
+        }  else {
+            $.get("?eda_type=ajax&eda_code=<?= md5('get_cus_debt') ?>&eda_id="+$('#cus_id').val(), function(data){
+                document.getElementById("payment").value=sum+parseInt(data);
+                format(document.getElementById("payment"));
+                format(document.getElementById("total"));
+                change_payment();
+                if(readnum) {
+                    ajax_abort(readnum);
+                }
+                readnum=load("?eda_type=ajax&eda_code=<?= md5('doc_so') ?>&eda_module="+sum,"docsoid","html","GET",null,"no");                
+            });
+        }
+    }
+    function change_payment() {
+        document.getElementById("debt").value=strtoint(document.getElementById("total").value)-strtoint(document.getElementById("payment").value);
+        format(document.getElementById("debt"));
+    }
+    function browse_mat(id) {
+        cur_id=id;
+        document.getElementById('searchmatdiv').style.top=document.body.scrollTop+5;
+        document.getElementById('searchmatiframe').style.top=document.body.scrollTop+5;
+        document.getElementById('searchmatdiv').style.left=(screen.width-1000)/2+230;
+        document.getElementById('searchmatiframe').style.left=(screen.width-1000)/2+230;	
+        showdiv('searchmat');
+        document.getElementById('mat_name').focus();
+        load_mat_page(cur_mat_page);
+    }
+    var cur_msu='';
+    function getMatfromModel(v,id) {
+        if(v=='') {
+            return false;
+        } else {
+            var eda_ajax=new eda_ajaxclass();
+            eda_ajax.getAjaxRequest("?eda_code=<?= md5('getmatfrommodel') ?>&eda_type=ajax&eda_id="+document.getElementById('search_stock_id').value+"&eda_module="+encodeURI(v), null, function(){returnMatfromModel(eda_ajax,id);}, "txt");
+        }
+    }
+    function getMatfromBarcode(v) {
+        if(v=='') {
+            return false;
+        } else {
+            $.get("?eda_code=<?= md5('getmatfrombarcode') ?>&eda_type=ajax&eda_id="+document.getElementById('search_stock_id').value+"&eda_module="+encodeURI(v),function(data){
+                if(data=='none') {
+                    alert('Không tìm thấy mã vạch "'+v+'" vừa nhập trong kho hàng đã chọn');
+                } else {
+                    v=data.split(":");
+                    $input=$('input[name=\'smm_id[]\']');
+                    f=-1;
+                    for(i=0;i<$input.length;i++) {
+                        if(v[0]==$input[i].value) {
+                            f=i;
+                            id=$input[i].id.substr(7);
+                            break;
+                        }
+                        
+                    }
+                    if(f==-1) {
+                        for(i=0;i<$input.length;i++) {
+                            if($input[i].value=='') {
+                                f=i;
+                                id=$input[i].id.substr(7);
+                                break;
+                            }
+
+                        }                        
+                    }
+                    if(f==-1) {
+                        addrow();
+                        id=cur_index;
+                    }
+                    $("#smm_id_"+id).val(v[0]);
+                    //$("#msu_name_id_"+id).val(v[1]);
+                    load_msu(id,  v[6],v[1]);
+                    $("#mat_name_"+id).val(v[2]);
+                    $("#mat_model_"+id).val(v[3]);
+                    $("#vat_"+id).val(v[7]);
+                    $("#discount_"+id).val(0);
+                    if($("#quantity_"+id).val()<1) {
+                        $("#quantity_"+id).val(1);
+                    } else {
+                        $("#quantity_"+id).val(strtofloat($("#quantity_"+id).val())+1);
+                    }
+                    if(document.getElementById('price_type_1').checked) {
+                        document.getElementById("price_"+id).value=v[5];
+                        document.getElementById("mat_price_"+id).value=v[5];                     
+                        format(document.getElementById("price_"+id));
+                    } else if(document.getElementById('price_type_2').checked) {
+                        document.getElementById("price_"+id).value=v[8];
+                        document.getElementById("mat_price_"+id).value=v[8];                     
+                        format(document.getElementById("price_"+id));
+                    } else {
+                        document.getElementById("price_"+id).value=v[4];
+                        document.getElementById("mat_price_"+id).value=v[4];
+                        format(document.getElementById("price_"+id));
+                    }
+                    sum_mat(id);
+                }
+                $("#barcode").val('');
+                $("#barcode").focus();            
+            });
+        }
+    }
+    function returnMatfromModel(ajax_request,id) {
+        if (ajax_request.ajaxobj.readyState == 4 && (ajax_request.ajaxobj.status==200 || window.location.href.indexOf("http")==-1))
+        {
+            var v=ajax_request.ajaxobj.responseText;
+            if(v=='none') {
+                alert('Không tìm thấy mã sản phẩm vừa nhập trong kho hàng đã chọn');
+                document.getElementById("mat_model_"+id).select();
+            } else {
+                v=v.split(":");
+                document.getElementById("smm_id_"+id).value=v[0];
+                //document.getElementById("msu_name_id_"+id).value=v[1];
+                load_msu(id,  v[6],v[1]);
+                document.getElementById("mat_name_"+id).value=v[2];
+                document.getElementById("mat_model_"+id).value=v[3];
+                document.getElementById("vat_"+id).value=v[7];
+                document.getElementById("discount_"+id).value=0;
+                if(document.getElementById("quantity_"+id).value<1)
+                    document.getElementById("quantity_"+id).value=1;
+                if(document.getElementById('price_type_1').checked) {
+                    document.getElementById("price_"+id).value=v[5];
+                    document.getElementById("mat_price_"+id).value=v[5];
+                    /*var d=Math.round(v[4]-v[5]);
+                    if(d<0||isNaN(d)) {
+                        d=0;
+                    }
+                    document.getElementById("discount_"+id).value=d;*/
+                    format(document.getElementById("price_"+id));
+                } else if(document.getElementById('price_type_2').checked) {
+                    document.getElementById("price_"+id).value=v[8];
+                    document.getElementById("mat_price_"+id).value=v[8];                    
+                    format(document.getElementById("price_"+id));
+                } else {
+                    document.getElementById("price_"+id).value=v[4];
+                    document.getElementById("mat_price_"+id).value=v[4];
+                    format(document.getElementById("price_"+id));
+                }
+                sum_mat(id);
+                document.getElementById("add_mat").focus();
+            }
+        }
+    }
+    function load_mat() {
+        var jdata=JSON.parse(atob($("input[name='select_mat']:checked").closest("tr").attr("jdata")));
+        console.log(jdata);
+        document.getElementById("smm_id_"+cur_id).value=cur_smm_id;
+        document.getElementById("mat_name_"+cur_id).value=cur_mat_name;
+        document.getElementById("stock_name_"+cur_id).value=cur_stock_name;
+        document.getElementById("mat_model_"+cur_id).value=cur_mat_model;
+        document.getElementById("vat_"+cur_id).value=cur_vat;
+        document.getElementById("discount_"+cur_id).value=0; 
+        document.getElementById("serials_"+cur_id).value=""; 
+        if(document.getElementById("quantity_"+cur_id).value<1){
+            document.getElementById("quantity_"+cur_id).value=jdata.quantity;
+            document.getElementById("quantity_"+cur_id).max=jdata.quantity;
+            format(document.getElementById("quantity_"+cur_id));
+        }
+        if(document.getElementById('price_type_1').checked) {		
+            document.getElementById("price_"+cur_id).value=cur_price_dealer;
+            document.getElementById("mat_price_"+cur_id).value=cur_price_dealer;
+            cur_price=cur_price_dealer;
+            /*var d=Math.round(10000*(cur_price-cur_price_dealer)/cur_price)/100;
+                if(d<0||isNaN(d)) {
+                    d=0;
+                }
+                document.getElementById("discount_"+cur_id).value=d;*/
+            format(document.getElementById("price_"+cur_id));
+        } else if(document.getElementById('price_type_2').checked) {
+            document.getElementById("price_"+cur_id).value=cur_price_dealer2;
+            document.getElementById("mat_price_"+cur_id).value=cur_price_dealer2;
+            cur_price=cur_price_dealer2;
+            format(document.getElementById("price_"+cur_id));
+        } else {
+            document.getElementById("price_"+cur_id).value=cur_price;
+            document.getElementById("mat_price_"+cur_id).value=cur_price;
+            format(document.getElementById("price_"+cur_id));
+        }
+        document.getElementById("inamount_"+cur_id).value= cur_price_input;
+        //document.getElementById("mat_price_"+cur_id).value=cur_price;
+        load_msu(cur_id,  cur_mat_id,cur_mms_id);
+        sum_mat(cur_id);
+    }
+    function get_price_from_mms(id, mms_id){
+        $.get('?eda_type=ajax&eda_code=<?= md5("get_price_from_mms") ?>&eda_id='+mms_id,function(data) {
+            if(data!='none') {
+                v=data.split(":");
+                if(document.getElementById('price_type_1').checked) {		
+                    document.getElementById("price_"+id).value=v[1];
+                    document.getElementById("mat_price_"+id).value=v[1];
+                    cur_price=v[1];
+                    /*var d=Math.round(10000*(cur_price-cur_price_dealer)/cur_price)/100;
+                        if(d<0||isNaN(d)) {
+                            d=0;
+                        }
+                        document.getElementById("discount_"+cur_id).value=d;*/                
+                    format(document.getElementById("price_"+id));
+                } else {
+                    document.getElementById("price_"+id).value=v[0];
+                    document.getElementById("mat_price_"+id).value=v[0];
+                    format(document.getElementById("price_"+id));
+                }
+                price_change(id);
+            }
+        });        
+    }
+    function load_msu(id, mat_id,mms_id,func){
+        $.get('?eda_type=ajax&eda_code=<?= md5("load_msu") ?>&msu_type=msu_only&eda_id='+mat_id,function(data) {
+            add_listbox(document.getElementById('mms_id_'+id),data);
+            $('#mms_id_'+id).val(mms_id);
+            if(func) {
+                func(id);
+            }
+        });
+    }    
+    function discount_change(id) {
+        var v=strtoint(document.getElementById("discount_"+id).value);
+        if(v<=100) {
+            document.getElementById("price_"+id).value=Math.round(strtoint(document.getElementById("mat_price_"+id).value)*(100-document.getElementById("discount_"+id).value)/100);
+        } else {
+            document.getElementById("price_"+id).value=Math.round(strtoint(document.getElementById("mat_price_"+id).value)-strtoint(document.getElementById("discount_"+id).value));
+        }
+        format(document.getElementById("price_"+id));
+        format(document.getElementById("discount_"+id));
+        sum_mat(id);        
+    }
+    function price_change(id) {
+        var d=Math.round(strtoint(document.getElementById("mat_price_"+id).value)-strtoint(document.getElementById("price_"+id).value));
+        if(d<0||isNaN(d)) {
+            d=0;
+        }
+        document.getElementById("discount_"+id).value=d;
+        format(document.getElementById("discount_"+id));
+        sum_mat(id);
+    }
+    function sum_mat(id) {
+        document.getElementById("sum_"+id).value=parseInt((100+strtoint(document.getElementById("vat_"+id).value))*strtoint(document.getElementById("price_"+id).value)*strtofloat(document.getElementById("quantity_"+id).value)/100);
+        format(document.getElementById("sum_"+id));
+        change_number();
+    }
+    function sum_all() {
+        var sum=0;
+        var sumr=0;
+        var sumv=0;
+        for(i=0;i<=cur_index;i++)
+            if(document.getElementById("sum_"+i))
+                if(document.getElementById("sum_"+i).value!='')
+        {
+            if(document.getElementById("sum_"+i).value!=''&&document.getElementById("smm_id_"+i).value!='')
+            {
+                sum+=strtoint(document.getElementById("sum_"+i).value);
+                sumr+=(strtoint(document.getElementById("quantity_"+i).value)*strtoint(document.getElementById("price_"+i).value)) || 0;
+                sumv+=(strtoint(document.getElementById("quantity_"+i).value)*strtoint(document.getElementById("price_"+i).value)*strtoint(document.getElementById("vat_"+i).value)/100) || 0;
+            }
+        }
+        var vat_per=sumv/sumr*100||0;
+        $("#vat_price").val(sumv);
+        $("#vat_per").val(vat_per);
+        return sum;
+    }
+     function sum_real() {
+        var sum=0;
+        for(i=0;i<=cur_index;i++)
+            if(document.getElementById("inamount_"+i))
+                if(document.getElementById("inamount_"+i).value)
+        {
+            if(document.getElementById("inamount_"+i).value)
+            {
+
+                if(document.getElementById("serials_"+i).value!="")
+                {
+                sum+=strtoint(document.getElementById("inamount_"+i).value);
+                }
+                else
+                {
+                document.getElementById("inamount_"+i).value=strtoint(document.getElementById("inprice_"+i).value)*strtoint(document.getElementById("quantity_"+i).value);
+                    sum+=strtoint(document.getElementById("inamount_"+i).value);
+                }
+                
+            }
+        }
+        if(document.getElementById("totalreal"))
+            document.getElementById("totalreal").innerHTML='<b>Giá gốc: </b>'+formatnumber(sum,",",0)+' đ';
+        return sum;
+    }
+    var excel_type="output";
+    function excel()
+    {
+        document.getElementById('exceldiv').style.top=document.body.scrollTop+5;
+        document.getElementById('exceliframe').style.top=document.body.scrollTop+5;
+        document.getElementById('exceldiv').style.left=(screen.width-1000)/2+230;
+        document.getElementById('exceliframe').style.left=(screen.width-1000)/2+230;
+        $('#dataid').html('');
+        $('#excelfile').val('');
+        showdiv('excel');
+	
+    }
+    function browse_cus()
+    {
+        document.getElementById('searchcusdiv').style.top=document.body.scrollTop+5;
+        document.getElementById('searchcusiframe').style.top=document.body.scrollTop+5;
+        document.getElementById('searchcusdiv').style.left=(screen.width-1000)/2+230;
+        document.getElementById('searchcusiframe').style.left=(screen.width-1000)/2+230;
+        showdiv('searchcus');
+        if(document.getElementById('cusid').innerHTML=="")
+            load_cus_page(1);
+	
+    }
+    function load_cus()
+    {
+        document.getElementById("cus_id").value=cur_cus_id;
+        document.getElementById("cus_name").value=cur_cus_name;
+        loadCusForm(cur_cus_id);
+    }
+    function browse_serials(id) {
+
+        if(document.getElementById('smm_id_'+id).value!='') {
+            cur_id=id;
+            var smm_id=document.getElementById('smm_id_'+id).value;
+            
+            
+
+            document.getElementById('serialdiv').style.top=document.body.scrollTop+5;
+            document.getElementById('serialiframe').style.top=document.body.scrollTop+5;
+            document.getElementById('serialdiv').style.left=(screen.width-1000)/2+250;
+            document.getElementById('serialiframe').style.left=(screen.width-1000)/2+250;
+            document.getElementById('tbl').innerHTML='<table id="serialtbl"  width="100%" border="0"  cellpadding="0" cellspacing="0"><tbody></tbody></table>';
+            curserial_index=0;
+            serial_num=0;
+            $.post( "?eda_type=ajax&eda_code=<?= md5('load_seria') ?>",{"smm_id":smm_id}, function() {
+            })
+            .done(function(data) {
+                data=JSON.parse(data);
+                console.log(data);
+                var html="";
+                $(data).each(function(i,item){
+                    if(item.serial_end>item.serial_start && item.serial_start>0)
+                    {
+                        for (var i = item.serial_start; i <= item.serial_end; i++) {
+                            html+="<div class=ser_select invd_id="+item.invd_id+" sid="+i+">"+i+" ( Giá : "+formatnumber(item.s_price,",",0)+" ) ( Đơn nhập kho : "+(item.inv_code)+" )</div>";
+                        }
+                    }
+                    else
+                    {
+                            html+="<div class=ser_select invd_id="+item.invd_id+" sid="+item.serial_start+">"+item.serial_start+" ( Giá : "+formatnumber(item.s_price,",",0)+" ) ( Đơn nhập kho : "+(item.inv_code)+" )</div>";
+                    }
+                    
+                });
+               $("#serial_list").html(html);
+
+            })
+            .fail(function() {
+            });
+            load_serials();
+            showdiv('serial');
+            document.getElementById('serial_start').focus();
+        } else {
+            alert('Hãy chọn sản phẩm');
+            document.getElementById(id).focus();		
+        }
+    }
+
+    function check_invcode()
+    {
+        if(document.getElementById('inv_code').readOnly==true)
+        {
+            document.getElementById('inv_code').readOnly=false;
+            document.getElementById('inv_code').select();
+        }
+        else
+        {
+            document.getElementById('inv_code').readOnly=true;
+            document.getElementById('inv_code').value="<?= $return_val['inv_code'] ?>";		
+        }
+		
+    }
+    function change_sup()
+    {
+        if(document.getElementById('sup_id').value!='')
+            document.getElementById('search_by_sup').innerHTML='<input checked type="checkbox" id="chk_sup" value="1"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById(\'chk_sup\').checked=!document.getElementById(\'chk_sup\').checked;">Chỉ tìm những sản phẩm đã nhập của nhà cung cấp này</a>';
+        else
+            document.getElementById('search_by_sup').innerHTML='';
+        load_mat_page(cur_mat_page);
+		
+    }
+    function browse_emp() {
+        document.getElementById('searchempdiv').style.top=document.body.scrollTop+5;
+        document.getElementById('searchempiframe').style.top=document.body.scrollTop+5;
+        document.getElementById('searchempdiv').style.left=(screen.width-1000)/2+250;
+        document.getElementById('searchempiframe').style.left=(screen.width-1000)/2+250;
+        showdiv('searchemp');
+    }
+    function load_emp() {
+        document.getElementById("user_id").value=cur_user_id;
+        document.getElementById("full_name").value=cur_full_name;
+    }
+    function add_serial_chk() {
+        eda_request=load("?eda_type=ajax&eda_code=<?= md5('chk_serial') ?>&eda_id="+document.getElementById('smm_id_'+cur_id).value+"&serial_start="+document.getElementById('serial_start').value+"&serial_end="+document.getElementById('serial_end').value,"add_serial_chk_finish","func","GET",null,"Đang kiểm tra");
+    }
+    function add_serial_chk_finish(str) {
+        str=decodeURIComponent(str);
+        var mar=str.split('|');
+        str=mar[0];
+        var s_price=parseInt(mar[1])||0;
+        if(str=='SELL') {
+            if(document.getElementById('serial_end').value=='') {
+                alert('Serial đã xuất bán');
+            } else {
+                alert('Dải Serial đã xuất bán');
+            }
+            document.getElementById('serial_start').focus();					
+        } else if(str=='TRUE') {
+            
+            if(s_price>=0){
+
+            $("#price_"+cur_index).val(s_price);
+            $("#inamount_"+cur_index).val(s_price);
+            $("#mat_price_"+cur_index).val(formatnumber(s_price,",",0));
+            $("#mat_price_"+cur_index).trigger('keyup').trigger('input').trigger('keydown');
+            }
+            addrow_serial();
+            update_serials();
+        } else {
+            if(document.getElementById('serial_end').value=='') {
+                alert('Serial không tồn tại trong kho hàng');
+            } else {
+                alert('Dải Serial không tồn tại trong kho hàng');
+            }
+            document.getElementById('serial_start').focus();		
+        }
+    }
+    function add_serial() {
+        document.getElementById('serial_start').value=document.getElementById('serial_start').value.toUpperCase();
+        document.getElementById('serial_end').value=document.getElementById('serial_end').value.toUpperCase();
+        var srs=document.getElementById('serial_start').value;
+        var back=false;
+        $("input[name='serials_start[]']").each(function(){
+            if($(this).val()==srs){
+                back=true;
+                return false;
+            }
+        });
+        if(back){
+            alert("Serial đã tồn tại.");
+            return false;
+        }
+        if(document.getElementById('serial_end').value=='' && document.getElementById('serial_start').value=='') {
+            alert('Hãy nhập vào serial cần thêm');
+            document.getElementById('serial_start').focus();
+        } else if(document.getElementById('serial_end').value=='') {
+            if(document.getElementById('chk_serial').checked==true) {
+                addrow_serial();
+                update_serials();
+            } else {
+                add_serial_chk();
+            }
+        } else {
+            if(chk_head_serial(document.getElementById('serial_start').value,document.getElementById('serial_end').value)) {
+                alert('Hãy nhập dạng dải serial giống nhau');
+            } else if(toint(document.getElementById('serial_start').value) >= toint(document.getElementById('serial_end').value)){
+                alert('Hãy nhập số serial đến lớn hơn số serial bắt đầu');
+                document.getElementById('serial_end').focus();
+                document.getElementById('serial_end').select();	
+            } else {
+                if(document.getElementById('chk_serial').checked) {
+                    addrow_serial();
+                    update_serials();
+                } else {
+                    add_serial_chk();
+                }
+            }
+        }
+    }
+    function chk_head_serial(s1,s2) {
+        var c1='',c2='';
+        if(s1.length!=s2.length) {
+            return true;
+        }
+        for(i=s1.length;i>=0;i--) {
+            if(isNaN(s1.charAt(i))) {
+                break;
+            }
+        }
+        c1=s1.substring(0,i+1);
+        for(i=s2.length;i>=0;i--) {
+            if(isNaN(s2.charAt(i))) {
+                break;
+            }
+        }
+        c2=s2.substring(0,i+1);	
+        if(c1!=c2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    function toint(str) {
+        var i,k,p, num='';
+        if(str=='') {
+            return 0;
+        }
+        p=-1;
+        for(i=str.length-1;i>=0;i--) {
+            if(isNaN(str.charAt(i))) {
+                p=i;
+                break;
+            }
+        }
+        if(p<str.length && p>-1) {
+            p=p+1;
+        } else if(p==-1){
+            p=0;
+        }
+        k=p;
+        for(i=p;i<str.length;i++) {
+            if(str.charAt(i)!=0) {
+                k=i;
+                break;
+            }	
+        }
+        if(k==str.length) {
+            num=0;
+        } else {
+            num=str.substring(k,str.length);
+        }
+        return parseInt(num);
+    }
+    var curserial_index=0;
+    var serial_num=0;
+    function addrow_serial() {
+        var doc=document;
+        var tbl = doc.getElementById('serialtbl').getElementsByTagName('tbody')[0];
+        //create a new row
+        var newrow = doc.createElement("TR");
+        var newcol , newinput;
+					
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newcol.style.height="25";
+        newcol.style.width="35%";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="serials_start_"+curserial_index;
+        newinput.name="serials_start[]";
+        newinput.value=document.getElementById('serial_start').value;
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="170px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+		
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newcol.style.width="35%";
+        if(document.getElementById('serial_end').value!='') {
+            newinput = doc.createElement("input");
+            newinput.type="text";
+            newinput.id="serials_end_"+curserial_index;
+            newinput.name="serials_end[]";
+            newinput.value=document.getElementById('serial_end').value;
+            newinput.readOnly=true;
+            newinput.className='catbg';
+            newinput.style.width="170px";
+            newcol.appendChild(newinput);
+        }
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newcol.style.width="20%";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.readOnly=true;
+        newinput.id="serial_quantity_"+curserial_index;
+        newinput.name="serial_quanlity[]";
+        if(document.getElementById('serial_end').value!='') {
+            newinput.value=toint(document.getElementById('serial_end').value)-toint(document.getElementById('serial_start').value)+1;
+            serial_num+=parseInt(newinput.value);
+        } else {
+            newinput.value=1;
+            serial_num+=1;
+        }
+        newinput.style.width="60px";
+        newinput.className='catbg';
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+		
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newcol.style.width="10%";
+        newinput = doc.createElement("input");
+        newinput.type="button";
+        newinput.id='del_mat_'+curserial_index;
+        newinput.name="del_mat[]";
+        newinput.value="-";
+        newinput.style.width="30px";
+        newinput.onclick=function(){delRow_serial(this);};
+        newinput.className='button';
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+		
+        tbl.appendChild(newrow);
+        curserial_index++;
+        document.getElementById('serial_start').value='';
+        document.getElementById('serial_end').value='';
+        document.getElementById('serial_start').focus();
+        document.getElementById("tblscr").scrollTop=document.getElementById("tblscr").scrollHeight;
+    }
+
+    function delRow_serial(a) { 
+        var row = a.parentNode.parentNode; 
+        var tbody = document.getElementById('serialtbl').getElementsByTagName('tbody')[0]; 
+        serial_num-=parseInt(document.getElementById('serial_quantity_'+a.id.substring(8)).value);
+        tbody.removeChild(row); 
+        update_serials();
+        document.getElementById('serial_start').focus();
+    }
+    function update_serials() {
+        var serials='';
+        for(i=0;i<curserial_index;i++)
+        if(document.getElementById('serials_start_'+i)){
+            if(document.getElementById('serials_end_'+i)) {
+                serials+=(serials==''?'':';')+document.getElementById('serials_start_'+i).value+'-'+document.getElementById('serials_end_'+i).value;
+            } else {
+                serials+=(serials==''?'':';')+document.getElementById('serials_start_'+i).value;
+            }
+        }
+        document.getElementById('serials_'+cur_id).value=serials;
+        if(serial_num==0) {
+            document.getElementById('quantity_'+cur_id).readOnly=false;
+        } else {
+            document.getElementById('quantity_'+cur_id).readOnly=true;
+        }	
+        document.getElementById('quantity_'+cur_id).value=serial_num;	
+        sum_mat(cur_id);
+var mms_id=document.getElementById('mms_id_'+cur_id).value;
+        $.post( "?eda_type=ajax&eda_code=<?= md5('get_seria_price') ?>",{"mms_id":mms_id,"serial_list":serials}, function() {
+            })
+            .done(function(data) {
+                data=JSON.parse(data);
+                console.log("data:",data);
+                var html="";
+                var tong=0;
+                $(data).each(function(i,item){
+                    tong+=item.s_price;
+                });
+               document.getElementById('inamount_'+cur_id).value=tong;    
+var r=sum_real(); 
+            })
+            .fail(function() {
+            });
+    }
+    function load_serials() {
+        if(document.getElementById('serials_'+cur_id).value!='') {
+            var text= document.getElementById('serials_'+cur_id).value.split(";");
+            if(isArray(text))
+            {
+                for(var i=0;i<text.length;i++)
+                {
+                    if(text[i].indexOf("-")>0) {
+                        tmp=text[i].split("-");
+                        if(isArray(tmp))
+                        {
+                            document.getElementById('serial_start').value=tmp[0];
+                            document.getElementById('serial_end').value=tmp[1];
+                        } 
+                    }
+                    else {
+                        document.getElementById('serial_start').value=text[i];
+                    }
+                    addrow_serial();
+                }
+            }
+        }
+    }
+    $(document).ready(function(){
+        $(document).on("click",".ser_select",function(){
+            var sid=$(this).attr("sid");
+            var invd_id=$(this).attr("invd_id");
+            $("#inv_"+cur_id).val(invd_id);
+            $("#serial_start").val(sid);
+            add_serial();
+        });
+        $(document).on("input","#vat_price",function(){
+            change_number();
+        });
+        
+
+
+
+$(document).on("click",".add_pp",function(){
+            var tbody=$(this).closest("table").find("tbody");
+            tbody.append('<tr class="phuphi">'+
+                '<td width="90" align="center"><input name="pp_name[]" style="width:95%;" value="Phí ..." class="catbg pp_name"></td>'+
+                '<td><select class="catbg pp_slc" name="pp_type[]"><option value=0>Tiền Thu</option><option value=1>Tiền Trả khách</option></select></td>'+
+                '<td width="215" align="center" height="25"><input name="pp_price[]" style="width:95%;" value="0" class="catbg pp_price"></td>'+
+                '<td><input name="pp_show[]" type="number" value="0"><input type="checkbox" name="pp_show_chk[]" value=1></td>'+
+                '<td width="30" align="center"><input type="button" class="button rmv_pp" name="add_mat" value="-"></td>'+
+                '</tr>');
+});
+        
+$(document).on("click",".rmv_pp",function(){
+            $(this).closest("tr").remove();            
+});
+
+$(document).on("change","#pp_tbl input[type='checkbox'],#pp_tbl .pp_slc",function(){
+         change_number();
+});
+$(document).on("change","#pp_tbl input[type='checkbox']",function(){
+         if($(this).prop('checked')){
+            $(this).closest("td").find("input[name='pp_show[]']").val(1);
+         }
+         else
+            $(this).closest("td").find("input[name='pp_show[]']").val(0);
+});
+$(document).on("input",".pp_price",function(){
+         change_number();
+});
+var bobj;
+$(document).on("click","input[name='inamount[]']",function(){
+    if($(this).closest("tr").find("input[name='serials[]']").val()!="")return false;
+    bobj=$(this).parent().find("input[name='inv[]']").attr("id");
+    var mms_id=$(this).closest("tr").find("select[name='mms_id[]']").val();
+
+         $.post( "?eda_type=ajax&eda_code=<?= md5('inprice_table') ?>",{"key":mms_id}, function() {
+            })
+            .done(function(data) {
+                data=JSON.parse(data);
+                console.log(data);
+                taobang(data);
+
+            })
+            .fail(function() {
+            });
+});
+
+
+
+$(document).on("click",".trg_row",function(e){
+    var data=$(this).data("data");
+    var qt=strtoint($("#"+bobj).closest("tr").find("input[name='quantity[]']").val());
+    if(data.has<qt || data.has==0){
+        alert("Sản phẩm ["+data.mat_name+"] với giá ["+data.price+"] số lượng không đủ xuất kho !");
+        return false;
+    }
+   $("#"+bobj).val(data.invd_id);
+   $("#"+bobj).trigger("input");
+   $("#"+bobj).closest("tr").find("input[name='inamount[]']").val(data.price*qt).trigger("input");
+   $("#"+bobj).parent().find("input[name='inprice[]']").attr("price",data.price).val(data.price).trigger("input");
+    if($("#"+bobj).closest("tr").find("input[name='price[]']").val()=="0"){
+       $("#"+bobj).closest("tr").find("input[name='mat_price[]']").attr("price",data.price).val(data.price).trigger("input");
+       $("#"+bobj).closest("tr").find("input[name='price[]']").attr("price",data.price).val(data.price).trigger("keyup").trigger("input");
+    }
+   $("#"+bobj).closest("tr").find("input[name='smm_id[]']").val(data.smm_id).trigger("input");
+   $("#"+bobj).closest("tr").find("input[name='stock_name[]']").val(data.stock_name).trigger("input");
+   sum_real();
+   $(".bangbox").remove();
+});
+
+$(document).on("click",function(e){
+    if($(e.target).hasClass("bangbox_td")){
+         $(".bangbox").remove();
+    }
+   
+});
+
+
+
+$(document).on("input","#vat_per",function(e){
+    $("#mat_tbl input[name='vat[]']").val($(this).val());
+    $("#mat_tbl input[name='vat[]']").trigger("keyup");
+   
+});
+var checkform=true;
+$("form[name='frmadmin']").on("submit",function(){
+    var cusid=document.getElementById("cus_id").value;
+
+$("tr").removeClass("thieu");
+$("input[name='quantity[]']").each(function(){
+    var value=parseInt(numR($(this).val()))||0;
+    var max=parseInt($(this).attr("max"))||0;
+    if(value>max){
+        $(this).closest("tr").addClass("thieu");
+    }
+});
+if($("tr.thieu").length>0){
+    alert("Không thể xuất quá lượng hàng tồn !");
+    return false;
+}
+
+    if(checkform){
+    $.getJSON("?eda_code=<?= md5('getCus') ?>&eda_id="+cusid+"&eda_type=ajax", function(data){
+            if(data[0]) {
+                data=data[0];
+                if(typeof data.debt_info.debt_final != "undefined"){
+                    cotheno=data.debt_info.debt_limit-data.debt_info.debt_final;
+                    var total=parseFloat(numR(document.getElementById("total").value))||0;
+                    var vuot=cotheno-total;
+                    if(vuot>0){
+                        checkform=false;
+                        $("form[name='frmadmin']").submit();
+                    }
+                    else{
+                        var coms=confirm("Khách hàng ["+data.cus_name+"] đã vượt quá nợ cho phép "+numF(Math.abs(vuot))+" bạn có xác nhận tạo đơn không!");
+                        if(coms){
+                            checkform=false;
+                            $("form[name='frmadmin']").submit();
+                        }
+                    }
+                }
+            }
+        });
+    }
+    else{
+        checkform=true;
+    return true;
+    }
+    return false;
+});
+
+
+function taobang(data){
+    $(".bangbox").remove();
+    $("body").append("<table class=bangbox><tr><td align=center valign=middle class=bangbox_td><table id=bang_content><tr><td>loading</td></tr></table></td></tr></table>");
+
+$("#bang_content").html("");
+$("#bang_content").append(
+                    "<thead><tr>"+
+                    "<th>Số phiếu nhập</th>"+
+                    "<th>Tên sản phẩm</td>"+
+                    "<th>Ngày chứng từ</th>"+
+                    "<th>Kho</th>"+
+                    "<th>Số lượng nhập</th>"+
+                    "<th>Số lượng tồn theo đơn</th>"+
+                    "<th>Số lượng tồn kho</th>"+
+                    "<th>Đơn giá nhập</th>"+
+                    "<tr></thead>"+
+                    "</tr>"
+                    );
+if(data.length>0)
+                $(data).each(function(i,item){
+
+                   $("#bang_content").append(
+                    "<tr class=trg_row>"+
+                    "<td><a target=_blank href='?eda_act=8325324b47e1e62a1c2998a640cbdc72&eda_code=c004cd308aa7033b880dbde1298e44a6&eda_id="+item.inv_id+"'>"+item.inv_code+"</a></td>"+
+                    "<td>"+item.mat_name+"</td>"+
+                    "<td>"+item.created_date+
+                    "</td>"+
+                    "<td>"+item.stock_name+
+                    "</td>"+
+                    "<td>"+item.quantity+" "+item.msu_name+
+                    "</td>"+
+                    "<td>"+item.has+" "+item.msu_name+
+                    "</td>"+
+                    "<td>"+item.sum+" "+item.msu_name+
+                    "</td>"+
+                    "<td>"+item.price+
+                    "</td>"+
+                    "<tr>"+
+                    "</tr>"
+                    );
+                    $("#bang_content .trg_row").last().data("data",item);                  
+                    
+                });
+            else
+                $(".bangbox").remove();
+}
+
+
+    });
+</script>          
+<style>
+    #phuphibox tr td:nth-child(2){
+        text-align: center;
+    }
+    #phuphibox tr td:nth-child(2) select{
+        width: 90%
+    }
+    input[name="pp_show[]"]{
+        display:none;
+    }
+    .bangbox{
+        background: rgba(1,1,1,0.5);
+        position: fixed;
+        left: 0px;
+        top:0px;
+        width: 100%;
+        height: 100%;
+    }
+    .bangbox > tbody > tr > td{
+        padding:0px 10%;
+    }
+    #bang_content{
+        width: 100%;
+        border-collapse: collapse;
+        border:1px solid #b6b6b6;
+        background: #fff;
+    }
+    #bang_content thead tr{
+        background: #cae7f9;
+    }
+    .trg_row:hover{
+        cursor: pointer;
+        background: #e6e6e6;
+    }
+    #bang_content,#bang_content th,#bang_content td {
+  border: 1px solid #b6b6b6;
+}
+    .trg_row td{
+        text-align: center;
+    }
+    input[name='inv[]'],input[name='inprice[]']{
+        display: none;
+    }
+</style>

@@ -1,0 +1,365 @@
+<form onkeypress="return tabOnEnter(document.activeElement, event);" onsubmit="return false;" name="addmatfrm" id="addmatfrm" method="post" action="?eda_act=<?= md5('general') ?>&eda_code=<?= md5('add_mat_sm') ?>" style="margin:0px">
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td width="30" align="center">
+                <img style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/download.png" width="18" height="18"/>        
+            </td>
+            <td  height="25"><b>Thêm sản phẩm mới</b></td>
+        </tr>
+    </table>
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr><td style="padding-top:10px;padding-bottom:10px;">        
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td height="25" width="160" align="left"><b>(*) Tên sản phẩm</b></td>
+                        <td width="250"><input style="width:200px;" class="catbg" name="mat_name" id="mat_name" type="text" value="<?= isset($return_val['mat_name']) ? $return_val['mat_name'] : '' ?>" /></td>
+                        <td width="110" height="25" align="left"><b>Mã sản phẩm</b></td>
+                        <td>
+                            <input style="width:200px;" class="catbg" class="textbox" value="<?= isset($return_val['mat_model']) ? $return_val['mat_model'] : '' ?>" name="mat_model" id="mat_model" type="text" />                                                      
+                        </td>
+                    </tr>
+                    <tr>
+                            <td height="25" width="160" align="left"><b>Số IMEI 1</b></td>
+                            <td width="250"><input style="width:200px;" class="catbg" name="qc" id="qc" type="text" value="<?= isset($return_val['qc']) ? $return_val['qc'] : '' ?>" /></td>
+                            <td width="110" height="25" align="left"><b>Số IMEI 2</b></td>
+                            <td>
+                                <input style="width:200px;" class="catbg" class="textbox" value="<?= isset($return_val['xuatxu']) ? $return_val['xuatxu'] : '' ?>" name="xuatxu" id="xuatxu" type="text" />                                                      
+                            </td>
+                        </tr>
+                    <tr>
+                        <td height="25" width="160" align="left"><b>(*) Chủng loại sản phẩm</b></td>
+                        <td width="200">
+                            <select onchange="load_mfa();$('#cat_id').val(this.value);" class="catbg" name="cat_id" id="add_cat_id" style="width:200px;">
+                                <option value="">Chủng loại</option>
+                                <?php
+                                $max_mat = get_data("select max(mat_id) from materials");
+                                $return_val ['barcode'] = str_pad($max_mat [0] [0] + 1, 10, '0', STR_PAD_LEFT);
+                                $cat = get_data("select cat_id, cat_name from categories order by cat_name");
+                                for ($i = 0; $i < count($cat); $i++)
+                                    echo '<option ' . (isset($return_val['cat_id']) ? ($return_val['cat_id'] == $cat[$i]['cat_id'] ? 'selected' : '') : '') . ' value="' . $cat[$i]['cat_id'] . '">' . $cat[$i]['cat_name'] . '</option>';
+                                ?>              
+                            </select>               
+                        </td>
+                        <td width="110" height="25" align="left"><b>Bảo hành</b></td>
+                        <td>
+                            <input style="width:150px;" onfocus="this.select();" class="catbg" class="textbox" value="<?= isset($return_val['mat_waranty']) ? $return_val['mat_waranty'] : '12' ?>" name="mat_waranty" id="mat_waranty" type="text" />  Tháng
+                        </td>
+                    </tr> 
+                    <tr>
+                        <td height="25" width="160" align="left"><b>Mã vạch</b></td>
+                        <td width="250" colspan="2">
+                            Nhập (bằng máy quét hoặc nhập tay)
+                        </td>
+                        <td rowspan="2">
+                            <span id="barcodedisplay" class="barcode"><?= isset($return_val['barcode']) ? $return_val['barcode'] : '' ?></span>
+                        </td>
+                    </tr>
+                    <tr><td></td><td colspan="2"><input style="width:200px;" class="catbg" class="textbox" value="<?= isset($return_val['barcode']) ? $return_val['barcode'] : '' ?>" name="barcode" id="barcode" type="text" onkeyup="$('#barcodedisplay').html($(this).val());"/></td></tr>
+                    <tr>
+                        <td height="25" align="left"><b>Đặc tả sản phẩm</b></td>
+                        <td colspan="3"><textarea  style="width:560px;" class="catbg" name="mat_desc" type="text" id="mat_desc" cols="80" rows="4"><?= isset($return_val['mat_desc']) ? $return_val['mat_desc'] : '' ?></textarea></td>             
+                    </tr>  
+                        <tr><td  height="40"><b>Thuế VAT</b></td>
+                            <td height="25" colspan="3"><input  type="text" class="textbox" style="width:90px;" value="<?= isset($return_val['vat']) ? $return_val['vat'] : '0' ?>" name="vat">%</td>
+                        </tr> 
+                    <tr><td colspan="4" align="center">
+                            <table id="price_tbl" width="700" border="1" cellspacing="0" cellpadding="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+                                <tbody>
+                                    <tr>
+                                        <td width="130" height="25" bgcolor="#afd7ff" align="center"><b>Đơn vị tính</b></td>
+                                        <td width="130" bgcolor="#afd7ff" align="center"><b>Giá bán</b></td>    
+                                        <td width="100" bgcolor="#afd7ff" align="center"><b>Giá đại lý cấp 1</b></td>
+                                        <td width="100" bgcolor="#afd7ff" align="center"><b>Giá đại lý cấp 2</b></td>
+                                        <td width="130" bgcolor="#afd7ff" align="center"><b>Giá nhập</b></td>    
+                                        <td width="100" bgcolor="#afd7ff" align="center"><b>CK nhập</b></td>    
+                                        <td align="center" bgcolor="#afd7ff"><input onclick="addrowP();" type="button" class="button" value="Thêm mới" name="add_price"></td>   
+                                    </tr>
+                                    <?php
+                                    if (isset($return_val['msu_id'])) {
+                                        $return_val['msu_id'] = array_unique($return_val['msu_id']);
+                                        for ($i = 0; $i < count($return_val['msu_id']); $i++)
+                                            if (!empty($return_val['msu_id'][$i])) {
+                                                ?>            
+                                                <tr>
+                                                    <td align="center" height="25">
+                                                        <select  onchange="check_msu_duplicate(this.id.substring(7));" class="catbg" name="msu_id[]" id="msu_id_<?= $i ?>" style="width:120px;">
+                                                            <option value="">Chọn đơn vị tính</option>
+                                                            <?php
+                                                            $msu = get_data("select msu_id, msu_name from meansure where msu_multiple=1 order by msu_name");
+                                                            for ($j = 0; $j < count($msu); $j++) {
+                                                                echo '<option ' . ($return_val['msu_id'][$i] == $msu[$j]['msu_id'] ? 'selected' : '') . ' value="' . $msu[$j]['msu_id'] . '">' . $msu[$j]['msu_name'] . '</option>';
+                                                                $sub_msu = get_data("select msu_id, msu_name from meansure where msu_parid='" . $msu[$j]['msu_id'] . "' order by msu_name");
+                                                                for ($k = 0; $k < count($sub_msu); $k++) {
+                                                                    echo '<option ' . ($return_val['msu_id'][$i] == $sub_msu[$k]['msu_id'] ? 'selected' : '') . ' value="' . $sub_msu[$k]['msu_id'] . '"> - ' . $sub_msu[$k]['msu_name'] . '</option>';
+                                                                }
+                                                            }
+                                                            ?>              
+                                                        </select> 
+
+                                                    </td>       
+                                                    <td align="center">
+                                                        <input onfocus="this.select();" onkeyup="format(this);" style="width:100px;" class="catbg" name="price[]" type="text" value="<?= $return_val['price'][$i] ?>" />            
+                                                    </td>
+                                                    <td align="center">
+                                                        <input onfocus="this.select();" onkeyup="format(this);" style="width:90px;" class="catbg" name="price_seller[]" type="text" value="<?= $return_val['price_seller'][$i] ?>" />            
+                                                    </td>   
+                                                    <td align="center">
+                                                        <input onfocus="this.select();" onkeyup="format(this);" style="width:90px;" class="catbg" name="price_seller2[]" type="text" value="<?= $return_val['price_seller2'][$i] ?>" />            
+                                                    </td>                                                     
+                                                    <td align="center">
+                                                        <input onfocus="this.select();" onkeyup="format(this);" style="width:100px;" class="catbg" name="price_input[]" type="text" value="<?= $return_val['price_input'][$i] ?>" />            
+                                                    </td>
+                                                    <td align="center">
+                                                        <input onfocus="this.select();" onkeyup="format(this);" style="width:90px;" class="catbg" name="discount_input[]" type="text" value="<?= $return_val['discount_input'][$i] ?>" />            
+                                                    </td>
+                                                    <td align="center"><input type="button" style="width:60px;" class="button" onclick="delRow(this);" name="del_cus[]" value="Loại bỏ"></td>
+                                                </tr>
+                                                <?php
+                                            }
+                                    }
+                                    ?>            
+                                    <tr>
+                                        <td align="center" height="25">
+                                            <select onchange="check_msu_duplicate(this.id.substring(7));" class="catbg" name="msu_id[]" id="msu_id_<?= isset($return_val['msu_id']) ? count($return_val['msu_id']) : 0 ?>" style="width:120px;">
+                                                <option value="">Chọn đơn vị tính</option>
+                                                <?php
+                                                $msu = get_data("select msu_id, msu_name from meansure where msu_multiple=1 order by msu_name");
+                                                for ($i = 0; $i < count($msu); $i++) {
+                                                    echo '<option value="' . $msu[$i]['msu_id'] . '">' . $msu[$i]['msu_name'] . '</option>';
+                                                    $sub_msu = get_data("select msu_id, msu_name from meansure where msu_parid='" . $msu[$i]['msu_id'] . "' order by msu_name");
+                                                    for ($k = 0; $k < count($sub_msu); $k++) {
+                                                        echo '<option value="' . $sub_msu[$k]['msu_id'] . '"> - ' . $sub_msu[$k]['msu_name'] . '</option>';
+                                                    }
+                                                }
+                                                ?>              
+                                            </select> 
+
+                                        </td>                   
+                                        <td align="center">
+                                            <input onfocus="this.select();" onkeyup="format(this);" style="width:100px;" class="catbg" name="price[]" type="text" value="" />            
+                                        </td>
+                                        <td align="center">
+                                            <input onfocus="this.select();" onkeyup="format(this);" style="width:90px;" class="catbg" name="price_seller[]" type="text" value="" />            
+                                        </td>
+                                        <td align="center">
+                                            <input onfocus="this.select();" onkeyup="format(this);" style="width:90px;" class="catbg" name="price_seller2[]" type="text" value="" />            
+                                        </td>                                        
+                                        <td align="center">
+                                            <input onfocus="this.select();" onkeyup="format(this);" style="width:100px;" class="catbg" name="price_input[]" type="text" value="" />            
+                                        </td>
+                                        <td align="center">
+                                            <input onfocus="this.select();" onkeyup="format(this);" style="width:90px;" class="catbg" name="discount_input[]" type="text" value="" />            
+                                        </td>
+                                        <td align="center"><input type="button" style="width:60px;" class="button" onclick="delRow(this);" name="del_cus[]" value="Loại bỏ"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td></tr>
+                    <tr><td colspan="4" height="25"><b>Chọn hãng sản xuất</b></td></tr>
+                    <tr><td colspan="4" align="center" bgcolor="#efefef" style="padding-top:5px;padding-left:5px;padding-right:5px;padding-bottom:5px;" id="mfaid">   
+                            <?php
+                            if (!empty($return_val['cat_id'])) {
+                                $action->eda_id = $return_val['cat_id'];
+                                include("bms/templates/load_mfa.htm");
+                            }
+                            ?>                              
+                        </td></tr>  
+                </table>
+                <?= !empty($err_msg) ? '<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>' . $err_msg . '</b><br></font></td></tr></table>' : '' ?> 
+
+            </td></tr>
+    </table>
+        <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=5></td>
+            </tr>
+            <tr>
+                <td><b>Lưu ý:</b> Chiết khấu nhập nhằm hỗ trợ cho các đơn vị kinh doanh các mặt hàng có giá nhập theo dạng chiết khấu như SIM/Thẻ điện thoại, giúp thực hiện thao tác nhập hàng được tốt hơn. Chiết khấu nhập sẽ tự động tính theo đơn vị % và tính thành tiền nếu nhập vào giá trị >=100.</td>
+            </tr>
+            <tr>
+                <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=5></td>
+            </tr>            
+        </table>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td  height="30" style="padding-left:5px;">
+                <input style="font-weight:bold;cursor:pointer;"  class="button" type="button" onclick="load_mat_page(1);" name="cancel" value="Hủy bỏ" />
+                &nbsp;&nbsp;<input style="font-weight:bold;cursor:pointer;"  class="button" type="button" onclick="add_mat_quick_submit();" name="sm" value="Lưu sản phẩm" />
+                &nbsp;&nbsp;<input type="checkbox" id="continue_add" name="continue_add"> Tiếp tục thêm sản phẩm
+            </td>
+        </tr>
+    </table>          
+</form>
+<script language="javascript">
+    var cur_indexP=<?= isset($return_val['msu_id']) ? count($return_val['msu_id']) : 0 ?>;
+    function checkbarcode(obj) {
+        if(obj.checked&&obj.value=='auto') {
+            $('#barcode').hide();
+            $('#barcodedisplay').html('<?= isset($return_val['barcode']) ? $return_val['barcode'] : '' ?>');
+            $('#barcode').val('<?= isset($return_val['barcode']) ? $return_val['barcode'] : '' ?>');
+        } else {
+            $('#barcode').show();
+            $('#barcode').focus();
+            $('#barcode').select();
+        }
+    }
+    function add_mat_quick_submit() {
+        $.post('?eda_type=ajax&eda_code=<?= md5("add_mat_quick") ?>',$('#addmatfrm').serialize(),function(data){
+            if(data.substring(0,3)=='id:') {
+                v=data.split(":");
+                cur_mat_id=v[1];
+                cur_mat_name=v[2];
+                cur_mat_model=v[3];
+                cur_mms_id=v[4];
+                load_mat();                   
+                if($('#continue_add').attr('checked')=='checked') {
+                    load_add_mat();
+                } else {
+                    hidediv('searchmat');
+                }
+                addrow();
+                cur_id=cur_index;
+            } else {
+                alert(data);
+            }
+        });
+    }
+    function addrowP() {
+        var doc=document;
+        var tbl = doc.getElementById('price_tbl').getElementsByTagName('tbody')[0];
+        //create a new row
+        var newrow = doc.createElement("TR");
+        var newcol , newinput;
+        cur_indexP++;
+					
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newcol.style.height="25";
+        newinput = doc.createElement("select");
+        newinput.id="msu_id_"+cur_indexP;
+        newinput.name="msu_id[]";
+        newinput.options[0] = new Option("Chọn đơn vị tính", "", false, false);
+<?php
+$msu = get_data("select msu_id, msu_name from meansure where msu_multiple=1 order by msu_name");
+$i = 0;
+for ($j = 0; $j < count($msu); $j++) {
+    echo 'newinput.options[' . ($i + 1) . '] = new Option("' . $msu[$j]['msu_name'] . '", "' . $msu[$j]['msu_id'] . '", false, false);';
+    $sub_msu = get_data("select msu_id, msu_name from meansure where msu_parid='" . $msu[$j]['msu_id'] . "' order by msu_name");
+    $i++;
+    for ($k = 0; $k < count($sub_msu); $k++) {
+        echo 'newinput.options[' . ($i + 1) . '] = new Option(" - ' . $sub_msu[$k]['msu_name'] . '", "' . $sub_msu[$k]['msu_id'] . '", false, false);';
+//			echo '<option '.($return_val['msu_id'][$i]==$msu[$k]['msu_id']?'selected':'').' value="'.$msu[$k]['msu_id'].'"> - '.$msu[$k]['msu_name'].'</option>';		
+        $i++;
+    }
+}
+?>              
+        newinput.onchange=function(){check_msu_duplicate(this.id.substring(7));}
+        newinput.className='catbg';
+        newinput.style.width="120px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+		
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.name="price[]";
+        newinput.onfocus=function(){this.select();}
+        newinput.onkeyup=function(){format(this);}
+        newinput.className='catbg';
+        newinput.style.width="100px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+            
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.name="price_seller[]";
+        newinput.onfocus=function(){this.select();}
+        newinput.onkeyup=function(){format(this);}			
+        newinput.className='catbg';
+        newinput.style.width="90px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+        
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.name="price_seller2[]";
+        newinput.onfocus=function(){this.select();}
+        newinput.onkeyup=function(){format(this);}			
+        newinput.className='catbg';
+        newinput.style.width="90px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);        
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.name="price_input[]";
+        newinput.onfocus=function(){this.select();}
+        newinput.onkeyup=function(){format(this);}
+        newinput.className='catbg';
+        newinput.style.width="100px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.name="discount_input[]";
+        newinput.onfocus=function(){this.select();}
+        newinput.onkeyup=function(){format(this);}
+        newinput.className='catbg';
+        newinput.style.width="90px";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="button";
+        newinput.id="del_mat_"+cur_indexP;
+        newinput.name="del_mat[]";
+        newinput.value="Loại bỏ";
+        newinput.style.width="60px";
+        newinput.onclick=function(){delRowP(this);};
+        newinput.className='button';
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+		
+        tbl.appendChild(newrow);
+    }
+
+    function delRowP(a) 
+    { 
+        var row = a.parentNode.parentNode; 
+        var tbody = document.getElementById('price_tbl').getElementsByTagName('tbody')[0]; 
+        tbody.removeChild(row); 
+        change_number();
+    }
+    function check_msu_duplicate(id)
+    {
+        chk=false;
+        for(i=0;i<cur_indexP;i++)
+        if(document.getElementById('msu_id_'+i))
+            if(id!=i && document.getElementById('msu_id_'+id).value==document.getElementById('msu_id_'+i).value)
+        {
+            chk=true;
+            break;
+        }
+        if(chk)
+        {
+            alert('Bạn không được chọn đơn vị trùng nhau');
+            document.getElementById('msu_id_'+id).value='';
+        }
+    }
+    function load_mfa()
+    {
+        eda_request=load('?eda_type=ajax&eda_code=<?= md5("load_mfa") ?>&eda_id='+document.getElementById("add_cat_id").value,'mfaid','html','GET',null,'no');
+    }  
+</script>

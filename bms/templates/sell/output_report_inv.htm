@@ -1,0 +1,85 @@
+	<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="12%" align="center" bgcolor="#afd7ff" height="25"><b>Mã phiếu</b></td>
+		<td width="15%" align="center" bgcolor="#afd7ff"><b>Thời gian</b></td>
+		<td width="15%" align="center" bgcolor="#afd7ff"><b>Hạn thanh toán</b></td>
+		<td width="16%" align="center" bgcolor="#afd7ff"><b>Người bán</b></td>
+		<td width="16%" align="center" bgcolor="#afd7ff"><b>Khách hàng</b></td>
+		<td width="1%" align="center" bgcolor="#afd7ff"><b>VAT(%)</b></td>
+		<td width="6%" align="center" bgcolor="#afd7ff"><b>Tiền VAT</b></td>
+                <td  align="center" bgcolor="#afd7ff"><b>Ghi chú</b></td>
+                <?php
+                $chk_priv=check_func('view_output_price');
+                if ($chk_priv) {
+                ?>                
+		<td width="10%" align="center" bgcolor="#afd7ff"><b>Tổng tiền</b></td>
+		<td width="10%" align="center" bgcolor="#afd7ff"><b>Giá vốn</b></td>
+                <?php
+                }
+                ?>
+		</tr>
+<?php
+	$chk_mainstock=get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='".$sessions->get_session("user_id")."' or ugp.group_id='".$sessions->get_session("group_id")."') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+	$chk_empstock=get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='".$sessions->get_session("user_id")."' or ugp.group_id='".$sessions->get_session("group_id")."') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+	if(count($chk_mainstock)>0 && count($chk_empstock)>0) {
+		$stock_where="";
+	} else if(count($chk_mainstock)>0) {
+		$stock_where=" and smm.stock_id in (select stock_id from stocks where user_id is null or user_id='".$sessions->get_session('user_id')."')";
+	} else {
+		$stock_where=" and smm.stock_id in (select stock_id from stocks where user_id='".$sessions->get_session('user_id')."')";
+	}
+	$inv=get_data("select inv.inv_id,inv.vat_per,inv.vat_price,inv.max_time, inv.comment, inv.inv_code, inv.created_date, inv.cus_id, usr.full_name, cus.cus_name, inv.total, sum(invd.inamount) total2 
+				from out_invoices inv, users usr, customers cus, out_invoice_details invd, stock_mat_msu smm, mat_msu mms, materials mat  
+				where inv.inv_type=0 and  inv.inv_id=invd.inv_id and  invd.smm_id=smm.smm_id ".(!empty($return_val['stock_id'])?"  
+				and smm.stock_id=".$return_val['stock_id']:$stock_where)." and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id ".(!empty($return_val['cat_id'])?"  
+				and mat.cat_id=".$return_val['cat_id']:"").(!empty($return_val['draft_chk'])?" and inv.draft=1":"").(!empty($return_val['user_id'])?" and inv.user_id='".$return_val['user_id']."' ":"")
+                .(!empty($return_val['cus_id']) ? " and inv.cus_id='" . $return_val['cus_id'] . "' " : "")." 
+				and inv.cus_id=cus.cus_id and inv.user_id=usr.user_id and inv.created_date between ".$sdate." and ".$edate." 
+				".($return_val['cus_chk']==1?" and cus.cus_name like '%Khách lẻ%'":'')."
+				group by inv.inv_id order by inv.created_date desc");
+	$total=0;$total2=0;
+	for($i=0;$i<count($inv);$i++)
+	{	
+?>	
+	    <tr  <?= $action->eda_type!='ajax'?' style="cursor:pointer;" onmouseover="this.style.backgroundColor=\'yellow\';" onmouseout="this.style.backgroundColor=\'\';" onclick="window.location=\'?eda_act='.md5('sell').'&eda_code='.md5('view_output').'&eda_id='.$inv[$i]['inv_id'].'\';"':''?>>
+		<td align="center" height="25"><?= $inv[$i]['inv_code']?></td>
+		<td align="center"><?= date('d/m/Y H:i',$inv[$i]['created_date'])?></td>
+		<td align="center"><?php 
+	if(time()>$inv[$i]['max_time'])
+		echo "<b style='color:red'>".date('d/m/Y H:i',$inv[$i]['max_time'])."</b>";
+	else
+		echo "<b>".date('d/m/Y H:i',$inv[$i]['max_time'])."</b>";
+
+	?></td>
+		<td style="padding-left:5px;"><?= $inv[$i]['full_name']?></td>
+		<td style="padding-left:5px;"><?= $inv[$i]['cus_name']?></td>
+		<td style="padding-left:5px;"><?= $inv[$i]['vat_per']?></td>
+		<td style="padding-left:5px;"><?= numF($inv[$i]['vat_price'])?></td>
+                <td style="padding-left:5px;"><?= $inv[$i]['comment']?></td>
+                <?php
+                if ($chk_priv) {
+                ?>                  
+		<td align="right" style="padding-right:5px;"><?= number_format($inv[$i]['total'],0,","," ")?></td>
+		<td align="right" style="padding-right:5px;"><?= number_format($inv[$i]['total2'],0,","," ")?></td>
+                <?php
+                }
+                ?>
+		</tr>
+
+<?php
+		$total+=$inv[$i]['total'];
+		$total2+=$inv[$i]['total2'];
+	}
+?>	
+                <?php
+                if ($chk_priv) {
+                ?>                                  
+	    <tr>
+		<td colspan="8" height="25" align="center"><b>Tổng cộng</b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($total,0,","," ")?></b></td>		
+		<td align="right" style="padding-right:5px;"><b><?= number_format($total2,0,","," ")?></b></td>		
+		</tr>
+                <?php
+                }
+                ?>
+	</table>

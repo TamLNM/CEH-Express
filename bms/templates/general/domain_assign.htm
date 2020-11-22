@@ -1,0 +1,160 @@
+<center>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td width="30" align="center">
+                <img style="cursor:pointer;" src="bms/images/icon/regdomain.png" width="18" height="18"/>        
+            </td>
+            <td  height="25"><b>Gắn tên miền riêng</b></td>
+            <td align="right" style="padding-right:5px;"><img onclick="window.location='/';" style="cursor:pointer;" src="bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>
+    <table width="98%" border="0" bgcolor='#ffffff' cellspacing="0" cellpadding="0">
+        <tr>
+            <td align=center>
+                <table width="100%" border="0" bgcolor='#ffffff' cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td style="padding-top:10px;padding-bottom:10px; padding-left:10px;padding-right:10px;">
+                            <?= $err_msg != "" ? '<table width="100%" border="0"><tr><td valign="top" style="padding-left:10px;padding-bottom:10px;font-family:Arial;font-size:12px;color:red;"><b>' . $err_msg . '</b></td> </tr></table>' : '' ?>  
+
+                            <table  border="0" width="100%" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td  height="25" width="230" align="right" style="padding-right:5px;"><b>(*) Tên miền: &nbsp; http://www.</b></td>
+                                    <td  ><input onblur="this.value=punycode.ToASCII(this.value);" class="textbox" type="text" id="domain_name" value="<?= isset($_GET['domain_name']) ? $_GET['domain_name'] : '' ?>" name="domain_name" maxlength="255"  style="width:200px;"/>
+                                        <input style="font-weight:bold;cursor:pointer;" class="button" type="button" name="submit" onclick="window.location='?eda_act=<?= md5('general') ?>&eda_code=<?= md5('domain_assign_sm') ?>&domain_name='+document.getElementById('domain_name').value+'&eda_module=business';" value="Thực hiện" />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" height="30"><b>DANH SÁCH TÊN MIỀN ĐÃ GÁN</b></td>
+                                </tr>		
+                                <tr>
+                                    <td colspan="2">
+                                        <table border="1" bordercolor="#cccccccc" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+						<tr  style="background-Color:#dddddd;">
+						<td height="25" width="40" align="center"><b>STT</b></td>
+						<td width="450" align="center"><b>Tên miền</b></td>
+                                                <td align="center" width="110"><b>Kiểu tên miền</b></td>
+                                                <td align="center" width="100"><b>Trạng thái</b></td>
+						<td align="center"><b>Huỷ bỏ</b></td>
+						</tr>
+<?php
+	$domains=get_data("select * from domains");
+	for($i=0;$i<count($domains);$i++) {
+		echo '<tr><td height="30" align="center">'.($i+1).'</td><td style="padding-left:10px;" id="domainid_'.$i.'">'.$domains[$i]['domain_name'].' <i>(đang kiểm tra ...)</i></td>';
+                echo '<td align="center">';
+                if($domains[$i]['sdo_default']==1) {
+                    echo '<b>Tên miền chính</b>';
+                } else {
+                    if($domains[$i]['sdo_active']==1) {
+                    echo '<select id="maindomain'.$i.'" style="width:100px;"  onchange="window.location=\'?eda_act='.md5('general').'&eda_code='.md5('domain_assign_default').'&eda_module=store&eda_id='.$domains[$i]['sdo_id'].'&dm=\'+this.value;">
+                        <option value="1" '.($domains[$i]['sdo_default']==1?'selected':'').'>Tên miền chính</option>
+                        <option value="0" '.(empty($domains[$i]['sdo_default'])?'selected':'').'>Bí danh</option>
+                        <option value="2" '.($domains[$i]['sdo_default']==2?'selected':'').'>Chuyển tiếp</option>
+                        </select>';
+                    } else {
+                    echo '<select id="maindomain'.$i.'" style="width:100px;" disabled  onchange="window.location=\'?eda_act='.md5('general').'&eda_code='.md5('domain_assign_default').'&eda_module=store&eda_id='.$domains[$i]['sdo_id'].'&dm=\'+this.value;">
+                        <option value="1" '.($domains[$i]['sdo_default']==1?'selected':'').'>Tên miền chính</option>
+                        <option value="0" '.(empty($domains[$i]['sdo_default'])?'selected':'').'>Bí danh</option>
+                        <option value="2" '.($domains[$i]['sdo_default']==2?'selected':'').'>Chuyển tiếp</option>
+                        </select>';                        
+                    }
+                }
+                echo '</td>';
+                echo '<td align="center" style="padding-top:5px;" title="Bật/Tắt tên miền">';
+                if($domains[$i]['sdo_default']==1) {
+                    echo '<img src="bms/images/icon/on_dis.png" width="64"/>';
+                } else {
+                    echo ($domains[$i]['sdo_active']==1?'<img id="onoffdomain'.$i.'" style="cursor:pointer;" onclick="onoffDomain('.$domains[$i]['sdo_id'].','.$i.');" src="bms/images/icon/on.png" width="64"/>':'<img id="onoffdomain'.$i.'" style="cursor:pointer;" onclick="onoffDomain('.$domains[$i]['sdo_id'].','.$i.')" src="bms/images/icon/off.png" width="64"/>');
+                }
+                echo '</td>';
+		echo '<td align="center" title="Xóa tên miền khỏi danh sách">';
+                if($domains[$i]['sdo_default']==1) {
+                    echo '<img src="bms/images/icon/delete_dis.png" width="32"/>';
+                } else {
+                    echo '<img style="cursor:pointer;" src="bms/images/icon/delete_f2.png" width="32" onclick="if(confirm(\'Bạn có chắc chắn muốn huỷ bỏ tên miền '.$domains[$i]['domain_name'].' không?\'))window.location=\'?eda_act='.md5('general').'&eda_code='.md5('domain_assign_del').'&eda_module=business&eda_id='.$domains[$i]['sdo_id'].'\';"/>';
+                }
+                echo '</td></tr>';
+	}
+?>										
+						</table>
+                                    </td> 
+                                </tr>															
+                            </table>						
+                        </td>
+                    </tr>
+                    <!--
+                      <tr><td  height="30"><b>Chuyển tiếp về tên miền chính</b></td></tr>
+                    <?php
+                    if (!($store_info['store_level'] > 1 && $store_info['expire_date'] > time())) {
+                        echo '<tr><td colspan="2" height="30" style="color:red;">(Vui lòng nâng cấp lên gói trả phí để sử dụng chức năng này)</td></tr>';
+                    }
+                    ?>
+                      <tr>
+                      <tr>
+                          <td  style="padding-bottom:10px;">
+                              <input id="default_domain" name="default_domain" <?= (isset($store_conf['default_domain']) && !isset($_GET['default_domain'])) || @$_GET['default_domain'] == 1 ? 'checked' : '' ?> type="checkbox" value="1">Bật chế độ chuyển tiếp về tên miền chính.<br/><i> Khi bật chức năng này, truy cập vào địa chỉ <b>http://<?= $action->eda_store ?>.divivu.com</b> sẽ được tự động chuyển về tên miền chính <?= empty($action->default_domain) ? '' : '(<b>http://' . $action->default_domain . '</b>)' ?> mà bạn đã chọn ở trên</i>
+                          </td>
+                      </tr>
+                   <tr>
+                      <td width="100%"><input style="font-weight:bold;cursor:pointer;" class="button" type="button" name="submit" onclick="window.location='?eda_act=<?= md5('general') ?>&eda_code=<?= md5('domain_assign_sm') ?>&default_domain='+(document.getElementById('default_domain').checked?1:0);" value="Thực hiện" /></td>
+                    </tr>   
+                    -->
+                    <tr>
+                        <td style="padding-top:5px;padding-bottom:10px;line-height:20px;">
+                            <b>Hướng dẫn:</b>
+                                <br/>- Kiểu tên miền: Tên miền chính khi được thiết lập thì mọi email thông báo, liên kết, các tài khoản email, ftp mặc định sẽ theo tên miền chính. Tên miền chuyển tiếp khi đặt thì sẽ chuyển hướng về tên miền chính. Tên miền bí danh khi đặt thì sẽ hoạt động song song như tên miền chính.
+                                <br/>- Trạng thái: Trạng thái tên miền là trạng thái kích hoạt (sử dụng) hoặc vô hiệu (không sử dụng). Bạn có thể vô hiệu tên miền nếu tạm thời không muốn cho tên miền này gán vào gian hàng
+                                <br/><b>Ghi chú:</b>
+                                <br> Chức năng này cho phép bạn gắn một hay nhiều tên miền riêng vào phần mềm của bạn 
+                                <br>- Để thực hiện chức năng này bạn chỉ cần trỏ tên miền về máy chủ (nếu như bạn đã có sẳn tên miền) bằng cách sau:
+                                <br>+ Đăng nhập vào chức năng quản lý tên miền của bạn và sửa/tạo bản ghi (@ và www) tên miền (record A) với IP trỏ tới là địa chủ máy chủ <?= gethostbyname($_SERVER['HTTP_HOST'])?>
+                                <br>- Nếu bạn đã có tên miền đăng ký ở nhà đăng ký khác, hãy transfer về EDA để có thể tự quản lý bản ghi DNS tại <a class="cart_payment" href="http://ceh.vn" target="_blank"><b>http://ceh.vn</b></a>
+                                <br>- Nếu bạn chưa có tên miền riêng, bạn có thể đăng ký tên miền mới tại website: <a class="cart_payment" href="http://ceh.vn" target="_blank"><b>http://ceh.vn</b></a>
+                                <br>- Nếu có khó khăn gì về việc gắn tên miền riêng, vui lòng liên hệ với bộ phận trực tuyến hoặc email về <a class="cart_payment" href="mailto:support@eda.vn"><b>support@ceh.vn</b></a> để được giải đáp
+                        </td>
+                    </tr>    
+                </table>
+            </td>
+        </tr>
+    </table>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td  height="30" style="padding-left:5px;">
+            </td>
+            <td align="right" style="padding-right:5px;"><img  onclick="window.location='/';" style="cursor:pointer;" src="bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table> 
+</center>
+<?php
+if (count($domains) > 0) {
+    echo '<script language="javascript" type="text/javascript">';
+    for ($i = 0; $i < count($domains); $i++) {
+        echo '
+            setTimeout("loaddomain(' . $i . ',\'' . $domains[$i]['domain_name'] . '\')",' . $i . '*500);
+            ';
+    }
+    echo '
+        function loaddomain(i,dm) {
+            load("?eda_type=ajax&eda_act=' . md5("general") . '&eda_code=' . md5("checkdomain") . '&domain="+dm,"domainid_"+i,"html","GET",null,"no");
+        }';
+    echo '</script>';
+}
+?>
+<script type="text/javascript" src="/talawebstatic/common/punycode.js"></script>
+<script type="text/javascript" src="/talawebstatic/common/editor/jquery.js"></script>
+<script language="javascript" type="text/javascript">
+    function onoffDomain(id,i) {
+        $.get('?eda_act=<?=md5('general').'&eda_code='.md5('domain_assign_active')?>&eda_module=business&eda_id='+id, function (data) {
+            if($('#onoffdomain'+i).attr('src')=='bms/images/icon/on.png') {
+                $('#onoffdomain'+i).attr('src','bms/images/icon/off.png');
+                if($('#maindomain'+i)) {
+                    $('#maindomain'+i).attr('disabled','disabled');
+                }
+            } else {
+                $('#onoffdomain'+i).attr('src','bms/images/icon/on.png');
+                if($('#maindomain'+i)) {
+                    $('#maindomain'+i).removeAttr('disabled');
+                }                
+            }
+        });
+    }
+</script>

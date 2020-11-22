@@ -1,0 +1,130 @@
+<?php
+header("Access-Control-Allow-Origin: *");
+
+$headers = apache_request_headers();
+$param=array();
+parse_str( @explode("?", $_SERVER['REQUEST_URI'])[1],$param);
+$token=safe_str(@$_SERVER['HTTP_TOKEN']);
+if($token=="")$token=safe_str(@$param['token']);
+$signalKey=safe_str(@$param['signalKey']);
+
+$err="";
+
+
+$inputJSON = file_get_contents('php://input');
+
+
+
+
+$code=safe_str(@$param['code']);
+$trueSignalKey=sha1("code={$code}&secretKey=".SECRET_KEY);
+
+//Test data
+// $inputJSON='{
+//   "code": "TA2",
+//   "name": "Thanh An",
+//   "email": "ta_email@vinhkhanhtire.vn",
+//   "address": "157/8 Bùi Quốc Khánh , Chánh Nghĩa, TDM BD",
+//   "phone_contact": "08-38351888",
+//   "name_contact": "QUANG"
+// }';
+
+
+$data = json_decode($inputJSON, TRUE);
+
+if($token!=TOKEN){
+	$reback['result']=false;
+	$reback['message']="Sai token !! [".$token."]";
+	echo json_encode($reback,true);die();
+}
+if($trueSignalKey!=$signalKey){
+	$reback['result']=false;
+	$reback['message']="Sai signalKey !! [".$trueSignalKey."]";
+	echo json_encode($reback,true);die();
+}
+
+	if(isset($data['code'])){
+		$code_new=safe_str(@$data['code']);
+	}
+	$cus_code=safe_str(@$code_new);
+	$cus_name=safe_str(@$data['name']);
+	$email=safe_str(@$data['email']);
+	$address=safe_str(@$data['address']);
+	$tel=safe_str(@$data['phone_contact']);
+	$tel_dd=$tel;
+	$daidien=safe_str(@$data['name_contact']);
+	if($cus_name==""){
+		$err="Không có dữ liệu cus_name";
+		goto error_out;
+	}
+	if($cus_code==""){
+		$err="Không có dữ liệu cus_code";
+		goto error_out;
+	}
+
+
+	
+
+$check_cus=get_data("select * from customers where cus_code ='".$code."'");
+if(count($check_cus)>0){
+	if(($check_cus[0]['cus_code'])!=($cus_code))
+	{
+		$db->query("update customers set cus_code='{$cus_code}' where cus_id='{$check_cus[0]['cus_id']}'");
+		$reback['edit_list'][]="cus_code";
+	}
+	if(($check_cus[0]['cus_name'])!=($cus_name))
+	{
+		$db->query("update customers set cus_name='{$cus_name}' where cus_id='{$check_cus[0]['cus_id']}'");
+		$reback['edit_list'][]="cus_name";
+	}
+	if(($check_cus[0]['email'])!=($email))
+	{
+		$db->query("update customers set email='{$email}' where cus_id='{$check_cus[0]['cus_id']}'");
+		$reback['edit_list'][]="email";
+	}
+	if(($check_cus[0]['address'])!=($address))
+	{
+		$db->query("update customers set address='{$address}' where cus_id='{$check_cus[0]['cus_id']}'");
+		$reback['edit_list'][]="address";
+	}
+	if(($check_cus[0]['tel'])!=($tel))
+	{
+		$db->query("update customers set tel='{$tel}' , tel_dd='{$tel_dd}' where cus_id='{$check_cus[0]['cus_id']}'");
+		$reback['edit_list'][]="tel";
+		$reback['edit_list'][]="tel_dd";
+	}
+	if(($check_cus[0]['daidien'])!=($daidien))
+	{
+		$db->query("update customers set daidien='{$daidien}' where cus_id='{$check_cus[0]['cus_id']}'");
+		$reback['edit_list'][]="daidien";
+	}
+	$reback['result']=true;
+	$reback['message']="Cập nhật khách hàng [{$code}] thành công !";
+	$reback['do']="edit";
+	echo json_encode($reback,true);die();
+}
+else
+{
+	$cus_type="DN";
+	$debt=0;
+	$comment="Thêm bằng API";
+	$tax_no=time();
+	$reg_no=time();
+	$fax="";
+
+	$db->query("insert into customers (cus_name,address,tel,cus_code,comment,tax_no,reg_no,fax,email,cus_type,debt,daidien,tel_dd) 
+		values 
+		('{$cus_name}','{$address}','{$tel}','{$cus_code}','{$comment}','{$tax_no}','{$reg_no}','{$fax}','{$email}','{$cus_type}','{$debt}','{$daidien}','{$tel_dd}')");
+	$mat_id=$db->insert_id();
+	$reback['result']=true;
+	$reback['message']="Thêm mới khách hàng [{$code}] thành công !";
+	$reback['do']="add";
+	echo json_encode($reback,true);die();
+}
+
+
+error_out:
+$reback['result']=false;
+$reback['message']=$err;
+echo json_encode($reback,true);die();
+?>

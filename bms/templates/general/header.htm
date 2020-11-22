@@ -1,0 +1,114 @@
+<?php
+        /*if(empty($sessions->session_prefix)) {
+            include ("bms/modules/head.php");
+        } else {
+            include ("bms/users/".$sessions->session_prefix."/head.php");
+        }*/
+global $head;
+include ("data/head.php");
+include("bms/update/update.php");
+?>	
+<html>
+<head>
+<LINK REL="SHORTCUT ICON" HREF="<?=$head['logo']?>">
+<title><?= $action->title?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" type="text/css" href="bms/skins/homepage/style.css">
+<link rel="stylesheet" type="text/css" href="bms/common/avim.css">
+<link rel="stylesheet" href="bms/skins/ThemeOffice2003/theme.css" type="text/css">
+<script type="text/javascript" src="bms/skins/ThemeOffice2003/theme.js"></script>
+<script language="javascript" src="bms/common/JSCookMenu.js"></script>
+<script language="javascript" src="bms/common/jquery.js"></script>
+<script language="javascript" src="bms/common/jquery.json.js"></script>
+<script language="javascript" src="bms/common/avim.js"></script>
+<Script language="javascript" src="bms/common/ajax.php"></Script>
+<body onmousemove="move_window(event);" onmouseup="cur_div_move='no';"  style="background: #333;background-repeat:repeat-x;background-position:top;"  leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<center>
+<table cellspacing="0" border="0" cellpadding="0"  width="1000" bgcolor="#FFFFFF">
+<tr><td align="center">
+<table cellspacing="0" border="0" cellpadding="0"  width="998" style="background: #f5f5f5;">
+  <tbody>  
+	<tr><td height="80">
+	<table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+		<tr>
+		<td width="100" align="center">
+		<img src="<?=$head['logo']?>"  height="55" align="middle">
+		</td>
+		<td style="color:red;font-size:18px;font-weight:bold;line-height:30px;" align="center">
+		<?=$head['line1']?>
+		<br><font color="green" size="3pt"><?=$head['line2']?></font>
+		</td>
+
+		</tr>
+	</table>
+</td></tr>
+  </tbody>
+</table>
+
+<table border="0" width="998" height="40" align="center" cellpadding="0" cellspacing="0" background="<?=ROOT_URL?>bms/images/admin_top.jpg">
+    <tr>
+      <td width="30"  style="padding-top:5px;" align="center"><img height="18" src="<?=ROOT_URL?>bms/images/icon/home.gif" border="0" /></td>
+      <td <?=$sessions->get_session('login')=='logined'?' width="70"':''?>  style="padding-top:6px;"  style="cursor:pointer;"><a href="?eda_act=<?= md5('homepage')?>" class="cart_payment"><b>Trang chủ</b> </a></td>
+        
+<?php
+	if($sessions->get_session('login')=='logined')
+	{
+?>              
+        <td style="padding-top:6px;">
+        <div id="softwarecenterMenuID">
+            <script   language="JavaScript" type="text/javascript">
+                var myMenu =[
+<?php
+$parmenu = get_data("select * from function_menu where fmenu_parid is null and  fmenu_act!='other' order by order_by");
+$mnu=get_data("select count(*) c from function_menu fmenu, user_group_permission ugp where fmenu.fmenu_id=ugp.fmenu_id  and ugp.user_id='" . $sessions->get_session('user_id') . "' order by order_by");
+for ($i = 0; $i < count($parmenu); $i++) {
+    if ($sessions->get_session('user_name') == 'admin') {
+        $menu = get_data("select fmenu.* from function_menu fmenu where fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' order by order_by");
+    } else {
+        $menu=get_data("select fmenu.* from function_menu fmenu, user_group_permission ugp where fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' and fmenu.fmenu_id=ugp.fmenu_id  and ugp.user_id='" . $sessions->get_session('user_id') . "' order by order_by");
+        if($mnu[0]['c']==0) {
+            $menu = get_data("select fmenu.* from function_menu fmenu, user_group_permission ugp where fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' and fmenu.fmenu_id=ugp.fmenu_id  and ugp.group_id='" . $sessions->get_session('group_id') . "' order by order_by");
+        }
+    }
+   if(count($menu)>0) {
+?>
+                    [null,'<?=$parmenu[$i]['fmenu_name']?>',null,null,'<?=$parmenu[$i]['fmenu_name']?>',null,
+<?php
+			for($j=0;$j<count($menu);$j++) {
+?>                            
+                        ['<img src="<?=ROOT_URL?>bms/images/icon/<?=$menu[$j]['fmenu_img']?>" width="18" />','<?=$menu[$j]['fmenu_name']?>','?eda_act=<?= md5($parmenu[$i]['fmenu_act'])?>&eda_code=<?= md5($menu[$j]['fmenu_act'])?>',null,'<?=$menu[$j]['fmenu_name']?>'],
+<?php
+			}
+?> 
+                    ], 
+<?php
+   }
+}
+?>
+                ];
+                cmDraw ('softwarecenterMenuID', myMenu, 'hbr', cmThemeOffice2003, 'ThemeOffice2003');
+            </script>
+        </div>            
+        </td>
+<?php
+	}
+	if($sessions->get_session('login')=='logined')
+	{
+?>      
+      <td width="30"   style="padding-top:6px;" align="center"><img height="18" src="<?=ROOT_URL?>bms/images/icon/cancel_f2.png" border="0" /></td>
+      <td width="100"   style="padding-top:6px;"  style="cursor:pointer;"><a href="?eda_code=<?= md5('logout')?>" class="cart_payment"><b>(<?= $sessions->get_session('user_name')?>) Thoát</b> </a></td>
+<?php
+	}
+?>      
+    </tr>
+</table>
+
+
+    <script language=javascript>
+    	left=screen.width/2-100;
+	document.writeln('<div id="loadid" style="text-align:center;visibility: hidden; position:absolute; left:'+left+'px; top:20px; width:150px; height:22; z-index:1; color: #0000FF; background-Color:#ebeced;font-weight: bold;  border: 1px none #000000;"></div>');
+    </script>
+	<table width="998" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+	<tr><td align=center valign=top>     
+       <div id="centerid">
+

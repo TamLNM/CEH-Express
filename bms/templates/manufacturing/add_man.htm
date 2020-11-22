@@ -1,0 +1,354 @@
+<form onkeypress="return tabOnEnter(document.activeElement, event);" onsubmit="return false;"  name="frmadmin" method="post" action="?eda_act=<?= md5('sell')?>&eda_code=<?= md5('input_mat_sm')?>" style="margin:0px">
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/databaseup.png" width="18" height="18"/>
+          </td>
+          <td  height="25"><b>Khai báo thành phẩm</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">
+<?php
+	if(!isset($return_val['full_name'])) {
+		$usr=get_data("select full_name from users where user_id='".$sessions->get_session('user_id')."'");
+		if(count($usr)>0) {
+			$return_val['full_name']=$usr[0][0];
+			$return_val['user_id']=$sessions->get_session('user_id');
+		}
+	}
+?>
+      <table width="780" border="0" cellspacing="0" cellpadding="0">
+          
+            <tr>
+              <td height="25" align="left"><b>(*) Tên thành phẩm</b></td>
+              <td>
+              <input  value="<?= isset($return_val['sup_id'])?$return_val['sup_id']:''?>"  name="sup_id" type="hidden" id="sup_id" size="25" />
+              <input readonly value="<?= isset($return_val['sup_name'])?$return_val['sup_name']:''?>" style="width:165px;" class="catbg" name="sup_name" type="text" id="sup_name" size="25" />
+              <input type="button" style="width:30px;" class="button" onclick="browse_sup();" name="browser" id="browser" value="...">
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Đơn vị tính</b></td>
+              <td>
+				<select style="width:200px;" class="catbg" name="msu_id"  id="stock_id">
+<?php
+	$msu=get_data("select msu_id, msu_name from meansure where msu_multiple=1 order by msu_name");
+	for($i=0;$i<count($msu);$i++) {
+		echo '<option value="'.$msu[$i]['msu_id'].'">'.$msu[$i]['msu_name'].'</option>';
+		$sub_msu=get_data("select msu_id, msu_name from meansure where msu_parid='".$msu[$i]['msu_id']."' order by msu_name");
+		for($k=0;$k<count($sub_msu);$k++) {
+			echo '<option value="'.$sub_msu[$k]['msu_id'].'"> - '.$sub_msu[$k]['msu_name'].'</option>';
+		}
+	}
+?>
+				</select>
+              </td>
+            </tr>
+          </table>
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height="40"><b>DANH SÁCH NGUYÊN VẬT LIỆU CẦN DÙNG</b></td>
+		      </tr>
+	</table>
+	<table width="570" id="mat_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	<tbody>
+	    <tr>
+		<td width="345" align="center" bgcolor="#afd7ff" height="25"><b>Sản phẩm</b></td>
+		<td width="90" align="center" bgcolor="#afd7ff"><b>Số lượng</b></td>
+		<td width="90" align="center" bgcolor="#afd7ff"><b>Đơn vị tính</b></td>
+		<td  align="center" bgcolor="#afd7ff"><input type="button" onclick="addrow();" style="width:25px;" class="button" name="add_mat" value="+"></td>
+		</tr>
+<?php
+	if(isset($return_val['mat_id']))
+	for($i=0;$i<count($return_val['mat_id']);$i++)
+	if(!empty($return_val['mat_id'][$i]))
+	{
+?>
+		<tr>
+		<td align="center" height="25"><input  value="<?= $return_val['mat_id'][$i]?>"  name="mat_id[]" type="hidden" id="mat_id_<?= $i?>" size="25" />
+		<input readonly style="width:310px;" value="<?= $return_val['mat_name'][$i]?>"  class="catbg" name="mat_name[]" type="text" id="mat_name_<?= $i?>" size="25" /><input type="button" style="width:30px;" class="button" onclick="browse_mat(<?= $i?>)" name="browse_mat[]" value="...">
+		</td>
+		<td align="center"><input onfocus="this.select();"  onkeyup="format(this);sum_mat(this.id.substring(9));" style="width:80px;" value="<?= $return_val['quantity'][$i]?>"  class="catbg" name="quantity[]" type="text" id="quantity_<?= $i?>" size="25" /></td>
+		<td align="center">
+		<select  class="catbg" name="mms_id[]" id="mms_id_<?= $i?>" style="width:80px;">
+<?php
+		$mms=get_data("select mms.mms_id, mms.price, msu.msu_name from mat_msu mms, meansure msu where mms.mat_id='".$return_val['mat_id'][$i]."' and mms.msu_id=msu.msu_id order by msu.msu_name");
+		for($j=0;$j<count($mms);$j++)
+		{
+			echo '<option '.($mms[$j]['mms_id']==$return_val['mms_id'][$i]?'selected':'').' value="'.$mms[$j]['mms_id'].'">'.$mms[$j]['msu_name'].'</option>';
+		}
+?>
+		</select>
+		</td>
+   		<td align="center"><input type="button" style="width:25px;" class="button" onclick="delRow(this);" name="del_user[]" value="-"></td>
+	    </tr>
+<?php
+	}
+?>
+		<tr>
+		<td align="center" height="25"><input  value=""  name="mat_id[]" type="hidden" id="mat_id_<?= isset($return_val['mat_id'])?count($return_val['mat_id']):0?>" size="25" />
+		<input readonly style="width:310px;" value=""  class="catbg" name="mat_name[]" type="text" id="mat_name_<?= isset($return_val['mat_id'])?count($return_val['mat_id']):0?>" size="25" /><input type="button" style="width:30px;" class="button" onclick="browse_mat(<?= isset($return_val['mat_id'])?count($return_val['mat_id']):0?>)" name="browse_mat[]" value="...">
+		</td>
+		<td align="center"><input onfocus="this.select();"  onkeyup="format(this);sum_mat(this.id.substring(9));" style="width:80px;" value=""  class="catbg" name="quantity[]" type="text" id="quantity_<?= isset($return_val['mat_id'])?count($return_val['mat_id']):0?>" size="25" /></td>
+		<td align="center">
+		<select  class="catbg" name="mms_id[]" id="mms_id_<?= isset($return_val['mat_id'])?count($return_val['mat_id']):0?>" style="width:80px;"></select>
+		</td>
+   		<td align="center"><input type="button" style="width:25px;" class="button" onclick="delRow(this);" name="del_user[]" value="-"></td>
+	    </tr>
+	   </tbody>
+	</table>
+</td></tr>
+</table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          <input style="font-weight:bold;cursor:pointer;" onclick="document.forms[0].submit();" class="button" type="button" name="sm" value="Lưu phiếu" />
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+   </form>
+<style>
+#searchempdiv, #searchsupdiv, #searchmatdiv, #serialdiv{
+	position:absolute;
+	left:0px;
+	top:20px;
+	width:550px;
+	height:450px;
+	z-index:21;
+}
+#searchempiframe, #searchsupiframe, #searchmatiframe, #serialiframe {
+	position:absolute;
+	left:0px;
+	top:20px;
+	width:546px;
+	height:446px;
+	z-index:21;
+}
+</style>
+<iframe id="searchsupiframe" style="visibility:hidden;"></iframe>
+<div  id="searchsupdiv" style="visibility:hidden;">
+	<table  bgcolor="#ffffff" width="550" border="0" height="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td height="25" valign=top align=center width="100%">
+	  <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+          <tr>
+            <td width="94%" height="25" id="searchsuphead" background="<?=ROOT_URL?>/bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('searchsup',event);" style="color:white;"><b>&nbsp;&nbsp;Danh sách khách hàng</b></td>
+            <td width="3%" height="25" align="right" background="<?=ROOT_URL?>/bms/images/head_bg.gif">
+			<img onmouseover="this.style.cursor='pointer'; this.src='bms/images/minimize2.gif';" onmouseout=" this.src='bms/images/minimize.gif';" src="<?=ROOT_URL?>/bms/images/minimize.gif" width="21" height="21" onclick="hidediv('searchsup');" /></td>
+            <td width="3%" height="25" align="right" background="<?=ROOT_URL?>/bms/images/head_bg.gif" style="padding-right:2px;"><img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>/bms/images/close.gif" width="21" height="21" onclick="this.src='bms/images/close.gif';closediv('searchsup');"></td>
+          </tr>
+        </table>
+        </td></tr>
+    <tr>
+      <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>
+        <div id="searchsupid">
+<?php
+	include("bms/templates/search_sup.htm");
+?>
+        </div>
+	  </td>
+    </tr>
+	</table>
+</div>
+<iframe id="searchmatiframe" style="visibility:hidden;"></iframe>
+<div  id="searchmatdiv" style="visibility:hidden;">
+	<table  bgcolor="#ffffff" width="550" border="0" height="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td height="25" valign=top align=center width="100%">
+	  <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+          <tr>
+            <td width="94%" height="25" id="searchmathead" background="<?=ROOT_URL?>/bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('searchmat',event);" style="color:white;"><b>&nbsp;&nbsp;Danh sách sản phẩm</b></td>
+            <td width="3%" height="25" align="right" background="<?=ROOT_URL?>/bms/images/head_bg.gif">
+			<img onmouseover="this.style.cursor='pointer'; this.src='bms/images/minimize2.gif';" onmouseout=" this.src='bms/images/minimize.gif';" src="<?=ROOT_URL?>/bms/images/minimize.gif" width="21" height="21" onclick="hidediv('searchmat');" /></td>
+            <td width="3%" height="25" align="right" background="<?=ROOT_URL?>/bms/images/head_bg.gif" style="padding-right:2px;"><img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>/bms/images/close.gif" width="21" height="21" onclick="this.src='bms/images/close.gif';closediv('searchmat');"></td>
+          </tr>
+        </table>
+        </td></tr>
+    <tr>
+      <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>
+        <div id="searchmatid">
+<?php
+	include("bms/templates/search_mat.htm");
+?>
+        </div>
+	  </td>
+    </tr>
+	</table>
+</div>
+<script language="javascript">
+var cur_index=<?= isset($return_val['mat_id'])?count($return_val['mat_id']):0?>;
+var select_id=0;
+function addrow() {
+		var doc=document;
+		var tbl = doc.getElementById('mat_tbl').getElementsByTagName('tbody')[0];
+		//create a new row
+		var newrow = doc.createElement("TR");
+		var newcol , newinput;
+		cur_index++;
+
+		newcol = doc.createElement("TD");
+		newcol.style.textAlign="center";
+		newcol.style.height="25";
+		newinput = doc.createElement("input");
+		newinput.type="hidden";
+		newinput.id="mat_id_"+cur_index;
+		newinput.name="mat_id[]";
+		newcol.appendChild(newinput);
+		newinput = doc.createElement("input");
+		newinput.type="text";
+		newinput.id="mat_name_"+cur_index;
+		newinput.name="mat_name[]";
+		newinput.readOnly=true;
+		newinput.className='catbg';
+		newinput.style.width="310px";
+		newcol.appendChild(newinput);
+		newinput = doc.createElement("input");
+		newinput.type="button";
+		newinput.id=cur_index;
+		newinput.name="browse_mat[]";
+		newinput.value="...";
+		newinput.style.width="30px";
+		newinput.onclick=function(){browse_mat(this.id);};
+		newinput.className='button';
+		newcol.appendChild(newinput);
+		newrow.appendChild(newcol);
+
+		newcol = doc.createElement("TD");
+		newcol.style.textAlign="center";
+		newinput = doc.createElement("input");
+		newinput.type="text";
+		newinput.id="quantity_"+cur_index;
+		newinput.name="quantity[]";
+		newinput.onfocus=function(){this.select();}
+		newinput.onkeyup=function(){format(this);sum_mat(this.id.substring(9));}
+		newinput.className='catbg';
+		newinput.style.width="80px";
+		newcol.appendChild(newinput);
+		newrow.appendChild(newcol);
+
+		newcol = doc.createElement("TD");
+		newcol.style.textAlign="center";
+		newinput = doc.createElement("select");
+		newinput.id="mms_id_"+cur_index;
+		newinput.name="mms_id[]";
+		//newinput.options[0] = new Option("Đơn vị tính", "", false, false);
+		//newinput.options[0].disabled=true;
+		newinput.className='catbg';
+		newinput.style.width="80px";
+		newcol.appendChild(newinput);
+		newrow.appendChild(newcol);
+
+		newcol = doc.createElement("TD");
+		newcol.style.textAlign="center";
+		newinput = doc.createElement("input");
+		newinput.type="button";
+		newinput.id="del_mat_"+cur_index;
+		newinput.name="del_mat[]";
+		newinput.value="-";
+		newinput.style.width="25px";
+		newinput.onclick=function(){delRow(this);};
+		newinput.className='button';
+		newcol.appendChild(newinput);
+		newrow.appendChild(newcol);
+
+		tbl.appendChild(newrow);
+}
+
+function delRow(a) {
+	var row = a.parentNode.parentNode;
+	var tbody = document.getElementById('mat_tbl').getElementsByTagName('tbody')[0];
+	tbody.removeChild(row);
+	change_number();
+}
+function change_number() {
+	var sum=sum_all();
+	document.getElementById("total").value=sum;
+}
+
+function browse_mat(id) {
+	cur_id=id;
+	document.getElementById('searchmatdiv').style.top=document.body.scrollTop+5;
+	document.getElementById('searchmatiframe').style.top=document.body.scrollTop+5;
+	document.getElementById('searchmatdiv').style.left=(screen.width-1000)/2+230;
+	document.getElementById('searchmatiframe').style.left=(screen.width-1000)/2+230;
+	showdiv('searchmat');
+	change_sup();
+
+}
+var cur_msu='';
+
+function load_mat() {
+	document.getElementById("mat_id_"+cur_id).value=cur_mat_id;
+	document.getElementById("mat_name_"+cur_id).value=cur_mat_name;
+	if(document.getElementById("quantity_"+cur_id).value<1)
+		document.getElementById("quantity_"+cur_id).value=1;
+	document.getElementById("price_"+cur_id).value=0;
+	load_msu(cur_id,  cur_mat_id);
+}
+function load_msu(id, mat_id) {
+	eda_request=load('?eda_type=ajax&eda_code=<?= md5("load_msu")?>&msu_type=msu_only&eda_id='+mat_id,'mms_id_'+id,'listbox','GET',null,'no');
+}
+function sum_mat(id) {
+	document.getElementById("sum_"+id).value=parseInt(document.getElementById("price_"+id).value)*parseInt(document.getElementById("quantity_"+id).value);
+	change_number();
+}
+function sum_all() {
+	var sum=0;
+	for(i=0;i<=cur_index;i++)
+	if(document.getElementById("sum_"+i))
+	if(document.getElementById("sum_"+i).value!='')
+	{
+		if(document.getElementById("sum_"+i).value!=''&&document.getElementById("mat_id_"+i).value!='')
+		{
+			sum+=parseInt(document.getElementById("sum_"+i).value);
+		}
+	}
+	return sum;
+}
+function check_invcode() {
+	if(document.getElementById('inv_code').readOnly==true)
+	{
+		document.getElementById('inv_code').readOnly=false;
+		document.getElementById('inv_code').select();
+	}
+	else
+	{
+		document.getElementById('inv_code').readOnly=true;
+		document.getElementById('inv_code').value="<?= $return_val['inv_code']?>";
+	}
+
+}
+function change_sup() {
+		if(document.getElementById('sup_id').value!='')
+			document.getElementById('search_by_sup').innerHTML='<input checked type="checkbox" id="chk_sup" value="1"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById(\'chk_sup\').checked=!document.getElementById(\'chk_sup\').checked;">Chỉ tìm những sản phẩm đã nhập của nhà cung cấp này</a>';
+		else
+			document.getElementById('search_by_sup').innerHTML='';
+		load_mat_page(cur_mat_page);
+}
+
+function browse_sup() {
+		document.getElementById('searchsupdiv').style.top=document.body.scrollTop+5;
+		document.getElementById('searchsupiframe').style.top=document.body.scrollTop+5;
+		document.getElementById('searchsupdiv').style.left=(screen.width-1000)/2+250;
+		document.getElementById('searchsupiframe').style.left=(screen.width-1000)/2+250;
+		showdiv('searchsup');
+}
+
+function load_emp() {
+	document.getElementById("user_id").value=cur_user_id;
+	document.getElementById("full_name").value=cur_full_name;
+}
+function load_sup() {
+	document.getElementById("sup_id").value=cur_sup_id;
+	document.getElementById("sup_name").value=cur_sup_name;
+	change_sup();
+}
+
+</script>

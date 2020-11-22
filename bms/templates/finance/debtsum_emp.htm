@@ -1,0 +1,47 @@
+<?php
+$date=strtotime( str_replace("/", "-", @$_GET['date'])." 23:59:59" );
+if($date==0)$date=time();
+?>
+
+	<table width="98%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height="30" align="right" style="padding-left:10px;">Ngày lập: <?=date('d/m/Y',$date)?></td>
+	      </tr>
+	</table> 
+        <table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="30%" align="center" bgcolor="#afd7ff" height="25"><b>Tên nhân viên</b></td>
+		<td width="30%" align="center" bgcolor="#afd7ff"><b>Địa chỉ</b></td>
+		<td width="13%" align="center" bgcolor="#afd7ff"><b>Điện thoại</b></td>
+		<td width="14%" align="center" bgcolor="#afd7ff"><b>Tên đăng nhập</b></td>
+		<td width="13%" align="center" bgcolor="#afd7ff"><b>Tổng tiền</b></td>
+		</tr>
+<?php
+	$inv=get_data("select usr.user_name, usr.user_id, usr.full_name, usr.address, usr.tel from users  usr");
+        //$inv=get_data("select f.sum amount, usr.user_name, usr.user_id, usr.full_name, usr.address, usr.tel from users usr,  fund f where f.user_id=usr.user_id and f.sum!=0");
+	$total=0;
+	for($i=0;$i<count($inv);$i++)
+	{
+            $debt=$this->get_emp_debt($inv[$i]['user_id']);
+            $amount=get_data("select sum(amount) amount from fund where user_id='".$inv[$i]['user_id']."'");
+            $inv[$i]['amount']=$amount[0]['amount'];
+            if($inv[$i]['amount']+$debt!=0) {
+?>	
+	    <tr style="cursor:pointer;" onmouseover="this.style.backgroundColor='yellow';" onmouseout="this.style.backgroundColor='';" onclick="window.location='?eda_act=57336afd1f4b40dfd9f5731e35302fe5&eda_code=5cbd85d3e8fee28f51c0575297c0dca1&user_id=<?=$inv[$i]['user_id']?>';">
+		<td style="padding-left:5px;" height="25"><?= $inv[$i]['full_name']?></td>
+		<td style="padding-left:5px;" height="25"><?= $inv[$i]['address']?></td>
+		<td style="padding-left:5px;" height="25"><?= $inv[$i]['tel']?></td>	
+		<td style="padding-left:5px;" height="25"><?= $inv[$i]['user_name']?></td>
+		<td style="padding-right:5px;" align="right"><?= number_format($inv[$i]['amount']+$debt,0,","," ")?></td>	
+		</tr>
+
+<?php
+		$total+=$inv[$i]['amount']+$debt;
+            }
+	}
+?>	
+	    <tr>
+		<td height="25" colspan="4" align="center"><b>Tổng cộng</b></td>
+		<td style="padding-right:5px;" align="right"><b><?= number_format($total,0,","," ")?></b></td>			
+		</tr>
+	</table>

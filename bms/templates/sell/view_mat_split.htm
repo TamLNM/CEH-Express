@@ -1,0 +1,174 @@
+<style>
+	#mat_tb2 td,#mat_tb1 td{
+		text-align: center;
+	}
+
+</style>
+<?php
+if($action->eda_type!='ajax')
+{
+?>	 
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/packageIcon.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Xem phiếu tách sản phẩm bán lẻ</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="<?= $action->eda_code==md5('mat_split_finish')?'window.location=\'?eda_act='.md5('sell').'eda_code='.md5('mat_split').'\'':'history.go(-1);'?>" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<?php
+	}
+	$return_val=get_data("select * from mat_split_history where id='".$action->eda_id."'");
+	if(count($return_val)>0)
+	{
+		$return_val=$return_val[0];
+?>        
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding:10px;">        
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td height="25" width="160" align="left"><b>Người thực hiện</b></td>
+              <td width="200">
+<?php
+	$mat=get_data("select * from mat_split_history where id=" . $action->eda_id)[0];
+	$cat_id=get_data("select cat_id from materials where mat_id=" . $mat['mat_id'])[0][0];
+	$mms_id=get_data("select mms_id from stock_mat_msu where smm_id=" . $mat['smm_id'])[0][0];
+	$msu_id=get_data("select msu_id from mat_msu where mms_id=" . $mms_id)[0][0];
+	echo get_data("select full_name from users where user_id=" . $mat['user_id'])[0][0];
+?>                  
+              </td>
+              <td width="115" height="25" align="left" style="padding-left:20px;"><b>Thời gian tách</b></td>
+              <td>
+              <?= isset($return_val['created_date'])?date('d/m/Y H:i',$return_val['created_date']):'Không xác định'?>
+              </td>
+            </tr>
+            <tr>
+              <td height="25" width="160" align="left"><b>Kho hàng</b></td>
+              <td width="200">
+				<?= get_data("select stock_name from stocks where stock_id=" . $mat['stock_id'])[0][0] ?>
+              </td>
+              <td width="115" height="25" align="left" style="padding-left:20px;"><b>Số phiếu tách</b></td>
+              <td>
+              <?= $return_val['inv_code']?>
+              </td>
+            </tr>            
+            <tr>
+              <td height="25" align="left"><b>Chủng loại</b></td>
+              <td>
+				<?= get_data("select cat_name from categories where cat_id=". $cat_id)[0][0]; ?>
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Hãng sản xuất</b></td>
+              <td>
+				<?= @get_data("select mfa_name from manufactures where mfa_id=". $mat['mfa_id'])[0][0] ?>
+              </td>             
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Tên sản phẩm</b></td>
+              <td>
+			<?= get_data("select mat_name from materials where mat_id=" . $mat['mat_id'])[0][0]; ?>
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Đơn vị cần tách</b></td>
+              <td>
+				<?= get_data("select msu_name from meansure where msu_id=" . $msu_id)[0][0] ?>
+			  </td>
+              </td>             
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Số Serial</b></td>
+              <td>
+			<?= @$mat['serial']; ?>
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"></td>
+              <td>
+				
+			  </td>
+              </td>             
+            </tr>         
+             <tr>
+              <td height="25" align="left"><b>Ghi chú</b></td>
+              <td colspan="3"><?= isset($return_val['comment'])?$return_val['comment']:''?></td>
+			</tr>      
+			
+			<?php
+				$extra_list = get_data("select mat.mat_model,mat.mat_name,stock.stock_name,msh.quantity from mat_split_history_details msh,materials mat,stocks stock,mat_msu mms where msh.msh_id=" . $action->eda_id . " and msh.type=0 and msh.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and stock.stock_id=msh.stock_id");
+				//print_r($extra_list);die();
+				//$consume_list = get_data("select * from mat_split_history_details where msh_id=" . $action->eda_id . " and type=1");
+				$consume_list = get_data("select mat.mat_model,mat.mat_name,stock.stock_name,msh.quantity from mat_split_history_details msh,materials mat,stocks stock,mat_msu mms where msh.msh_id=" . $action->eda_id . " and msh.type=1 and msh.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and stock.stock_id=msh.stock_id");
+			?>
+
+			<table width="950" id="mat_tb1" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+				<br/>
+				<tbody>
+					<tr><td align="center" bgcolor="#afd7ff" height="25" colspan="5"><b>Sản phẩm dư ra</b></td></tr>
+					<tr>
+						<td width="15%" align="center" bgcolor="#afd7ff"><b>Mã SP</b></td>
+            <td width="40%" align="center" bgcolor="#afd7ff" height="25"><b>Sản phẩm</b></td>
+            <td width="15%" align="center" bgcolor="#afd7ff" height="25"><b>Kho</b></td>
+						<td width="10%" align="center" bgcolor="#afd7ff" height="25"><b>Số lượng</b></td>
+					</tr>
+					<?php for($i = 0; $i < count($extra_list); $i++) { ?> 
+						<tr>
+							<td height="25"><?= @$extra_list[$i]['mat_model']; ?></td>
+							<td height="25"><?= @$extra_list[$i]['mat_name']; ?></td>
+							<td height="25"><?= @$extra_list[$i]['stock_name']; ?></td>
+							<td height="25"><?= $extra_list[$i]['quantity']; ?></td>
+						</tr>
+					<?php } ?>
+				</tbody>
+			</table>
+			<br/>
+			<table width="950" id="mat_tb2" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+				<tbody>
+					<tr><td align="center" bgcolor="#afd7ff" height="25" colspan="5"><b>Sản phẩm tiêu hao</b></td></tr>
+					<tr>
+						<td width="15%" align="center" bgcolor="#afd7ff"><b>Mã SP</b></td>
+            <td width="40%" align="center" bgcolor="#afd7ff" height="25"><b>Sản phẩm</b></td>
+            <td width="15%" align="center" bgcolor="#afd7ff" height="25"><b>Kho</b></td>
+						<td width="10%" align="center" bgcolor="#afd7ff" height="25"><b>Số lượng</b></td>
+					</tr>
+					<?php for($i = 0; $i < count($consume_list); $i++) { ?> 
+						<tr>
+							<td height="25"><?= @$consume_list[$i]['mat_model']; ?></td>
+							<td height="25"><?= @$consume_list[$i]['mat_name']; ?></td>
+							<td height="25"><?= @$consume_list[$i]['stock_name']; ?></td>
+							<td height="25"><?= $consume_list[$i]['quantity']; ?></td>
+						</tr>
+					<?php } ?>
+				</tbody>
+			</table>
+
+
+          </table>
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+
+</td></tr>
+</table>
+<?php
+	}
+	else
+		echo 'Không tìm thấy phiếu tách sản phẩm bán lẻ';
+?>
+<?php
+if($action->eda_type!='ajax')
+{
+?>	
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;" width="30">
+          <img src="<?=ROOT_URL?>/bms/images/icon/preview.gif" height="24">
+          </td>
+          <td   style="padding-left:5px;">
+          <a class="cart_payment" href="?eda_code=<?= md5('view_report')?>&eda_type=ajax&eda_module=sell/view_mat_split&eda_id=<?= $action->eda_id?>" target="_blank"><b>Xem dạng in ấn</b></a>
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="<?= $action->eda_code==md5('mat_split_finish')?'window.location=\'?eda_act='.md5('sell').'eda_code='.md5('mat_split').'\'':'history.go(-1);'?>" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table> 
+<?php
+	}
+?>        

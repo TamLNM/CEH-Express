@@ -1,0 +1,53 @@
+/*author: Manes;
+createdate: 18/04/2018;
+*/
+
+.m-split{
+	// flex-basis: 50%!important;
+	overflow: auto;
+}
+
+.m-flex-split{
+	display: flex;
+	flex-direction: row;
+	flex-basis: auto;
+	width: 100%;
+	// background: url('../images/icons/tally-background.png'),#c4f1fbb8;
+	background: transparent;
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: top;
+	.main-tab{
+		position: relative;
+		min-width: 20vw;
+		flex-basis: 20%;
+		border: 2px solid #cecece;
+		box-shadow: 2px 0 10px dimgray;
+		transition: all 0.5s;
+		-moz-transition: all 0.5s;
+		-webkit-transition: all 0.5s;
+		-ms-transition: all 0.5s;
+		overflow: hidden;
+	}
+	.m-tab{
+		flex-basis: 80%;
+		// min-width: 75vw;
+		overflow: auto;	
+		position: relative;
+		transition:all 0.5s;
+		-moz-transition: all 0.5s;
+		-webkit-transition: all 0.5s;
+		-ms-transition: all 0.5s;
+	}
+}
+
+.m-tab-type1{
+	width: 100%;
+	.m-tab-title{
+
+	}
+	.m-tab-content{
+		display: none;
+		text-align: center;
+	}
+}

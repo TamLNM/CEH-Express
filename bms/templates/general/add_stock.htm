@@ -1,0 +1,65 @@
+<form onkeypress="return tabOnEnter(document.activeElement, event);" onsubmit="return false;" name="frmadmin" method="post" action="?eda_act=<?=md5('general')?>&eda_code=<?= md5('add_stock_sm')?>" style="margin:0px">
+	<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+	    <tr>
+	        <td width="30" align="center">
+	            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/stock.png" width="18" height="18" />
+	        </td>
+	        <td height="25"><b>Thêm Hàng hóa</b></td>
+	        <td align="right" style="padding-right:5px;"><img onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('district')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+	    </tr>
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+            			<tr>
+			              	<td height="25" width="15%" align="left" style="padding-left:20px;"><b>Mã sản phẩm (*)</b></td>
+			              	<td width="25%">
+				              	<input style="width: 70%;" class="catbg" name="stock_code" id="stock_code" type="text" value="<?=isset($return_val['stock_code'])?$return_val['stock_code']:''?>" />
+							</td>
+			              	<td height="25" width="15%" align="left" style="padding-left:20px;"><b>Tên sản phẩm (*)</b></td>
+			              	<td width="25%">
+              					<input style="width: 70%;" class="catbg" name="stock_name" id="stock_name" type="text" value="<?=isset($return_val['stock_name'])?$return_val['stock_name']:''?>" />
+              				</td>
+              				
+				        <tr>
+				        	<td height="25" width="10%" align="left" style="padding-left:20px;"><b>Loại hàng</b></td>
+			              	<td width="20%">
+				              	<select style="width: 70%" class="catbg" name="stock_type_id" id="stock_type_id"  data-placeholder="Chọn Loại kho">	
+								    <?php $stock_type_list = get_data('select * from stock_type order by stock_type_id, stock_type_name'); 
+								        for ($i = 0; $i < count($stock_type_list); $i++){
+								            echo ('<option value="'.$stock_type_list[$i]['stock_type_id'].'">'.$stock_type_list[$i]['stock_type_name'].'</option>');
+								        }
+								    ?>
+								</select>
+              				</td>
+				        	<td height="25" width="10%" align="left" style="padding-left:20px;"><b>Thuộc Kho</b></td>
+			              	<td width="20%">
+				              	<select style="width: 70%" class="catbg" name="warehouse_id" id="warehouse_id"  data-placeholder="Chọn Loại kho">	
+								    <?php $warehouse_list = get_data('select * from warehouse order by warehouse_id, warehouse_name'); 
+								        for ($i = 0; $i < count($warehouse_list); $i++){
+								            echo ('<option value="'.$warehouse_list[$i]['warehouse_id'].'">'.$warehouse_list[$i]['warehouse_name'].'</option>');
+								        }
+								    ?>
+								</select>
+              				</td>				        	
+				        </tr>
+				        <tr>
+				        	<td height="25" width="10%" align="left" style="padding-left:20px;"><b>Giá</b></td>
+			              	<td width="20%">
+				              	<input style="width: 70%;" class="catbg" name="price" id="price" type="text" value="<?=isset($return_val['price'])?$return_val['price']:''?>" />
+              				</td>
+				    </table>
+				</td>
+			</tr>
+		</table>
+		<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+	        <tr>
+	          	<td  height="30" style="padding-left:5px;">
+	          		<input style="font-weight:bold;cursor:pointer;" onclick="document.forms[0].submit();" class="button" type="button" name="button" value="Lưu thông tin" />&nbsp;
+	          	</td>
+	        	<td align="right" style="padding-right:5px;"><img  onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('district')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+	        </tr>
+	    </table> 
+	</table>
+</form>
+<?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 

@@ -1,0 +1,109 @@
+body, td, th {
+	color: #004c93;
+	font-family: Arial;
+	font-size: 12px;
+}
+@font-face {
+    font-family: 'barcode';
+    src: url('fonts/barcod39-webfont.eot');
+    src: url('fonts/barcod39-webfont.eot?#iefix') format('embedded-opentype'),
+         url('fonts/barcod39-webfont.woff') format('woff'),
+         url('fonts/barcod39-webfont.ttf') format('truetype'),
+         url('fonts/barcod39-webfont.svg#barcode_fontregular') format('svg');
+}
+p {
+    margin:0px;
+    margin-top:5px;
+}
+.barcode {
+ font-family: barcode;
+ color:#000;
+ letter-spacing: 2px;
+ font-size:52px;
+}
+.catbg {
+	background-color: #dff3ff;
+	border: 1px solid #93ccf8;
+	border-collapse: collapse;
+	color: #1051A7;
+	font-family: Arial;
+	font-size: 12px;
+}
+
+.catbd {
+	border: 1px solid #7ec7ff;
+	color: #1051A7;
+	font-family: Arial;
+	font-size: 12px;
+}
+
+.searchbg {
+	background-color: #146eb4;
+}
+
+.textbox {
+	font-family: Arial;
+	font-size: 12px;
+	color: #146eb4;
+	border: 1px solid #93ccf8;
+}
+
+.button {
+	font-family: Arial;
+	font-size: 12px;
+	color: #146eb4;
+	border: 1px #146eb4 solid;
+	font-weight: bold;
+	text-align: center;
+	cursor: pointer;
+}
+
+A.tabcat {
+	color: #15507e;
+	font-family: Arial;
+	text-decoration: none;
+	font-size: 12px;
+	font-weight: normal;
+}
+
+A.tabcat:hover {
+	color: green;
+	font-family: Arial;
+	font-size: 12px;
+	text-decoration: none;
+	font-weight: normal;
+}
+
+A.cart_payment {
+	color: #004c93;
+	font-family: Arial;
+	text-decoration: none;
+	font-size: 12px;
+}
+
+A.cart_payment:hover {
+	color: #f60a36;
+	font-family: Arial;
+	font-size: 12px;
+	text-decoration: none;
+}
+
+.footer {
+	color: #146eb4;
+	font-weight: bold;
+	font-size: x-small;
+}
+
+.on {
+	
+}
+
+.off {
+	display: none;
+}
+
+.title {
+	COLOR: #ffffff;
+	FONT-FAMILY: Arial;
+	FONT-SIZE: 8pt;
+}

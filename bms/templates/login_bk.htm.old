@@ -1,0 +1,86 @@
+<style type="text/css">
+<!--
+.style6 {	color: #295053;
+	font-weight: bold;
+	font-size:12px;
+	font-family:Arial;	
+}
+.style7 {
+	color: #FFFFFF;
+	font-weight: bold;
+	font-size:12px;
+	font-family:Arial;
+	border:1px solid #93ccf8;
+}
+-->
+</style>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border-collapse:collapse">
+<tr>
+<td height="2" colspan="2"></td>
+</tr>
+<tr>
+<td height="50" width="685"><img vspace="10" src="<?=ROOT_URL?>/bms/images/login/6.jpg" width="680" height="35">
+<img src="<?=ROOT_URL?>/bms/images/login/2.jpg" width="680" height="140" /></td>
+<td>
+<table width="290" border="0" cellpadding="0" cellspacing="0"  class="catbg">
+          <tr>
+            <td align="center" valign="top" nowrap="nowrap">
+		<form name="LOGIN" method="POST" action="?eda_code=<?= md5('login')?>" style="margin:0px;">
+            <table width="85%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td width="24%" height="40" align="center" style="border-bottom:1px #5097A3 dotted"><img src="<?=ROOT_URL?>/bms/images/login/login1.gif" width="36" height="36" /></td>
+                  <td colspan="3" align="left" style="border-bottom:1px #5097A3 dotted"><div align="center" class="style6">Đăng nhập vào hệ thống </div></td>
+                </tr>
+                <tr>
+                  <td colspan="4">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td colspan="4" align="center"><table width="90%" border="0" cellspacing="0" cellpadding="0">
+                      <tr>
+                        <td width="47%" align="center"><span class="style6">Tài khoản: </span> </td>
+                        <td width="53%" align="center"><input onfocus="this.select();" class="textbox" style="width:120px" name="user_name" id="user_name" type="text"  size="12"/></td>
+                      </tr>
+                      <tr height="6">
+                        <td colspan="2"></td>
+                      </tr>
+                      <tr>
+                        <td><div align="center"><span class="style6">Mật khẩu: </span></div></td>
+                        <td align="center"><input class="textbox" style="width:120px" name="pass" type="password"  size="12"/></td>
+                      </tr>
+                  </table></td>
+                </tr>
+                <tr>
+                  <td height="55" colspan="2" rowspan="3" style="border-bottom:1px #FF9900 solid">&nbsp;</td>
+                  <td width="38%">&nbsp;</td>
+                  <td width="32%" height="55" rowspan="3" style="border-bottom:1px #FF9900 solid">&nbsp;</td>
+                </tr>
+                <tr>
+                  <td height="23" align="center" background="<?=ROOT_URL?>/bms/images/login/hop.jpg" onMouseOver="style.cursor='pointer';" ><input onMouseOver="style.cursor='pointer';" type="submit" value="Đăng nhập"  style="background:#3366CC;" class="style7"></td>
+                </tr>
+                <tr>
+                  <td style="border-bottom:1px #FF9900 solid" >&nbsp;</td>
+                </tr>
+                <tr>
+                  <td colspan="4" style="padding-top:5px;padding-bottom:5px;" align="center">
+			<table  border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+				<tr>
+					 <td width="30"><img src="<?=ROOT_URL?>/bms/images/icon/waranty_in.png" height="16"></td>
+					 <td><a class="cart_payment" href="?eda_code=<?=md5('find_waranty')?>"><b>Tra cứu bảo hành sản phẩm</b></a></td>
+				</tr>
+			</table> 
+		</td>
+                </tr>
+            </table>
+            </form>
+            </td>
+          </tr>
+        </table>
+        </td>
+  </tr> 
+  <tr>
+<td height="2" colspan="2"></td>
+</tr>
+</table>
+<script language="javascript" type="text/javascript">
+    document.getElementById('user_name').focus();
+</script>

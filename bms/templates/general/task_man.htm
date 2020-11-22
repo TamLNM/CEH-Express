@@ -1,0 +1,152 @@
+<?php
+    $s_proj = (isset($_GET["projid"]) && !empty($_GET["projid"])) ? "AND id = '" . $_GET["projid"] . "'" : '' ;
+    if($_SESSION["group_id"] == 1) {
+    $project_list = get_data("SELECT * FROM project_task WHERE cat_project = 0 $s_proj ORDER BY id DESC");
+?>
+
+<table width="100%" id="task_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse; margin-top:10px;">
+    <tr>
+        <td width="3%" align="center" bgcolor="#afd7ff" height="25"><b>Status</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff" height="25"><b>Priority</b></td>
+        <td width="10%" align="center" bgcolor="#afd7ff"><b>Start date</b></td>
+        <td width="10%" align="center" bgcolor="#afd7ff"><b>End date</b></td>
+        <td width="15%" align="center" bgcolor="#afd7ff"><b>Task title</b></td>
+        <td width="10%" align="center" bgcolor="#afd7ff"><b>Task owner</b></td>
+        <td width="20%" align="center" bgcolor="#afd7ff"><b>Task description</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Sửa</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Xoá</b></td>
+    </tr>
+    <?php foreach($project_list as $project) { ?>
+    <tr align="center" style="background: #f2d5a0;">
+        <td colspan="7">
+           <b><?=$project["project_name"]; ?></b>
+        </td>
+        <td align="center" height="25"><img onclick="edit_project(<?= $project["id"]?>);" style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" width="16" border="0"></td>
+        <td align="center" height="25"><a href="javascript:void()" onclick="if(confirm('Bạn có chắc chắn muốn xoá dự án này không?'))window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('proj_del')?>&pid=<?= $project['id']?>';" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="16" border="0"></a></td>
+    </tr>
+    <?php
+        $projId = $project["id"];
+        $task_list = get_data("SELECT * FROM project_task WHERE cat_project = '$projId' ORDER BY id DESC");
+        if(count($task_list) > 0) {
+        foreach($task_list as $task) {
+    ?>
+    <tr>
+        <tbody>
+            <tr style="cursor:pointer;" onmouseover="this.style.backgroundColor='yellow';" onmouseout="this.style.backgroundColor=''">
+                <td align="center">
+                    <input type="checkbox" value="<?=$task['id']; ?>" name="task_stat" <?php echo ($task['status'] == 1) ? "checked" : ""; ?>/>
+                </td>
+                <td style="padding-left:5px;" align="center">
+                    <?php
+                    $now = time();
+                    $enddate = new DateTime($task["end_date"]);
+                    if(($enddate->getTimestamp() - $now) < 259200) {
+                        echo '<span style="color: red"><b>HIGHT</b></span>';
+                    } elseif(($enddate->getTimestamp() - $now) < 604800) {
+                        echo '<span style="color: yellow"><b>MEDIUM</b></span>';
+                    } else {
+                        echo '<span style="color: green"><b>NORMAL</b></span>';
+                    }
+                    ?>
+                </td>
+                <td style="padding-left:5px;"><?=$task["start_date"] ;?></td>
+                <td style="padding-left:5px;"><?=$task["end_date"] ;?></td>
+                <td style="padding-left:5px;"><?=$task["task_title"] ;?></td>
+                <td style="padding-left:5px;">
+                    <?php
+                        $userId = explode(",", $task["task_owner"]);
+                        $username = "";
+                        for($i = 0; $i < count($userId); $i++) {
+                            $user = get_data("SELECT * FROM users where user_id = '$userId[$i]' LIMIT 1");
+                            if($i == 0) {
+                                $username = $user[0]['full_name'];
+                            } else {
+                                $username .= "<br/>" . $user[0]['full_name'];
+                            }
+                        }
+                        echo $username;
+                    ?>
+                </td>
+                <td style="padding-left:5px;"><?=$task["task_description"] ;?></td>
+                <td align="center" height="25"><img onclick="edit_task(<?=$task["id"] ;?>)" style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" width="16" border="0"></td>
+                <td align="center" height="25"><a href="javascript:void()" onclick="if(confirm('Bạn có chắc chắn muốn xoá công việc này không?'))window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('task_del')?>&tid=<?=$task['id']; ?>';" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="16" border="0"></a></td>
+            </tr>
+        </tbody>
+    </tr>
+
+    <?php }}}} else {
+        $usid = $_SESSION['user_id'];
+        $u_task = get_data("SELECT * FROM project_task WHERE FIND_IN_SET($usid, task_owner) GROUP BY cat_project");
+    ?>
+
+    <table width="100%" id="task_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse; margin-top:10px;">
+        <tr>
+            <td width="3%" align="center" bgcolor="#afd7ff" height="25"><b>Status</b></td>
+            <td width="5%" align="center" bgcolor="#afd7ff" height="25"><b>Priority</b></td>
+            <td width="10%" align="center" bgcolor="#afd7ff"><b>Start date</b></td>
+            <td width="10%" align="center" bgcolor="#afd7ff"><b>End date</b></td>
+            <td width="15%" align="center" bgcolor="#afd7ff"><b>Task title</b></td>
+            <td width="10%" align="center" bgcolor="#afd7ff"><b>Task owner</b></td>
+            <td width="20%" align="center" bgcolor="#afd7ff"><b>Task description</b></td>
+        </tr>
+        <?php if(count($u_task) > 0) {
+            foreach($u_task as $pj) {
+                $cat_p = $pj['cat_project'];
+                $project_list = get_data("SELECT * FROM project_task WHERE id = $cat_p $s_proj ORDER BY id DESC");
+            foreach($project_list as $project) { ?>
+        <tr align="center" style="background: #f2d5a0;">
+            <td colspan="7">
+                <b><?=$project["project_name"]; ?></b>
+            </td>
+        </tr>
+        <?php
+        $projId = $project["id"];
+        $task_list = get_data("SELECT * FROM project_task WHERE cat_project = '$projId' AND FIND_IN_SET($usid, task_owner) ORDER BY id DESC");
+        if(count($task_list) > 0) {
+        foreach($task_list as $task) {
+        ?>
+        <tr>
+            <tbody>
+        <tr style="cursor:pointer;" onmouseover="this.style.backgroundColor='yellow';" onmouseout="this.style.backgroundColor=''">
+            <td align="center">
+                <input type="checkbox" value="<?=$task['id']; ?>" name="task_stat" <?php echo ($task['status'] == 1) ? "checked" : ""; ?>/>
+            </td>
+            <td style="padding-left:5px;" align="center">
+                <?php
+                    $now = time();
+                    $enddate = new DateTime($task["end_date"]);
+                    if(($enddate->getTimestamp() - $now) < 259200) {
+                        echo '<span style="color: red"><b>HIGHT</b></span>';
+                    } elseif(($enddate->getTimestamp() - $now) < 604800) {
+                        echo '<span style="color: yellow"><b>MEDIUM</b></span>';
+                    } else {
+                        echo '<span style="color: green"><b>NORMAL</b></span>';
+                    }
+                ?>
+            </td>
+            <td style="padding-left:5px;"><?=$task["start_date"] ;?></td>
+            <td style="padding-left:5px;"><?=$task["end_date"] ;?></td>
+            <td style="padding-left:5px;"><?=$task["task_title"] ;?></td>
+            <td style="padding-left:5px;">
+                <?php
+                        $userId = explode(",", $task["task_owner"]);
+                        $username = "";
+                        for($i = 0; $i < count($userId); $i++) {
+                            $user = get_data("SELECT * FROM users where user_id = '$userId[$i]' LIMIT 1");
+                            if($i == 0) {
+                                $username = $user[0]['full_name'];
+                            } else {
+                                $username .= "<br/>" . $user[0]['full_name'];
+                            }
+                        }
+                        echo $username;
+                        ?>
+            </td>
+            <td style="padding-left:5px;"><?=$task["task_description"] ;?></td>
+        </tr>
+    </tbody>
+    </tr>
+
+    <?php }}}}}} ?>
+
+</table>

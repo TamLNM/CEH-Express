@@ -1,0 +1,183 @@
+.content-wrapper{
+    height: calc(100vh - 48px);
+}
+.icons-list.button-action-list{
+    margin-top: 0!important;
+}
+.wrap-text {
+    white-space: normal !important;
+}
+.width-200{
+    width: 200px!important;
+}
+.width-300{
+    width: 300px!important;
+}
+.width-500{
+    width: 500px!important;
+}
+
+.datatable-info-right {
+    float: right;
+    margin-right: 30px;
+}
+
+.dataTable {
+    width: 100%!important;
+    margin: 0;
+    max-width: none;
+    border-collapse: separate;
+}
+table.dataTable thead tr{
+    /*color: #000060;*/
+    /*background-color: #bddcef;*/
+
+    color: #000060;
+    font-weight: bold;
+    background: rgb(248,248,255); /* Old browsers */
+    background: -moz-linear-gradient(top, rgba(248,248,255,1) 0%, rgba(234, 234, 239, 1) 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(top, rgba(248,248,255,1) 0%,rgba(234, 234, 239,1) 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(to bottom, rgba(248,248,255,1) 0%,rgba(234, 234, 239,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#deefff', endColorstr='#98bede',GradientType=0 ); /* IE6-9 */
+}
+
+table.dataTable thead tr th{
+    text-align: center!important;
+}
+
+table.dataTable.stripe tbody tr.selected, table.dataTable.display tbody tr.selected {
+    background-color: rgba(255,231,112,0.4)!important;
+}
+
+.dataTable .dataTables_empty{
+    text-align: left!important;
+}
+.table > tbody > tr > td
+, .table > tfoot > tr > td
+, .table > thead > tr > td{
+    border-top: 0!important;
+    border-bottom: 1px solid #ddd!important;
+    border-right: 1px solid #ddd!important;
+}
+.table > tbody > tr > td:last-child
+, .table > tfoot > tr > td:last-child
+, .table > thead > tr > td:last-child{
+    border-right: 0!important;
+}
+
+.hidden-input{
+    display: none!important;
+}
+
+table.dataTable tbody tr td {
+    padding: 4px 10px!important;
+}
+
+table.dataTable tbody tr{
+    height: 36px;
+}
+
+td > button{
+    padding: 2px 11px!important;
+    font-size: 10px!important;
+}
+
+td > div.checkbox{
+    margin-top: 0!important;
+    margin-bottom: 0!important;
+}
+
+td > div.checkbox > div.checker{
+    top: 3px!important;
+}
+
+.dt-buttons{
+    margin: 0 0 0 20px!important;
+}
+
+.ui-datepicker .ui-datepicker-next, .ui-datepicker .ui-datepicker-prev{
+    margin-top: 3px!important;
+}
+.ui-datepicker .ui-datepicker-prev::after, .ui-datepicker .ui-datepicker-next::after{
+    content: ''!important;
+}
+.ui-datepicker .ui-datepicker-title{
+    padding-top: 0!important;
+    padding-bottom: 0!important;
+}
+
+.checkbox,
+.radio {
+    position: relative;
+    margin-bottom: 0;
+    cursor: pointer;
+    padding-left: 25px;
+    font-weight: 400;
+    min-height: 18px
+}
+.checkbox-primary input:checked ~ .input-span::after {
+    border-color: #fff;
+}
+.checkbox input:checked ~ .input-span::after, .radio input:checked ~ .input-span::after {
+    display: block;
+}
+.checkbox .input-span::after, .radio .input-span::after {
+    content: '';
+    position: absolute;
+    display: none;
+    width: 5px;
+    height: 10px;
+    left: 6px;
+    top: 2px;
+    border: solid #526477;
+    border-width: 0 2px 2px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+.checkbox-primary input:checked ~ .input-span {
+    background-color: #5c6bc0;
+    border-color: #5c6bc0;
+}
+.checkbox .input-span, .radio .input-span {
+    position: absolute;
+    display: inline-block;
+    height: 18px;
+    width: 18px;
+    left: 0;
+    top: 0;
+    border: 1px solid #bdc3c7;
+        border-top-color: rgb(189, 195, 199);
+        border-right-color: rgb(189, 195, 199);
+        border-bottom-color: rgb(189, 195, 199);
+        border-left-color: rgb(189, 195, 199);
+}
+.checkbox input, .radio input {
+    position: absolute;
+    opacity: 0;
+}
+canvas, img, input, textarea {
+    max-width: 100%;
+}
+.dataTable td .checkbox .input-span, .dataTable td .radio .input-span{
+    top: -4px!important;
+}
+
+label.col-form-label{
+    padding-top: 6px;
+}
+
+.page-break{
+    background-color: #f5f5f5;
+    margin: 10px -1px;
+    height: 5px;
+    border-top: 1px solid #ddd;
+    /*border-bottom: : 1px solid #ddd;*/
+    -moz-box-shadow:   inset 0 2px 0 #eee;
+   -webkit-box-shadow: inset 0 2px 0 #eee;
+   box-shadow:         inset 0 2px 0 #eee;
+}
+
+.text-center{
+    text-align: center!important;
+}

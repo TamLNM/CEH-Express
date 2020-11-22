@@ -1,0 +1,44 @@
+  <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+    <tr>
+    <td width="30" align="center">
+      <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/clear_db.png" width="18" height="18"/>        
+      </td>
+      <td  height="25"><b>Xoá dữ liệu bán hàng</b></td>
+    <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+    </tr>
+    </table>   
+<form action="?eda_act=<?=md5('general')?>&eda_code=<?=md5('clear_db_sm')?>" method="post">
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td width="160" style="padding-left:10px;padding-top:10px;padding-bottom:10px;line-height:20px;"><b>Lưu ý: Khi thực hiện xoá dữ liệu bán hàng, toàn bộ dữ liệu của Quản lý kho - Bán hàng, Tài chính - Công nợ, Quản lý bảo hành đều bị xoá. Bạn lưu ý sao lưu dữ liệu và tải về trước khi thực hiện xoá dữ liệu. Thông tin bị xoá bao gồm:</b>
+	<br>- Thông tin phiếu nhập hàng
+	<br>- Thông tin phiếu xuất hàng
+	<br>- Thông tin phiếu xuất kho nhân viên
+	<br>- Phiếu Thu/Chi
+	<br>- Công nợ
+	<br>- Tách sản phẩm bán lẻ
+	<br>- Điều chỉnh hàng tồn kho
+	<br>- Phiếu nhập trả lại
+	<br>- Phiếu bảo hành
+	<br>- Giao dịch chuyển Quỹ/Tài khoản
+    <br><input type="checkbox" name="del_cus" id="del_cus" value="1"> Xoá bảng dữ liệu khách hàng 
+    <br><input type="checkbox" name="del_sup" id="del_sup" value="1"> Xoá bảng dữ nhà cung cấp
+    <br><input type="checkbox" name="del_pro" id="del_pro" value="1"> Xoá bảng dữ liệu sản phẩm
+    <br><input type="checkbox" name="del_cat" id="del_cat" value="1"> Xoá bảng dữ liệu danh mục sản phẩm
+	<br><input type="checkbox" name="chk" id="chk" value="0" checked style="display:none;"> <!--Cập nhật tồn đầu ký cho kỳ tiếp theo -->
+	</td>
+  </tr>
+</table>         
+<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+      <tr>
+	<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+      </tr>
+</table>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+    <tr>  
+    <td height="30" style="padding-left:10px;"><input type="submit" value="Thực hiện xoá" onclick="if(confirm('Bạn có chắc chắn muốn xoá toàn bộ dữ liệu hệ thống không?')) return true; else return false;" name="search" class="button"></td>
+    <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+    </tr>
+ </table>    
+</form>
+

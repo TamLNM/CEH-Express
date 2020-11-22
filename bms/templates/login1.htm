@@ -1,0 +1,31 @@
+<?php
+global $head;
+$this->draw_head();
+?>
+<div id="wrapper" style="margin-bottom:10px;margin-top:10px;background:#fff;">
+    <div id="infobox" style="text-align:center;overflow:hidden;">
+        <img src="<?=empty($head['logo'])?'bms/skins/img/logo.png':$head['logo']?>" height="230"  style="margin-top:20px;"  alt=""/>
+        <div style="margin-top:20px;text-align:center;width:320px;background:green;color:#fff;font-weight:bold;font-size:16px;padding:10px;line-height:25px;">
+            <a style="color:#fff;" onmouseover="this.style.color='yellow';" onmouseout="this.style.color='#fff';" href="?eda_code=<?=md5('find_waranty')?>"><b>TRA CỨU BẢO HÀNH SẢN PHẨM</b></a>
+	</div>
+    </div>
+    <div id="regbox">
+        <div id="content">
+            <div style="text-align:center;"><h2 style="font-size:21px;"><b>CÁC CHỨC NĂNG CHÍNH CỦA PHẦN MỀM QUẢN TRỊ BMS</b></h2></div>
+            <img src="bms/skins/img/qlbh.jpg" width="350" align="right" style="margin:10px;" alt=""/>
+            <a class="menu" href="javascript:void(0);">- Quản lý xuất/nhập kho</a>
+            <a class="menu" href="javascript:void(0);">- Quản lý bán hàng</a>
+            <a class="menu" href="javascript:void(0);">- Quản lý bảo hành</a>
+            <a class="menu" href="javascript:void(0);">- Quản lý thu/chi</a>
+            <a class="menu" href="javascript:void(0);">- Quản lý khách hàng</a>
+            <a class="menu" href="javascript:void(0);">- Quản lý nhà cung cấp</a>
+            <a class="menu" href="javascript:void(0);">- Quản lý tài chính/công nợ</a>
+            <a class="menu" href="javascript:void(0);">- Quản lý người dùng</a>
+            <a class="menu" href="javascript:void(0);">- Phân quyền quản trị</a>
+            <a class="menu" href="javascript:void(0);">- Nhập/xuất với file excel ...</a>
+        </div>
+    </div>
+</div>
+<?php
+$this->draw_footer();
+?>

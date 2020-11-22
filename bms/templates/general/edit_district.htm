@@ -1,0 +1,110 @@
+<form onkeypress="return tabOnEnter(document.activeElement, event);" onsubmit="return false;" name="frmadmin" method="post" action="?eda_act=<?=md5('general')?>&eda_code=<?= md5('edit_district_sm')?>" style="margin:0px">
+	<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+	    <tr>
+	        <td width="30" align="center">
+	            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/city.png" width="18" height="18" />
+	        </td>
+	        <td height="25"><b>Chỉnh sửa thông tin Quận/ Huyện</b></td>
+	        <td align="right" style="padding-right:5px;"><img onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('district')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+	    </tr>
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+            			<tr>
+			              	<td height="25" width="13%" align="left"><b>(*) Quốc gia</b></td>
+			              	<td width="20%">
+				              	<select style="width: 70%" class="catbg" name="nation_id" id="nation_id"  data-placeholder="Chọn quốc gia">	
+								    <?php
+								    	$nation_list = get_data('select * from nation');
+								    	$data = get_data('select * from nation a, city b, district c where district_id="'.$action->eda_id.'" and a.nation_id = b.nation_id and b.city_id = c.city_id');
+
+								    	if (count($nation_list) > 0){
+								    		for ($i = 0; $i < count($nation_list); $i++){
+								    			if ($nation_list[$i]['nation_id'] == $data[0]['nation_id']){
+								       				echo ('<option selected value="'.$nation_list[$i]['nation_id'].'">'.$nation_list[$i]['nation_name'].'</option>');
+								       			}
+								       			else{
+								       				echo ('<option value="'.$nation_list[$i]['nation_id'].'">'.$nation_list[$i]['nation_name'].'</option>');
+								       			}
+								    		}
+
+								    	}
+								    ?>
+								</select>
+							</td>
+			              	<td height="25" width="15	%" align="left" style="padding-left:20px;"><b>Tỉnh/ thành phố (*)</b></td>
+			              	<td width="20%">
+              					<select id="city_id" name="city_id" class="catbg" data-placeholder="Chọn Tỉnh/ Thành phố" style="width: 90%">
+              						<?php
+								    	$city_list = get_data('select * from city');
+
+								    	if (count($city_list) > 0){
+								    		for ($i = 0; $i < count($city_list); $i++){
+								    			if ($city_list[$i]['city_id'] == $data[0]['city_id']){
+								       				echo ('<option selected value="'.$city_list[$i]['city_id'].'">'.$city_list[$i]['city_name'].'</option>');
+								       			}
+								       			else{
+								       				echo ('<option value="'.$city_list[$i]['city_id'].'">'.$city_list[$i]['city_name'].'</option>');
+								       			}
+								    		}
+
+								    	}
+								    ?>
+
+              						<?php 
+								        echo ('<option value="'.$data[0]['city_id'].'">'.$data[0]['city_name'].'</option>');
+								    ?>
+              					</select>
+              				</td>
+              				<td height="25" width="13%" align="left" style="padding-left:20px;"><b>Quận/ Huyện (*)</b></td>
+			              	<td width="20%">
+              					<input style="width: 70%;" class="catbg" name="district_name" id="district_name" type="text" value="<?=$data[0]['district_name'];?>" />
+
+              					<input hidden name="district_id" id="district_id" type="text" value="<?=isset($data[0]['district_id']) ? $data[0]['district_id']:''?>" />
+              				</td>
+				        </tr>
+				    </table>
+				</td>
+			</tr>
+		</table>
+		<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+	        <tr>
+	          	<td  height="30" style="padding-left:5px;">
+	          		<input style="font-weight:bold;cursor:pointer;" onclick="document.forms[0].submit();" class="button" type="button" name="button" value="Lưu thông tin" />&nbsp;
+	          	</td>
+	        	<td align="right" style="padding-right:5px;"><img  onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('district')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+	        </tr>
+	    </table> 
+	</table>
+</form>
+<?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+
+<script type="text/javascript">
+	$(document).ready(function () {	
+		$('#nation_id').on('change', function(){
+			var nation_id = $(this).val();
+
+			if(nation_id + "" != "0"){
+				$.ajax({
+                    url: "<?php echo "?eda_act=".md5('general') . '&eda_code=' . md5('load_city_list');?>",
+                    dataType: 'json',
+                    data: {"nation_id": nation_id},
+                    type: 'POST',
+                    success: function (data) {
+                        $('#city_id').html('');                         
+                        if(typeof data[0] != "undefined"){
+                            for (i = 0; i < data.length; i++){
+                            	$('#city_id').append('<option value="' + data[i]['city_id'] + '">' + data[i]['city_name'] + '</option>');
+                            }
+                        }
+                    },
+                    error: function(err){
+                    	console.log(err);
+
+                    }
+                });
+			}
+		});	
+	});
+</script>

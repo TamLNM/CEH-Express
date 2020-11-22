@@ -1,0 +1,217 @@
+<?php $data 			= get_data("select * from stock_type order by stock_type_id, stock_type_code, stock_type_name"); ?>
+<?php $warehouse_list 	= get_data("select * from warehouse"); ?>
+<?php $currency_list 	= get_data("select * from currency"); ?>
+
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/stock_type.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Quản lý Loại hàng</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+
+<div style="margin: 10px;" id="div_contenttable">
+	<input hidden id="table_name" value="stock_type">
+	<div style="width: 978px;">
+		<table id="contenttable" class="table table-striped display nowrap" cellspacing="0" style="width: 99.5%">
+			<thead>
+				<tr>
+					<th class="editor-cancel" col-name="STT" width="10%">STT</th>
+					<th col-name="stock_type_id"></th>
+					<th col-name="stock_type_code">Mã loại hàng</th>
+					<th col-name="stock_type_name">Loại hàng</th>
+					<th col-name="warehouse_id"></th>
+					<th col-name="warehouse_code"></th>
+					<th col-name="warehouse_name" style="min-width: 300px!important;">Thuộc kho</th>
+					<th col-name="expense_type" style="min-width: 100px!important;">Loại phụ phí</th>
+					<th col-name="currency_id"></th>
+					<th col-name="currency_code"></th>
+					<th col-name="currency_name" style="min-width: 150px!important;">Loại tiền</th>
+					<th col-name="expense">Phụ phí</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php $index = 1; 
+					for($i=0; $i < count($data); $i++){?>	
+					<tr>
+						<td contenteditable="true" align="center"><?=$index++;?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['stock_type_id'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['stock_type_code'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['stock_type_name'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['warehouse_id'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['warehouse_code'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['warehouse_name'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['expense_type'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['currency_id'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['currency_code'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['currency_name'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['expense'];?></td>
+					</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<?php
+	include("bms/templates/add_row_popup.htm");
+?>
+
+<input id="editor-input" hidden="">
+
+<div id="cell-context" class="btn-group" style="padding-top: 12px;">
+	<ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<div id="cell-context-2" class="btn-group" style="padding-top: 12px;">
+	<ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<div id="cell-context-3" class="btn-group" style="padding-top: 12px;">
+	<ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function () {
+		var tbl 			= $('#contenttable'),
+			_columns 		= ['STT', 'stock_type_id', 'stock_type_code', 'stock_type_name', 'warehouse_id', 'warehouse_code', 'warehouse_name', 'expense_type', 'currency_id', 'currency_code', 'currency_name', 'expense'],
+			expenseTypeList = ['Tiền mặt', '% Sản phẩm'];
+
+		var dataTbl = tbl.newDataTable({
+			scrollY: '55vh',
+			columnDefs: [
+				{ type: "num", className: "text-center", targets: _columns.indexOf('STT') },
+				{ className: "text-center", targets: _columns.getIndexs(['stock_type_code', 'stock_type_name', 'warehouse_name', 'currency_name', 'expense'])},
+				{ className: "hiden-input", targets: _columns.getIndexs(['stock_type_id', 'warehouse_id', 'warehouse_code', 'currency_id', 'currency_code'])},
+			],
+			order: [[ _columns.indexOf('STT'), 'asc' ]],
+			paging: false,
+			keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            arrayColumns: _columns,
+		});
+		tbl.editableTableWidget();
+		tbl.initComplete({
+			ADD: 'ADD',
+			SAVE: 'SAVE',
+			DELETE: 'DELETE'
+		});
+
+		var warehouseList = [];
+		<?php for($i = 0; $i < count($warehouse_list); $i++){ ?>
+			warehouseList.push({
+				'warehouse_code': <?="'".$warehouse_list[$i]['warehouse_code']."'";?>,
+				'warehouse_name': <?="'".$warehouse_list[$i]['warehouse_name']."'";?>,
+				'warehouse_id'  : <?="'".$warehouse_list[$i]['warehouse_id']."'";?>,
+				'nation_id'  	: <?="'".$warehouse_list[$i]['nation_id']."'";?>,
+				'nation_code'   : <?="'".$warehouse_list[$i]['nation_code']."'";?>,
+				'nation_name'  	: <?="'".$warehouse_list[$i]['nation_name']."'";?>,
+				'city_id'  		: <?="'".$warehouse_list[$i]['city_id']."'";?>,
+				'city_code'  	: <?="'".$warehouse_list[$i]['city_code']."'";?>,
+				'city_name'  	: <?="'".$warehouse_list[$i]['city_name']."'";?>,
+				'district_id'  	: <?="'".$warehouse_list[$i]['district_id']."'";?>,
+				'district_code' : <?="'".$warehouse_list[$i]['district_code']."'";?>,
+				'district_name' : <?="'".$warehouse_list[$i]['district_name']."'";?>,
+			});
+		<?php } ?>
+
+		tbl.setExtendDropdown({
+			target: "#cell-context",
+			source: warehouseList,
+			colIndex: _columns.indexOf("warehouse_name"), 
+			onSelected: function(cell, value){ 
+				var warehouse_name 	= '', 
+					warehouse_id 	= '';
+
+				for (i = 0; i < warehouseList.length; i++){
+					if (warehouseList[i].warehouse_code == value){
+						warehouse_name 	= warehouseList[i].warehouse_name;
+						warehouse_id   	= warehouseList[i].warehouse_id;
+						i 				= warehouseList.length;
+					}
+				}
+
+				var tempCell = cell;
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_name");
+				tbl.DataTable().cell(tempCell).data(warehouse_name).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_code");
+				tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_id");
+				tbl.DataTable().cell(tempCell).data(warehouse_id).draw(false);
+
+				var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+				if(!crRow.hasClass("addnew")){
+		        	tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+	        	}	
+			}
+		});	
+
+		var currencyList = [];
+		<?php for($i = 0; $i < count($currency_list); $i++){ ?>
+			currencyList.push({
+				'currency_code'	: <?="'".$currency_list[$i]['currency_code']."'";?>,
+				'currency_name'	: <?="'".$currency_list[$i]['currency_name']."'";?>,
+				'currency_id'  	: <?="'".$currency_list[$i]['currency_id']."'";?>,
+				
+			});
+		<?php } ?>
+
+		tbl.setExtendDropdown({
+			target: "#cell-context-2",
+			source: currencyList,
+			colIndex: _columns.indexOf("currency_name"), 
+			onSelected: function(cell, value){ 
+				var currency_name= '', currency_id = '';
+				for (i = 0; i < currencyList.length; i++){
+					if (currencyList[i].currency_code == value){
+						currency_name  = currencyList[i].currency_name;
+						currency_id    = currencyList[i].currency_id;
+						i 			   = currencyList.length;
+					}
+				}
+
+				var tempCell = cell;
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("currency_name");
+				tbl.DataTable().cell(tempCell).data(currency_name).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("currency_code");
+				tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("currency_id");
+				tbl.DataTable().cell(tempCell).data(currency_id).draw(false);
+
+				var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+				if(!crRow.hasClass("addnew")){
+		        	tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+	        	}	
+			}
+		});	
+
+		tbl.setExtendDropdown({
+			target: "#cell-context-3",
+			source: expenseTypeList,
+			colIndex: _columns.indexOf("expense_type"), 
+			onSelected: function(cell, value){ 
+				var tempCell = cell;
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("expense_type");
+				tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+				var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+				if(!crRow.hasClass("addnew")){
+		        	tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+	        	}
+			}
+		});	
+	});
+</script>

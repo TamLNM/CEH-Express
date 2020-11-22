@@ -1,0 +1,883 @@
+<Script type="text/javascript" src="<?=ROOT_URL?>bms/common/CalendarPopup.js"></Script>
+<script language="javaScript" id="jscal1x">
+var cal = new CalendarPopup("calendarpopup");
+cal.setTodayText("Hôm nay");
+cal.showNavigationDropdowns();
+cal.setYearSelectStartOffset(20);
+cal.setMonthNames("Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12");
+cal.setDayHeaders("CN","T2","T3","T4","T5","T6","T7");
+</script>
+<SCRIPT LANGUAGE="JavaScript">document.write(getCalendarStyles());</SCRIPT>
+<DIV ID="calendarpopup" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></DIV>
+<form id=frmadmin name="frmadmin" method="post" onsubmit="return checkform()" action="?eda_act=<?= md5('sell')?>&eda_code=<?= md5('mat_split_sm')?>" style="margin:0px">
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/packageicon.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Tách sản phẩm bán lẻ</b> </td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td height="25" width="160" align="left"><b>Người thực hiện</b></td>
+              <td width="200"><input disabled style="width:200px;" class="catbg" name="full_name" type="text" value="<?= $sessions->get_session('full_name')?>" /></td>
+              <td width="115" height="25" align="left" style="padding-left:20px;"><b>Thời gian tách</b></td>
+              <td>
+              <table  border="0" cellspacing="0" cellpadding="0">
+              <tr><td>
+              <input readonly style="width:90px;" class="catbg"  onclick="cal.select(document.getElementById('date'),'anchor1','dd/MM/yyyy');if(document.getElementById('date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;" class="textbox" value="<?= isset($return_val['date'])?$return_val['date']:gmdate('d/m/Y', time()+7*3600)?>" onBlur="check_date(this);" name="date" id="date" type="text" />
+              </td><td>
+              <A href="javascript:void()" onclick="cal.select(document.getElementById('date'),'anchor1','dd/MM/yyyy'); if(document.getElementById('date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor1" ID="anchor1" src="<?=ROOT_URL?>/bms/images/icon/calendar.gif" height="18" border="0"></A>
+              </td><td>
+              <select style="width:40px;" class="catbg" name="hour" type="text">
+<?php
+	for($i=0;$i<24;$i++)
+		echo '<option  '.(isset($return_val['date'])?($return_val['hour']==$i?'selected':''):($i==gmdate('H', time()+7*3600)?'selected':'')).' value="'.$i.'">'.str_pad($i,2,'0',STR_PAD_LEFT).'</option>';
+?>              
+			</select>
+			</td><td><b>&nbsp;:&nbsp;</b></td>
+			<td><select style="width:40px;" class="catbg" name="minute" type="text">
+<?php
+	for($i=0;$i<60;$i++)
+		echo '<option '.(isset($return_val['date'])?($return_val['minute']==$i?'selected':''):($i==gmdate('i', time()+7*3600)?'selected':'')).' value="'.$i.'">'.str_pad($i,2,'0',STR_PAD_LEFT).'</option>';
+?>              
+			</select>
+			</td></tr>
+			</table>
+              </td>
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Chọn kho hàng</b></td>
+              <td>
+				<select onchange="load_mat_info();" style="width:200px;" class="catbg" name="stock_id"  id="stock_id"> 
+				<option value="">Chọn kho</option>
+<?php
+	$chk_mainstock=get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='".$sessions->get_session("user_id")."' or ugp.group_id='".$sessions->get_session("group_id")."') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+	$chk_empstock=get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='".$sessions->get_session("user_id")."' or ugp.group_id='".$sessions->get_session("group_id")."') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+	if(count($chk_mainstock)>0 && count($chk_empstock)>0) {
+		$stock=get_data("select stock_id, stock_name, user_id from stocks order by stock_name");
+	} else if(count($chk_mainstock)>0) {
+		$stock=get_data("select stock_id, stock_name, user_id from stocks where user_id is null or user_id='".$sessions->get_session('user_id')."'  order by stock_name");
+	} else {
+		$stock=get_data("select stock_id, stock_name, user_id from stocks where user_id='".$sessions->get_session('user_id')."'  order by stock_name");
+	}
+	for($i=0;$i<count($stock);$i++) {
+		echo '<option '.(isset($return_val['stock_id'])?($return_val['stock_id']==$stock[$i]['stock_id']?'selected':''):'').' value="'.$stock[$i]['stock_id'].'">'.$stock[$i]['stock_name'].'</option>';
+	}
+?>
+				</select>             
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>(*) Số chứng từ</b></td>
+              <td>
+               <input readonly value="<?= isset($return_val['inv_code'])?$return_val['inv_code']:''?>" style="width:200px;" class="catbg" name="inv_code" type="text" id="inv_code" size="25" />
+              </td>             
+            </tr>              
+            <tr>
+              <td height="25" align="left"><b>Chủng loại</b></td>
+              <td>
+	<select onchange="load_mat_info();" class="catbg" style="width:200px;" name="cat_id" id="cat_id2">
+	<option value="">Chọn chủng loại</option>
+<?php
+	$cat=get_data("select * from categories where IFNULL(cat_type,'')!='XD' order by cat_name");
+	for($i=0;$i<count($cat);$i++)
+		echo '<option '.(isset($return_val['cat_id'])?($return_val['cat_id']==$cat[$i]['cat_id']?'selected':''):'').' value="'.$cat[$i]['cat_id'].'">'.$cat[$i]['cat_name'].'</option>';
+?>	
+	</select>
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Hãng sản xuất</b></td>
+              <td>
+	<select onchange="load_mat_info();" class="catbg" style="width:200px;" name="mfa_id" id="mfa_id">
+	<option value="">Tất cả hãng SX</option>
+<?php
+	$mfa=get_data("select * from manufactures order by mfa_name");
+	for($i=0;$i<count($mfa);$i++)
+		echo '<option '.(isset($return_val['mfa_id'])?($return_val['mfa_id']==$mfa[$i]['mfa_id']?'selected':''):'').' value="'.$mfa[$i]['mfa_id'].'">'.$mfa[$i]['mfa_name'].'</option>';
+?>	
+	</select>
+              </td>             
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Tên sản phẩm</b></td>
+              <td>
+			<select onchange="load_msu();" class="catbg" style="width:200px;" name="mat_id" id="mat_id">
+			<option value="">Chọn sản phẩm cần tách</option>
+<?php
+	if(isset($return_val['cat_id']))
+	{
+		$mat=get_data("select mat_id, mat_name from materials mat where cat_id='".$return_val['cat_id']."' ".(!empty($return_val['mfa_id'])?" and mat_id in(select mat_id from mfa_mat where mfa_id='".$return_val['mfa_id']."') ":"")."");
+		for($i=0;$i<count($mat);$i++)
+		{
+			echo '<option '.($return_val['mat_id']==$mat[$i]['mat_id']?'selected':'').' value="'.$mat[$i]['mat_id'].'">'.$mat[$i]['mat_name'].'</option>';
+		}					
+	}
+?>			
+			</select>
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>(*) Đơn vị cần tách</b></td>
+              <td>
+			<select onchange="load_msu_list();" class="catbg" style="width:200px;" name="smm_id" id="smm_id">
+			<option value="">Chọn đơn vị tính</option>
+<?php
+	if(isset($return_val['mat_id']))
+	{
+		$mms = get_data ( "select smm.smm_id, msu.msu_name from stock_mat_msu smm, mat_msu mms, meansure msu where mms.mat_id='" . $return_val['mat_id'] . "' and mms.msu_id=msu.msu_id and mms.mms_id=smm.mms_id and msu.msu_multiple!=1 and smm.stock_id='".$return_val['stock_id']."' order by msu.msu_multiple desc" );
+		for($i=0;$i<count($mms);$i++)
+		{
+			echo '<option '.($return_val['smm_id']==$mms[$i]['smm_id']?'selected':'').' value="'.$mms[$i]['smm_id'].'">'.$mms[$i]['msu_name'].'</option>';
+		}	
+	}
+?>			
+			</select>
+              </td>             
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Số serial</b></td>
+              <td colspan="1">
+              	<select id=serial_list name="serial">
+              		<option>Chọn trước sản phẩm</option>
+              	</select>
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Tìm nhanh</b></td>
+              <td colspan="1">
+              	<input id="findmat" style="width:200px;" class="catbg" placeholder="Tìm nhanh..">
+              </td>
+            </tr>   
+             <tr>
+              <td height="25" align="left"><b>Ghi chú</b></td>
+              <td colspan="3"><textarea  style="width:535px;" class="catbg" name="comment" type="text" id="comment" cols="80" rows="2" /><?= isset($return_val['comment'])?$return_val['comment']:''?></textarea></td>
+            </tr>               
+            <!-- <tr><td colspan="4" height="25"><b>(*) Cho phép bán lẻ dưới các đơn vị tính:</b></td>
+            <tr><td colspan="4" id="msu_list">
+<?php
+	if(isset($return_val['mms_id']))
+	{
+			$msu_chk=get_data("select msu_parid, msu_multiple from meansure where msu_id in(select msu_id from mat_msu where mms_id='".$return_val['mms_id']."')");
+			if(count($msu_chk)>0)
+				$msu_table=get_data("select msu.* from meansure msu, mat_msu mms where mms.mat_id='".$return_val['mat_id']."' and mms.msu_id=msu.msu_id and (msu.msu_parid='".$msu_chk[0]['msu_parid']."' or msu.msu_id='".$msu_chk[0]['msu_parid']."') and msu.msu_multiple<".$msu_chk[0]['msu_multiple']." order by msu.msu_name");
+			else 
+				$msu_table=array();
+			$i=0;
+			$st='';
+			$line=ceil(count($msu_table)/5);
+			if(count($msu_table)>0)
+			{
+				$st.= '<table width="760" border="0" cellspacing="0" cellpadding="0">';
+				for($j=0;$j<$line;$j++)
+				{
+					$st.= '<tr>';
+					for($k=0;$k<5;$k++)
+					{
+						$st.= '<td width="20%" height="25">';
+						if($i<count($msu_table))
+						{
+							$st.='<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr>';
+							$chk="";
+							if (isset($return_val['msu']))
+								for($t=0;$t<count($return_val['msu']);$t++)
+								{
+									if($msu_table[$i]["msu_id"]==$return_val['msu'][$t])
+										$chk="checked";
+								}
+							$st.= '<td width="20"><input value="'.$msu_table[$i]["msu_id"].'" '.$chk.' type="checkbox" name="msu[]" id="msu_'.$i.'"></td>';
+							$st.= '<td style="cursor:pointer;" onclick="document.getElementById(\'msu_'.$i.'\').checked=!document.getElementById(\'msu_'.$i.'\').checked;">';
+							$st.= $msu_table[$i]["msu_name"]."</td></tr></table>";
+						}
+						else
+							$st.="&nbsp;";
+						$st.= '</td>';
+						$i++;
+					}
+					$st.= '</tr>';
+				}			
+				$st.= '</table>';
+			}
+			echo $st;	
+	}
+?>            
+			</td></tr> -->
+			<!-- EDIT AREA -->
+
+			<table width="950" id="mat_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+        <br/>
+        <tbody>
+            <tr><td align="center" bgcolor="#afd7ff" height="25" colspan="7"><b>Sản phẩm dư ra</b></td></tr>
+					<tr>
+						<td width="15%" align="center" bgcolor="#afd7ff"><b>Mã SP</b></td>
+            <td width="40%" align="center" bgcolor="#afd7ff" height="25"><b>Sản phẩm</b></td>
+            <td width="15%" align="center" bgcolor="#afd7ff" height="25"><b>Kho nhập hàng</b></td>
+						<td width="10%" align="center" bgcolor="#afd7ff" height="25"><b>Số lượng</b></td>
+						<td width="10%" align="center" bgcolor="#afd7ff" height="25"><b>Đơn giá</b></td>
+						<td width="10%" align="center" bgcolor="#afd7ff" height="25"><b>Tồn</b></td>
+						<td width="3%" align="center" bgcolor="#afd7ff"><input type="button" onclick="addrowExtra();" class="button" name="add_mat" id="add_mat" value="+"></td>
+					</tr>
+					<?php
+						for ($i = 0; $i < 0; $i++) { 
+							
+						?>
+						<tr>
+							<td align="center"><input readonly style="width:95%" style="width:80px;" class="catbg" name="mat_model[]" type="text" id="mat_model_<?= $i ?>" size="25" /></td>
+							<td align="center" height="25" ><input name="mc_id[]" type="hidden" id="mc_id_<?= $i ?>" size="25" />
+								<input readonly style="width:92%;" class="catbg" name="mat_name[]" type="text" id="mat_name_<?= $i ?>" size="25" /><input type="button" style="width:30px;" class="button" id="<?= $i ?>" onclick="browse_mat(<?= $i ?>)" name="browse_mat[]" value="...">
+							</td>
+							<td align="center"><input style="width:95%" style="width:40px;" class="catbg" name="empty[]" type="text" id="empty_<?= $i ?>" size="25" /></td>
+							<td align="center"><input type="button" style="width:25px;" class="button" onclick="delRowExtra(this);" name="del_user[]" value="-"></td>
+							<input type="hidden" name="mat_id[]" id="mat_id_<?= $i ?>"/>
+						</tr>
+						
+						
+					<?php
+						}
+					?>
+				</tbody>
+			</table>
+      <br/>
+			<table width="950" id="mat_tbl2" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+				<tbody>
+            <tr><td align="center" bgcolor="#afd7ff" height="25" colspan="7"><b>Sản phẩm tiêu hao</b></td></tr>
+					<tr>
+						<td width="15%" align="center" bgcolor="#afd7ff"><b>Mã SP</b></td>
+            <td width="40%" align="center" bgcolor="#afd7ff" height="25"><b>Sản phẩm</b></td>
+            <td width="15%" align="center" bgcolor="#afd7ff" height="25"><b>Kho lấy hàng</b></td>
+						<td width="10%" align="center" bgcolor="#afd7ff" height="25"><b>Số lượng</b></td>
+						<td width="10%" align="center" bgcolor="#afd7ff" height="25"><b>Đơn giá</b></td>
+						<td width="10%" align="center" bgcolor="#afd7ff" height="25"><b>Tồn</b></td>
+						<td width="3%" align="center" bgcolor="#afd7ff"><input type="button" onclick="addrowConsume();" class="button" name="add_mat" id="add_mat" value="+"></td>
+					</tr>
+					<?php
+						for ($i = 0; $i < 0; $i++) { 
+							
+						?>
+						<tr>
+							<td align="center"><input readonly style="width:95%" style="width:80px;" class="catbg" name="mat_model[]" type="text" id="mat_model_<?= $i ?>" size="25" /></td>
+							<td align="center" height="25" ><input name="mc_id[]" type="hidden" id="mc_id_<?= $i ?>" size="25" />
+								<input readonly style="width:92%;" class="catbg" name="mat_name[]" type="text" id="mat_name_<?= $i ?>" size="25" /><input type="button" style="width:30px;" class="button" id="<?= $i ?>" onclick="browse_mat(<?= $i ?>)" name="browse_mat[]" value="...">
+							</td>
+							<td align="center"><input style="width:95%" style="width:40px;" class="catbg" name="empty[]" type="text" id="empty_<?= $i ?>" size="25" /></td>
+							<td align="center"><input type="button" style="width:25px;" class="button" onclick="delRowConsume(this);" name="del_user[]" value="-"></td>
+							<input type="hidden" name="mat_id[]" id="mat_id_<?= $i ?>" />
+						</tr>
+						
+						
+					<?php
+						}
+					?>
+				</tbody>
+			</table>
+
+			<!-- EDIT AREA -->
+
+
+
+		  </table>
+
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+
+</td></tr>
+</table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;" width="30">
+          <img src="<?=ROOT_URL?>/bms/images/icon/preview.gif" height="24">
+          </td>
+          <td   style="padding-left:5px;">        
+        <a class="cart_payment" href="?eda_act=<?= md5('sell')?>&eda_code=<?= md5('mat_split_report')?>"><b>Xem lịch sử tách bán lẻ</b></a>
+        </td>
+          <td  height="30" style="padding-left:5px;">
+          <input style="font-weight:bold;cursor:pointer;"  class="button" type="submit" name="submit" value="Thực hiện tách" />
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>          
+   </form>
+
+<style>
+    #searchempdiv, #searchsupdiv, #searchmatdiv, #serialdiv, #exceldiv,#searchstockdiv{
+        position:absolute;
+        left:0px;
+        top:20px;
+        width:550px;
+        height:450px;
+        z-index:21;
+    }
+    #searchmatdiv,#searchstockdiv {
+        width:750px;
+    }
+    #searchempiframe, #searchsupiframe, #searchmatiframe, #searchstockiframe, #serialiframe, #exceliframe {
+        position:absolute;
+        left:0px;
+        top:20px;
+        width:546px;
+        height:446px;
+        z-index:21;
+        border:0px;
+    }
+    #searchmatiframe,#searchstockiframe {
+        width:746px;
+    }
+    #exceldiv {
+        height:auto;
+    }    
+</style>
+
+<iframe id="searchmatiframe" style="visibility:hidden;"></iframe>
+<div  id="searchmatdiv" style="visibility:hidden;">
+   <table  bgcolor="#ffffff" width="750" border="0" height="100%" cellpadding="0" cellspacing="0">
+		<tr>
+	 	    <td height="25" valign=top align=center width="100%">
+				<table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+				   <tr>
+		 			    <td width="94%" height="25" id="searchmathead" background="<?=ROOT_URL?>bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('searchmat',event);" style="color:white;"><b>&nbsp;&nbsp;Danh sách sản phẩm</b></td>
+					    <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif">
+			   		    <img onmouseover="this.style.cursor='pointer'; this.src='bms/images/minimize2.gif';" onmouseout=" this.src='bms/images/minimize.gif';" src="<?=ROOT_URL?>bms/images/minimize.gif" width="21" height="21" onclick="hidediv('searchmat');" /></td>
+					    <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif" style="padding-right:2px;"><img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>bms/images/close.gif" width="21" height="21" onclick="this.src='bms/images/close.gif';closediv('searchmat');"></td>
+					</tr>
+				</table>
+			</td></tr>
+		<tr>
+			<td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+			    <div id="searchmatid">
+				    <?php
+				    	include("bms/templates/search_mat.htm");
+			 	    ?>        
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>     
+<iframe id="searchstockiframe" style="visibility:hidden;"></iframe>
+<div  id="searchstockdiv" style="visibility:hidden;">
+   <table  bgcolor="#ffffff" width="750" border="0" height="100%" cellpadding="0" cellspacing="0">
+		<tr>
+	 	    <td height="25" valign=top align=center width="100%">
+				<table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+				   <tr>
+		 			    <td width="94%" height="25" id="searchstockhead" background="<?=ROOT_URL?>bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('searchstock',event);" style="color:white;"><b>&nbsp;&nbsp;Danh sách sản phẩm</b></td>
+					    <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif">
+			   		    <img onmouseover="this.style.cursor='pointer'; this.src='bms/images/minimize2.gif';" onmouseout=" this.src='bms/images/minimize.gif';" src="<?=ROOT_URL?>bms/images/minimize.gif" width="21" height="21" onclick="hidediv('searchstock');" /></td>
+					    <td width="3%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif" style="padding-right:2px;"><img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>bms/images/close.gif" width="21" height="21" onclick="this.src='bms/images/close.gif';closediv('searchstock');"></td>
+					</tr>
+				</table>
+			</td></tr>
+		<tr>
+			<td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+			    <div id="searchstockid">
+				    <?php
+				    	//include("bms/templates/search_instock.htm");
+			 	    ?>        
+				</div>
+			</td>
+		</tr>
+	</table>
+</div> 
+
+<script language="javascript">   
+var cur_mms_id=''; 
+    function browse_mat(id) {
+        isExtra = true;
+        cur_id=id;
+        document.getElementById('searchmatdiv').style.top=(document.body.scrollTop+5)+"px";
+        document.getElementById('searchmatiframe').style.top=(document.body.scrollTop+5)+"px";
+        document.getElementById('searchmatdiv').style.left=((screen.width-1000)/2+230)+"px";
+        document.getElementById('searchmatiframe').style.left=((screen.width-1000)/2+230)+"px";	
+        showdiv('searchmat');        
+		load_mat_page(1);
+		
+    }  
+
+	function load_mat_extra() {
+		document.getElementById("mms_extra_id_"+cur_id).value=cur_mms_id;
+        document.getElementById("mat_extra_id_"+cur_id).value=cur_mat_id;
+        document.getElementById("mat_extra_name_"+cur_id).value=cur_mat_name;
+        document.getElementById("mat_extra_model_"+cur_id).value=cur_mat_model;
+        var stock=$("#stock_extra_id_"+cur_id).val();
+    		var mms_id=cur_mms_id;
+    		var targer=$("#stock_extra_id_"+cur_id).closest("tr").find(".max_q");
+    		if(parseInt(mms_id)>0){
+    			mms_id=parseInt(mms_id);
+    			$.ajax({
+		            url: '?eda_act=<?= md5('ajax');?>&eda_code=<?= md5('get_stock_quantity');?>',
+		            type: 'post',
+		            data:{mms_id:mms_id,stock_id:stock},
+		            dataType: 'json',
+		            contentType: 'application/x-www-form-urlencoded',
+		            success: function (data) {
+		              targer.html(data.sum);
+		            }
+		            
+		        });
+    		}
+    }
+
+	function browse_mat_consume(id) {//
+        isExtra = false;
+        cur_id=id;
+        document.getElementById('searchstockdiv').style.top=(document.body.scrollTop+5)+"px";
+        document.getElementById('searchstockiframe').style.top=(document.body.scrollTop+5)+"px";
+        document.getElementById('searchstockdiv').style.left=((screen.width-1000)/2+230)+"px";
+        document.getElementById('searchstockiframe').style.left=((screen.width-1000)/2+230)+"px";	
+        $.ajax({
+		            url: '?eda_act=<?= md5('ajax');?>&eda_code=<?= md5('chose_mat_instock');?>',
+		            type: 'post',
+		            data:{},
+		            dataType: 'text',
+		            contentType: 'application/x-www-form-urlencoded',
+		            success: function (data) {
+		              $("#searchstockid").html(data);
+		            }
+		            
+		});
+    }
+	function load_mat_consume() {
+		document.getElementById("mms_consume_id_"+cur_id).value=cur_mms_id;
+        document.getElementById("mat_consume_id_"+cur_id).value=cur_mat_id;
+        document.getElementById("mat_consume_name_"+cur_id).value=cur_mat_name;
+        document.getElementById("mat_consume_model_"+cur_id).value=cur_mat_model;
+        var stock=$("#stock_consume_id_"+cur_id).val();
+    		var mms_id=cur_mms_id;
+    		var targer=$("#stock_consume_id_"+cur_id).closest("tr").find(".max_q");
+    		if(parseInt(mms_id)>0){
+    			mms_id=parseInt(mms_id);
+    			$.ajax({
+		            url: '?eda_act=<?= md5('ajax');?>&eda_code=<?= md5('get_stock_quantity');?>',
+		            type: 'post',
+		            data:{mms_id:mms_id,stock_id:stock},
+		            dataType: 'json',
+		            contentType: 'application/x-www-form-urlencoded',
+		            success: function (data) {
+		              targer.html(data.sum);
+		            }
+		            
+		        });
+    		}
+
+    }
+
+  function load_mat() {
+    if(isExtra) load_mat_extra();
+    else load_mat_consume();
+  }
+load_mat_info();
+	function load_mat_info()
+	{
+		eda_request=load('?eda_type=ajax&eda_code=<?= md5("load_cat_mat_split")?>&eda_id='+document.getElementById("cat_id2").value+'&stock_id='+document.getElementById("stock_id").value+'&eda_cid='+document.getElementById("mfa_id").value,'mat_id','listbox','GET',null,'no');
+		document.getElementById("mat_id").value='';
+		load_msu();
+	}
+	function load_msu()
+	{
+		eda_request=load('?eda_type=ajax&eda_code=<?= md5("load_msu_split")?>&eda_id='+document.getElementById("mat_id").value+'&stock_id='+document.getElementById("stock_id").value,'smm_id','listbox','GET',null,'no');
+		//console.log(eda_request);
+		setTimeout(function(){
+			console.log($("#smm_id").find("option").length);
+			if($("#smm_id").find("option").length>1){
+				$("#smm_id").find("option").removeAttr("selected");
+				$("#smm_id").find("option:nth-child(2)").attr("selected","true");
+			}
+			loadserial();
+		},100);
+		//document.getElementById("msu_list").innerHTML='';
+	}
+	function load_msu_list()
+	{
+		eda_request=load('?eda_type=ajax&eda_code=<?= md5("load_msu_list")?>&eda_id='+document.getElementById("mat_id").value+'&eda_cid='+document.getElementById("smm_id").value,'msu_list','html','GET',null,'no');
+		loadserial();
+
+	}
+	function loadserial(){
+		var smm_id=$("#smm_id").val();
+		$.post( "?eda_type=ajax&eda_code=<?= md5('load_seria') ?>",{"smm_id":smm_id}, function() {
+            })
+            .done(function(data) {
+                data=JSON.parse(data);
+                console.log(data);
+                var html="";
+                $(data).each(function(i,item){
+                    if(item.serial_end>item.serial_start && item.serial_start>0)
+                    {
+                        for (var i = item.serial_start; i <= item.serial_end; i++) {
+                            html+="<option class=ser_select sid="+i+">"+i+" ( Giá : "+formatnumber(item.s_price,",",0)+" )</option>";
+                        }
+                    }
+                    else
+                    {
+                            html+="<option class=ser_select sid="+item.serial_start+">"+item.serial_start+" ( Giá : "+formatnumber(item.s_price,",",0)+" )</option>";
+                    }
+                    
+                });
+               $("#serial_list").html(html);
+
+            })
+            .fail(function() {
+            });
+	}
+	var waintL;
+	function find_mat(key){
+		console.log("begin",key);
+		clearTimeout(waintL);
+		waintL=setTimeout(function(){
+			console.log("tim");
+			$(".findmat_box").remove();
+		$("body").append("<div class=findmat_box>Loading...</div>");
+		$(".findmat_box").attr("style","padding:5px;position:absolute;background:#fff;left:"+$("#findmat").offset().left+"px;top:"+($("#findmat").offset().top+25)+"px");
+		$.post( "?eda_type=ajax&eda_code=<?= md5('findmat') ?>",{"key":key}, function() {
+            })
+            .done(function(data) {
+                data=JSON.parse(data);
+                console.log(data);
+                $(".findmat_box").html("");
+                $(data).each(function(i,item){                    
+                    $(".findmat_box").append("<div class=smm_select smm_id="+item.smm_id+">["+item.mat_name+"] ở kho ["+item.stock_name+"] còn ["+item.quantity+" "+item.msu_name+"] </div>");
+                    $(".smm_select[smm_id='"+item.smm_id+"']").last().data("data_row",item);
+                    
+                });
+                
+
+            })
+            .fail(function() {
+            });
+		},1000);
+
+		
+	}
+
+  function append_stock_option(newinput) {
+    var option = document.createElement("option");
+      option.value = 0;
+      option.text = "Chọn kho";
+      newinput.appendChild(option);
+    `<?php foreach($stock as $i){ ?>`
+      var option = document.createElement("option");
+      option.value = `<?= $i['stock_id'] ?>`;
+      option.text = `<?= $i['stock_name'] ?>`;
+      newinput.appendChild(option);
+    `<?php } ?>`
+  }
+	function addrowExtra() {
+        var doc=document;
+        var tbl = doc.getElementById('mat_tbl').getElementsByTagName('tbody')[0];
+
+        var newrow = doc.createElement("TR");
+        var newcol , newinput;
+        cur_index++;
+					
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newcol.style.height="25";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.readOnly = true;
+        newinput.id="mat_extra_model_"+cur_index;
+        newinput.name="mat_extra_model[]";
+        newinput.className='catbg';
+        newinput.style.width="95%";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="hidden";
+        newinput.id="mc_extra_id_"+cur_index;
+        newinput.name="mc_extra_id[]";
+        newcol.appendChild(newinput);		
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="mat_extra_name_"+cur_index;
+        newinput.name="mat_extra_name[]";
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="85%";
+        newcol.appendChild(newinput);
+        newinput = doc.createElement("input");
+        newinput.type="hidden";
+        newinput.className='mms_obj';
+        newinput.id="mms_extra_id_"+cur_index;
+        newinput.name="mms_extra_id[]";
+        newcol.appendChild(newinput);
+        newinput = doc.createElement("input");
+        newinput.type="button";
+        newinput.id=cur_index;
+        newinput.name="browse_mat_extra[]";
+        newinput.value="...";
+        newinput.style.width="30px";
+        newinput.onclick=function(){browse_mat(this.id);};
+        newinput.className='button';
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("select");
+        newinput.id="stock_extra_id_"+cur_index;
+        newinput.name="stock_extra_id[]";
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="95%";
+        append_stock_option(newinput);
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        
+		
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="number";
+        newinput.id="quantity_extra"+cur_index;
+        newinput.name="quantity_extra[]";
+        newinput.className='catbg';
+        newinput.style.width="95%";
+        newinput.value=1;
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="number";
+        newinput.id="price_extra"+cur_index;
+        newinput.name="price_extra[]";
+        newinput.className='catbg';
+        newinput.style.width="95%";
+        newinput.value=1;
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newcol.innerHTML="<b class=max_q idx='"+cur_index+"'></b>";
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="button";
+        newinput.id="del_mat_extra_"+cur_index;
+        newinput.name="del_mat_extra[]";
+        newinput.value="-";
+        newinput.style.width="25px";
+        newinput.onclick=function(){delRowExtra(this);};
+        newinput.className='button';
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newinput = doc.createElement("input");
+        newinput.type="hidden";
+        newinput.id="mat_extra_id_"+cur_index;
+        newinput.name="mat_extra_id[]";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+		
+        tbl.appendChild(newrow);
+    }
+    function delRowExtra(a) { 
+        var row = a.parentNode.parentNode; 
+        var tbody = document.getElementById('mat_tbl').getElementsByTagName('tbody')[0]; 
+        tbody.removeChild(row); 
+    }
+
+
+
+	function addrowConsume() {
+        var doc=document;
+        var tbl2 = doc.getElementById('mat_tbl2').getElementsByTagName('tbody')[0];
+
+        var newrow = doc.createElement("TR");
+        var newcol , newinput;
+        cur_index++;
+					
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newcol.style.height="25";
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.readOnly = true;
+        newinput.id="mat_consume_model_"+cur_index;
+        newinput.name="mat_consume_model[]";
+        newinput.className='catbg';
+        newinput.style.width="95%";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="hidden";
+        newinput.id="mat_consume_id_"+cur_index;
+        newinput.name="mat_consume_id[]";
+        newcol.appendChild(newinput);
+        newinput = doc.createElement("input");
+        newinput.type="hidden";
+        newinput.className='mms_obj';
+        newinput.id="mms_consume_id_"+cur_index;
+        newinput.name="mms_consume_id[]";
+        newcol.appendChild(newinput);	
+        newinput = doc.createElement("input");
+        newinput.type="text";
+        newinput.id="mat_consume_name_"+cur_index;
+        newinput.name="mat_consume_name[]";
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="85%";
+        newcol.appendChild(newinput);
+        newinput = doc.createElement("input");
+        newinput.type="button";
+        newinput.id=cur_index;
+        newinput.name="browse_mat_consume[]";
+        newinput.value="...";
+        newinput.style.width="30px";
+        newinput.onclick=function(){browse_mat_consume(this.id);};
+        newinput.className='button';
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+		
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("select");
+        newinput.id="stock_consume_id_"+cur_index;
+        newinput.name="stock_consume_id[]";
+        newinput.readOnly=true;
+        newinput.className='catbg';
+        newinput.style.width="95%";
+        append_stock_option(newinput);
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="number";
+        newinput.id="quantity_consume_"+cur_index;
+        newinput.name="quantity_consume[]";
+        newinput.className='catbg';
+        newinput.style.width="95%";
+        newinput.value=1;
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);   
+
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="number";
+        newinput.id="price_consume_"+cur_index;
+        newinput.name="price_consume[]";
+        newinput.className='catbg';
+        newinput.style.width="95%";
+        newinput.value=1;
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newcol.innerHTML="<b class=max_q idx='"+cur_index+"'></b>";
+        newrow.appendChild(newcol);
+
+        newcol = doc.createElement("TD");
+        newcol.style.textAlign="center";
+        newinput = doc.createElement("input");
+        newinput.type="button";
+        newinput.id="del_mat_"+cur_index;
+        newinput.name="del_mat_consume[]";
+        newinput.value="-";
+        newinput.style.width="25px";
+        newinput.onclick=function(){delRowConsume(this);};
+        newinput.className='button';
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+
+        newinput = doc.createElement("input");
+        newinput.type="hidden";
+        newinput.id="mat_consume_id_"+cur_index;
+        newinput.name="mat_consume_id[]";
+        newcol.appendChild(newinput);
+        newrow.appendChild(newcol);
+		
+        tbl2.appendChild(newrow);
+    }
+    function delRowConsume(a) { 
+        var row = a.parentNode.parentNode; 
+        var tbody = document.getElementById('mat_tbl2').getElementsByTagName('tbody')[0]; 
+        tbody.removeChild(row); 
+    }
+function checkform(){
+	var check=false;
+	$("#mat_tbl select").each(function(){
+		if($(this).val()+''=='0')
+		check=true;
+	});
+	$("#mat_tbl2 select").each(function(){
+		if($(this).val()+''=='0')
+		check=true;
+	});
+	if(check){
+		alert("Chưa chọn kho");
+		return false;
+	}else{
+		return true;
+	}
+}
+    $(document).ready(function(){
+
+
+
+    	$(document).on("change","select[name='stock_extra_id[]'] , select[name='stock_consume_id[]']",function(){
+    		var stock=$(this).val();
+    		var mms_id=$(this).closest("tr").find(".mms_obj").val();
+    		var targer=$(this).closest("tr").find(".max_q");
+    		if(parseInt(mms_id)>0){
+    			mms_id=parseInt(mms_id);
+    			$.ajax({
+		            url: '?eda_act=<?= md5('ajax');?>&eda_code=<?= md5('get_stock_quantity');?>',
+		            type: 'post',
+		            data:{mms_id:mms_id,stock_id:stock},
+		            dataType: 'json',
+		            contentType: 'application/x-www-form-urlencoded',
+		            success: function (data) {
+		              targer.html(data.sum);
+		            }
+		            
+		        });
+    		}
+    	});
+
+$(document).on("input","#findmat",function(){
+	find_mat($(this).val());
+});
+$(document).on("click",".smm_select",function(e){
+	var dt=$(this).data("data_row");
+	$("#stock_id").val(dt.stock_id);
+	$("#cat_id2").val(dt.cat_id);
+	$("#mat_id").html('<option value='+dt.mat_id+'>'+dt.mat_name+'</option>');
+	$("#smm_id").html('<option value='+dt.smm_id+'>'+dt.msu_name+'</option>');
+	loadserial();
+});
+$(document).on("click",function(e){
+	if($(e.targer).closest(".findmat_box").length<=0)
+	{
+		$(".findmat_box").remove();
+	}
+	
+});
+
+    });
+
+</script>          
+<style>
+	.smm_select:hover{
+		background: #08c;
+		color:#fff;
+		cursor: pointer;
+	}
+
+</style>

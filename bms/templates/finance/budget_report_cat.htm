@@ -1,0 +1,203 @@
+	<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="80%" align="center" bgcolor="#afd7ff" height="25"><b>Khoản Thu/Chi</b></td>
+		<td width="20%" align="center" bgcolor="#afd7ff"><b>Tổng tiền</b></td>
+		</tr>
+<?php
+	$bin=get_data("select itt.item_name, bin.bin_type, sum(bin.amount) amount from budget_invoices bin, item_type itt  where ".(!empty($return_val['fund_id'])?" bin.fund_id='".$return_val['fund_id']."' and ":"").(!empty($return_val['user_id'])?" bin.user_id='".$return_val['user_id']."' and ":"").(isset($return_val['bin_type'])?($return_val['bin_type']!=-1?" bin.bin_type='".$return_val['bin_type']."' and ":""):"").(isset($return_val['item_id'])?($return_val['item_id']!=-1?" itt.item_id='".$return_val['item_id']."' and ":""):"")." bin.created_date between ".$sdate." and ".$edate."  and bin.item_id=itt.item_id group by itt.item_id  order by bin.bin_type, itt.item_name");
+	$bin_before=get_data("select bin.bin_type, sum(bin.amount) amount from budget_invoices bin, item_type itt, users usr where ".(!empty($return_val['fund_id'])?" bin.fund_id='".$return_val['fund_id']."' and ":"").(!empty($return_val['user_id'])?" bin.user_id='".$return_val['user_id']."' and ":"").(isset($return_val['bin_type'])?($return_val['bin_type']!=-1?" bin.bin_type='".$return_val['bin_type']."' and ":""):"").(isset($return_val['item_id'])?($return_val['item_id']!=-1?" itt.item_id='".$return_val['item_id']."' and ":""):"")."   bin.created_date < ".$sdate."  and bin.user_id=usr.user_id and bin.item_id=itt.item_id  group by bin.bin_type order by bin.bin_type");
+	$bin_after=get_data("select bin.bin_type, sum(bin.amount) amount from budget_invoices bin, item_type itt, users usr where ".(!empty($return_val['fund_id'])?" bin.fund_id='".$return_val['fund_id']."' and ":"").(!empty($return_val['user_id'])?" bin.user_id='".$return_val['user_id']."' and ":"").(isset($return_val['bin_type'])?($return_val['bin_type']!=-1?" bin.bin_type='".$return_val['bin_type']."' and ":""):"").(isset($return_val['item_id'])?($return_val['item_id']!=-1?" itt.item_id='".$return_val['item_id']."' and ":""):"")."   bin.created_date > ".$edate."  and bin.user_id=usr.user_id and bin.item_id=itt.item_id  group by bin.bin_type order by bin.bin_type");
+	$amount_in=0;
+	$amount_out=0;
+	for($i=0;$i<count($bin);$i++)
+	{	
+		if($i>0&&$bin[$i]['bin_type']!=$bin[$i-1]['bin_type']&&$bin[$i]['bin_type']!=3)
+		{
+
+?>	
+	    <tr style="background-Color:#eeeeee;font-weight:bold;">
+		<td align="center" height="25">Tổng <?= ($bin[$i-1]['bin_type']==0?'Thu':'Chi')?></td>
+		<td align="right" style="padding-right:5px;"><?= number_format(($bin[$i-1]['bin_type']==0?$amount_in:$amount_out),0,","," ")?></td>
+		</tr>
+<?php
+		}
+?>		
+	    <tr>
+		<td style="padding-left:5px;" height="25"><?= ($bin[$i]['bin_type']==0?'Thu - ':'Chi - ').$bin[$i]['item_name']?></td>
+		<td align="right" style="padding-right:5px;"><?= number_format($bin[$i]['amount'],0,","," ")?></td>
+		</tr>
+
+<?php
+		if($bin[$i]['bin_type']==0)
+			$amount_in+=$bin[$i]['amount'];
+		else
+			$amount_out+=$bin[$i]['amount'];
+	}
+	if(count($bin)>0) {
+?>	
+	    <tr style="background-Color:#eeeeee;font-weight:bold;">
+		<td align="center" height="25">Tổng <?= ($bin[$i-1]['bin_type']==0?'Thu':'Chi')?></td>
+		<td align="right" style="padding-right:5px;"><?= number_format(($bin[$i-1]['bin_type']==0?$amount_in:$amount_out),0,","," ")?></td>
+		</tr>
+<?php
+	}
+	if(!isset($return_val['bin_type'])||$return_val['bin_type']==-1)
+	{
+?>		
+	    <tr style="background-Color:#afd7ff;">
+		<td height="25" align="center"><b>Tổng cộng (Thu-Chi)</b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($amount_in-$amount_out,0,","," ")?></b></td>
+		</tr>
+<?php
+	}
+?>			
+		</table>
+		<table><tr><td><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height="10"></td></tr></table>
+		
+<?php
+   $total_in = 0;
+	$total_out = 0;
+	if(!empty($return_val['fund_id'])) {
+     $inv_in=get_data("SELECT sum(fund.amount) amount    FROM fund_invoices fund
+                              WHERE  fund.fund_to=".$return_val['fund_id'].(!empty($return_val['user_id'])? " AND fund.user_id=".$return_val['user_id']:'')
+                              ." and  fund.created_date between ".$sdate." and ".$edate);	
+	if(count($inv_in)>0) {
+		$total_in=$inv_in[0][0];
+	} else {
+		$total_in=0;
+	}
+		if($total_in>0) {
+?>
+<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr style="background-Color:#eeeeee;">
+		<td colspan="5" height="25" align="center"><b>Tổng quỹ nhận</b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($total_in,0,","," ")?></b></td>
+		</tr>
+<?php
+	}
+     $inv_out=get_data("SELECT sum(fund.amount) amount    FROM fund_invoices fund
+                              WHERE  fund.fund_from=".$return_val['fund_id'].(!empty($return_val['user_id'])? " AND fund.user_id=".$return_val['user_id']:'')
+                              ." and  fund.created_date between ".$sdate." and ".$edate);	
+	if(count($inv_out)>0) {
+		$total_out=$inv_out[0][0];
+	} else {
+		$total_out=0;
+	}
+	if($total_out>0) {
+		if($total_in==0) {
+?>
+<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+<?php
+		}
+?>
+	    <tr style="background-Color:#eeeeee;">
+		<td colspan="5" height="25" align="center"><b>Tổng quỹ chuyển</b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($total_out,0,","," ")?></b></td>
+		</tr>
+<?php
+	}
+	if($total_in>0 || $total_out>0) {
+		echo '<tr style="background-Color:#afd7ff;">
+		<td colspan="5" height="25" align="center"><b>Tổng cộng (Nhận - Chuyển)</b></td>
+		<td align="right" style="padding-right:5px;"><b>'. number_format($total_in-$total_out,0,","," ").'</b></td>
+            </tr>
+	</table>
+		<table><tr><td><img src="'.ROOT_URL.'/bms/images/spacer.gif" height="10"></td></tr></table>';
+	}
+}
+?>		
+<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">		
+<?php
+	if(@!empty($_GET['fund_id'])) {
+		$dk=get_data("select amount, fund_name from fund where fund_id='".$_GET['fund_id']."'");
+		if(count($dk)>0) {
+			$dauky=$dk[0][0];
+			echo ' <tr style="background-Color:#eeeeee;">
+			<td colspan="5" height="25" style="padding-left:10px;"><b>Số dư đầu kỳ ('.$dk[0][1].')</b></td>
+			<td align="right" style="padding-right:5px;"><b>'. number_format($dauky,0,","," ").'</b></td>
+			</tr>';
+		} else {
+			$dauky=0;
+		}
+	} else {
+		$dk=get_data("select sum(amount) amount from fund");
+                $dauky=$dk[0][0];
+                echo ' <tr style="background-Color:#eeeeee;">
+                <td colspan="5" height="25" style="padding-left:10px;"><b>Số dư đầu kỳ</b></td>
+                <td align="right" style="padding-right:5px;"><b>'. number_format($dauky,0,","," ").'</b></td>
+                </tr>';
+	}
+	$sum_before=0;
+	$sum_after=0;
+	if(count($bin_before)>0) {
+		if($bin_before[0]['bin_type']==0) {
+			$sum_before+=$bin_before[0]['amount'];
+		} else {
+			$sum_before-=$bin_before[0]['amount'];
+		}
+		if(isset($bin_before[1]['bin_type'])) {
+			$sum_before-=$bin_before[1]['amount'];
+			if(isset($bin_before[2]['bin_type'])) {
+				$sum_before-=$bin_before[2]['amount'];
+			}
+		}
+	}
+	if(count($bin_after)>0) {
+		if($bin_after[0]['bin_type']==0) {
+			$sum_after+=$bin_after[0]['amount'];
+		} else {
+			$sum_after-=$bin_after[0]['amount'];
+		}
+		if(isset($bin_after[1]['bin_type'])) {
+			$sum_after-=$bin_after[1]['amount'];
+			if(isset($bin_after[2]['bin_type'])) {
+				$sum_after-=$bin_after[2]['amount'];
+			}
+		}
+	}	
+$inv_before=0;
+	$inv_after=0;
+	if(!empty($return_val['fund_id'])) {
+     $inv_in_before=get_data("SELECT sum(fund.amount) amount    FROM fund_invoices fund
+                              WHERE  fund.fund_to=".$return_val['fund_id'].(!empty($return_val['user_id'])? " AND fund.user_id=".$return_val['user_id']:'')
+                              ." and  fund.created_date < ".$sdate);	
+     $inv_out_before=get_data("SELECT sum(fund.amount) amount    FROM fund_invoices fund
+                              WHERE  fund.fund_from=".$return_val['fund_id'].(!empty($return_val['user_id'])? " AND fund.user_id=".$return_val['user_id']:'')
+                              ." and  fund.created_date < ".$sdate);						
+	if(count($inv_in_before)>0){
+		$inv_before+=$inv_in_before[0][0];
+	}
+	if(count($inv_out_before)>0){
+		$inv_before-=$inv_out_before[0][0];
+	}	
+     $inv_in_after=get_data("SELECT sum(fund.amount) amount    FROM fund_invoices fund
+                              WHERE  fund.fund_to=".$return_val['fund_id'].(!empty($return_val['user_id'])? " AND fund.user_id=".$return_val['user_id']:'')
+                              ." and  fund.created_date > ".$edate);	
+     $inv_out_after=get_data("SELECT sum(fund.amount) amount    FROM fund_invoices fund
+                              WHERE  fund.fund_from=".$return_val['fund_id'].(!empty($return_val['user_id'])? " AND fund.user_id=".$return_val['user_id']:'')
+                              ." and  fund.created_date > ".$edate);						
+	if(count($inv_in_after)>0){
+		$inv_after+=$inv_in_after[0][0];
+	}	
+	if(count($inv_out_after)>0){
+		$inv_after-=$inv_out_after[0][0];
+	}	
+}	
+?>		
+	    <tr style="background-Color:#eeeeee;">
+		<td colspan="5" height="25" style="padding-left:10px;"><b>Tổng Thu - Chi trước kỳ</b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($sum_before+$inv_before,0,","," ")?></b></td>
+		</tr>
+	    <tr style="background-Color:#eeeeee;">
+		<td colspan="5" height="25" style="padding-left:10px;"><b>Tổng Thu - Chi trong kỳ (<?= !empty($return_val['datefrom'])?$return_val['datefrom']:'Tất cả'?> - <?= !empty($return_val['dateto'])?$return_val['dateto']:date('d/m/Y')?>)</b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($amount_in-$amount_out+$total_in-$total_out,0,","," ")?></b></td>
+		</tr>	
+	    <tr style="background-Color:#eeeeee;">
+		<td colspan="5" height="25" style="padding-left:10px;"><b>Tổng Thu - Chi sau kỳ</b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($sum_after+$inv_after,0,","," ")?></b></td>
+		</tr>		
+	    <tr style="background-Color:#afd7ff;">
+		<td colspan="5" height="25" style="padding-left:10px;"><b>Tổng cộng (Tồn đầu kỳ + Thu - chi toàn kỳ)</b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($dauky+$sum_after+$sum_before+$inv_after+$inv_before+$amount_in-$amount_out+$total_in-$total_out,0,","," ")?></b></td>
+		</tr>			
+	</table>

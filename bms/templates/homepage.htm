@@ -1,0 +1,110 @@
+<LINK href="<?=ROOT_URL?>bms/common/admin_style.css" type=text/css rel=stylesheet>
+<style type="text/css">
+    <!--
+    .style1 {
+        color: #FFFFFF;
+        font-weight: bold;
+    }
+    .on
+    {
+    }
+    .off
+    {
+        display:none;
+    }
+    .menungang {
+        FONT-SIZE: 12px;font-weight:bold; FONT-FAMILY: arial;color:#f00000;TEXT-DECORATION: none;
+    }
+    .menungang:hover {
+        FONT-SIZE: 12px;font-weight:bold; FONT-FAMILY: arial;color:yellow;TEXT-DECORATION:none;
+    }
+    .postfieldevent
+    {
+        font-size:11px; font-family:arial; color:#B87604
+    }
+    .titlefieldevent
+    {
+        font-size:12px; font-family:arial;
+    }
+    .form {
+        BORDER-RIGHT: #cccccc 1px solid; BORDER-TOP: #cccccc 1px solid; FONT-SIZE: 12px;  BORDER-LEFT: #cccccc 1px solid; COLOR: #000000; BORDER-BOTTOM: #cccccc 1px solid; FONT-FAMILY: Arial; BACKGROUND-COLOR: #ffffff; TEXT-DECORATION: none;
+    }
+    .rg_textbox {
+        BORDER-RIGHT: #538ba6 0px solid; BORDER-TOP: #538ba6 0px solid; FONT-SIZE: 12px; BORDER-LEFT: #538ba6 0px solid; COLOR: #0044dd; BORDER-BOTTOM: #538ba6 1px dotted; FONT-FAMILY: Arial; BACKGROUND-COLOR: #ffffff
+    }
+    -->
+</style>
+<div style="margin:auto;width:998px;margin-bottom:5px;margin-top:5px;">
+    <table border="0" width="998"  align="center" cellpadding="0" cellspacing="0">
+        <tr>
+            <td width="30"  style="padding-top:5px;" align="center"><img height="18" src="<?=ROOT_URL?>bms/images/icon/home.gif" border="0" /></td>
+            <td <?= $sessions->get_session('login') == 'logined' ? ' width="70"' : '' ?>  style="padding-top:6px;"  style="cursor:pointer;"><a href="?eda_act=<?= md5('homepage') ?>" class="cart_payment"><b>Trang chủ</b> </a></td>
+
+            <?php
+            if ($sessions->get_session('login') == 'logined') {
+                ?>              
+                <td style="padding-top:6px;">
+                    <div id="softwarecenterMenuID">
+                        <script   language="JavaScript" type="text/javascript">
+                            var myMenu = [
+    <?php
+    $parmenu = get_data("select * from function_menu where is_visible = 1 and fmenu_parid is null and  fmenu_act not in('other','update') order by order_by");
+    $mnu = get_data("select count(*) c from function_menu fmenu, user_group_permission ugp where is_visible = 1 and fmenu.fmenu_id=ugp.fmenu_id  and ugp.user_id='" . $sessions->get_session('user_id') . "' order by order_by");
+    for ($i = 0; $i < count($parmenu); $i++) {
+        if ($sessions->get_session('user_name') == 'admin') {
+            $menu = get_data("select fmenu.* from function_menu fmenu where is_visible = 1 and fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' order by order_by");
+        } else {
+            $menu = get_data("select fmenu.* from function_menu fmenu, user_group_permission ugp where is_visible = 1 and fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' and fmenu.fmenu_id=ugp.fmenu_id  and ugp.user_id='" . $sessions->get_session('user_id') . "' order by order_by");
+            if ($mnu[0]['c'] == 0) {
+                $menu = get_data("select fmenu.* from function_menu fmenu, user_group_permission ugp where is_visible = 1 and fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' and fmenu.fmenu_id=ugp.fmenu_id  and ugp.group_id='" . $sessions->get_session('group_id') . "' order by order_by");
+            }
+        }
+        if (count($menu) > 0) {
+            ?>
+                                        [null, '<?= $parmenu[$i]['fmenu_name'] ?>', null, null, '<?= $parmenu[$i]['fmenu_name'] ?>', null,
+            <?php
+            for ($j = 0; $j < count($menu); $j++) {
+                ?>
+                                            ['<img src="<?=ROOT_URL?>bms/images/icon/<?= $menu[$j]['fmenu_img'] ?>" width="18" />', '<?= $menu[$j]['fmenu_name'] ?>', '?eda_act=<?= md5($parmenu[$i]['fmenu_act']) ?>&eda_code=<?= md5($menu[$j]['fmenu_act']) ?>', null, '<?= $menu[$j]['fmenu_name'] ?>'],
+                <?php
+            }
+            ?>
+                                        ],
+            <?php
+        }
+    }
+    ?>
+                            ];
+                            cmDraw('softwarecenterMenuID', myMenu, 'hbr', cmThemeOffice2003, 'ThemeOffice2003');
+                        </script>
+                    </div>            
+                </td>
+                <?php
+            }
+            ?>      
+        </tr>
+    </table>
+
+
+    <script language=javascript>
+        left = screen.width / 2 - 100;
+        document.writeln('<div id="loadid" style="text-align:center;visibility: hidden; position:absolute; left:' + left + 'px; top:20px; width:150px; height:22; z-index:1; color: #0000FF; background-Color:#ebeced;font-weight: bold;  border: 1px none #000000;"></div>');
+    </script>            
+</div>
+<div  style="margin:auto;width:998px;margin-top:10px;margin-bottom: 10px;border: 1px solid #ddd;border-top:0px;">
+    <table  width="998" border="0" cellpadding="0" cellspacing="0">
+        <tbody>
+            <tr>       
+                <td valign="top" align="left" bgcolor="#ffffff">
+                    <?php
+                    global $file_tmp;
+                    if (!empty($file_tmp) && file_exists(__DIR__ . "/" . $file_tmp))
+                        include("bms/templates/" . $file_tmp);
+                    else
+                        echo 'Không tìm thấy nội dung';
+                    ?>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

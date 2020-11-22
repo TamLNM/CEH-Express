@@ -1,0 +1,26 @@
+<?php
+header("Access-Control-Allow-Origin: *");
+$inputJSON = file_get_contents('php://input');
+$headers = apache_request_headers();
+echo "\n\rheaders:";
+print_r($headers);echo "\n\r_SERVER:";
+print_r($_SERVER);echo "\n\r_GET:";
+print_r($_GET);
+echo "\n\r_POST:";
+print_r($_POST);
+echo "\n\rinputJSON:";
+print_r($inputJSON);
+$param=array();
+parse_str( @explode("?", $_SERVER['REQUEST_URI'])[1],$param);
+echo "\n\rparam:";
+print_r($param);
+
+$qc=safe_str(@$param['name']);
+$gai=safe_str(@$param['gai']);
+$trueSignalKey=sha1("name={$qc}&gai={$gai}&secretKey=".SECRET_KEY);
+$trueSignalKey2=sha1("name={$param['name']}&gai={$param['gai']}&secretKey=".SECRET_KEY);
+echo "\n\rtrueSignalKey:";
+print_r($trueSignalKey);
+echo "\n\rtrueSignalKey2:";
+print_r($trueSignalKey2);
+die();

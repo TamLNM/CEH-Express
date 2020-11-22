@@ -1,0 +1,70 @@
+<?php
+header("Access-Control-Allow-Origin: *");
+
+$headers = apache_request_headers();
+$param=array();
+parse_str( @explode("?", $_SERVER['REQUEST_URI'])[1],$param);
+$token=safe_str(@$_SERVER['HTTP_TOKEN']);
+if($token=="")$token=safe_str(@$param['token']);
+
+//die($token);
+
+$signalKey=safe_str(@$param['signalKey']);
+
+$stock_code=safe_str(@$param['stock_code']);
+$qc=safe_str(@$param['name']);
+$gai=safe_str(@$param['gai']);
+
+$trueSignalKey=sha1("name={$qc}&gai={$gai}&secretKey=".SECRET_KEY);
+if($token!=TOKEN){
+	$reback['result']=false;
+	$reback['message']="Sai token !! [".$token."]";
+	echo json_encode($reback,true);die();
+}
+if($trueSignalKey!=$signalKey){
+	$reback['result']=false;
+	$reback['message']="Sai signalKey !! [".$trueSignalKey."]";
+	echo json_encode($reback,true);die();
+}
+
+$where="";
+if($stock_code!=""){
+	$where .= " and stock.stock_code like '".$stock_code."'";
+}
+if($qc!=""){
+	$where .= " and mat.qc = '".$qc."'";
+}
+if($gai!=""){
+	$where .= " and mat.gai = '".$gai."'";
+}
+
+$reback=array();
+if($qc==""){
+	$reback['result']=false;
+	$reback['message']="Thiếu trường Gai (gai) hoặc Quy cách (name)";
+	echo json_encode($reback,true);die();
+}
+
+
+$mat=get_data("select mat.*,msu.msu_name,mms.mms_id from materials mat,meansure msu ,mat_msu mms where mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id and mat.qc = '".$qc."' and mat.gai = '".$gai."'");
+if(count($mat)>0){
+	
+	$dtstock=get_data("select stock_code,stock_id from stocks");
+	$dts=array();
+	foreach ($dtstock as $key => $st) {
+		$instock=$this->get_instock($mat[0],time(),$st['stock_id']);
+		$dts[$st['stock_code']]=intval(@$instock['sum']);
+	}
+	$reback['result']=true;
+	$reback['data']=$dts;
+	echo json_encode($reback,true);die();
+	
+}
+else
+{
+	$reback['result']=false;
+	$reback['message']="Không tìm thấy dữ liệu sản phẩm";
+	echo json_encode($reback,true);die();
+}
+
+?>

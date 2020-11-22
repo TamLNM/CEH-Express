@@ -1,0 +1,310 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<link href="assets/css/custom.datatables.css" rel="stylesheet" type="text/css"/>
+        <link href="assets/css/main.min.css" rel="stylesheet" type="text/css"/>
+        <link href="assets/css/ro2.css" rel="stylesheet" type="text/css"/>
+        <script src="assets/vendors/jquery/dist/jquery2-1-4.min.js"></script>
+        <link href="assets/vendors/dataTables/datatables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/scroller.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/css/custom.datatables.css" rel="stylesheet" />
+        <link href="assets/vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+        <link href="assets/vendors/line-awesome/css/line-awesome.min.css" rel="stylesheet" />
+        <link href="assets/vendors/themify-icons/css/themify-icons.css" rel="stylesheet" />
+        <script src="assets/js/tablefilter/tablefilter.js"></script>
+        <script src="assets/js/datatables.ext.js"></script>
+        <script src="assets/vendors/dataTables/datatables.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/css/theme.default.min.css" rel="stylesheet" />
+
+        <link href="assets/vendors/dataTables/datatables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/jquery.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/vendors/dataTables/scroller.dataTables.min.css" rel="stylesheet" />
+        <link href="assets/css/custom.datatables.css" rel="stylesheet" />
+        <link href="assets/vendors/toastr/toastr.min.css" rel="stylesheet" type="text/css" />
+        <script src="assets/js/datatables.ext.js"></script>
+        <script src="assets/vendors/dataTables/dataTables.scroller.min.js"></script>
+
+        <!-- Datetime picker -->
+        <link href="assets/vendors/datetimepicker/jquery-ui-timepicker-addon.css" rel="stylesheet" />
+        <script type="text/javascript" src="assets/vendors/datetimepicker/jquery-ui-timepicker-addon.js"></script>
+
+        <!--    TABLES SCROLL-->
+        <script src="assets/vendors/dataTables/dataTables.scroller.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/key_table.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/mindmup-editabletable.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/numeric-input-example.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/autofill.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/scroller.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/select.min.js"></script>
+        <script type="text/javascript" src="assets/vendors/dataTables/extensions/buttons.min.js"></script>
+        <style>
+			@media only screen and (max-width: 768px) {
+				#contenttable_list tbody tr td:before{
+					min-width: 80px;
+					display: inline-block;
+				}
+
+				.button-bar-group{
+					text-align: right;
+				}
+				.button-bar-group .btn{
+					margin-bottom:5px;
+					margin-top:5px;
+					max-width: 33px;
+				}	
+				.button-bar-group .btn .fa{
+					padding-right: 50px;
+				}
+				.button-bar-group .btn:hover{
+					max-width: inherit !important;
+					width: auto;
+					min-width: auto;
+				}
+				.button-bar-group .btn:hover .fa{
+					padding-right: 5px;
+				}
+				.datatable-header{
+					margin-top:5px;
+				}
+		        table.mobile_tbl{
+		            display:block;
+		        }
+		        table.mobile_tbl *{
+		            box-sizing: border-box;
+		        }
+		        table.mobile_tbl .dataTables_scrollBody{
+		            overflow: unset;
+		        }
+		        table.mobile_tbl thead{
+		            display: none !important;
+		        }
+		        table.mobile_tbl tbody{
+		            display:block;
+		        }
+		        table.mobile_tbl tbody tr{
+		            display:block;
+		            position: relative;
+		            white-space: normal;
+		            border-bottom: 1px solid #dedede;
+		        }
+		        table.mobile_tbl tbody tr:nth-child(odd){
+		            background-color: #b6b6b6;
+
+		        }
+		        table.mobile_tbl tbody tr td{
+		            display:inline-block;
+		            border:none !important;
+		            box-sizing: border-box;
+		            min-width: 49%;
+		            text-align: left !important;
+		        }
+			}
+			.btn-group-sm .btn-icon-only, .btn-icon-only.btn-sm {
+				height: 25px;
+    			width: 25px;
+    			margin-top: 2px;
+			}
+			.btn-group-sm .btn-icon-only [class*=la-], .btn-icon-only.btn-sm [class*=la-] {
+				font-size: 1rem;
+			}
+			::placeholder{
+				font-style: italic;
+				color: #004c93;
+			}
+		</style>
+	</head>
+	<body>
+		<div align="right">			
+			<div style="display: inline-block;">
+				<button id="check_QR_import_stock" style="font-family: Times New Roman; border-radius: 5px; height: 2rem; width: 140px; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-left: 10px;"><p style="margin-top: auto; margin-bottom: auto"><span class="btn-icon"><i class="fa fa-barcode"></i>Quét mã chứng từ</span></p></button>
+
+				<button id="check_QR_import_stock" style="font-family: Times New Roman; border-radius: 5px; height: 2rem; width: 140px; background-color: rgb(255, 61, 0); border: rgb(255, 61, 0) solid 1px; color: white; margin-left: 10px;"><p style="margin-top: auto; margin-bottom: auto"><span class="btn-icon"><i class="fa fa-barcode"></i>Quét mã order</span></p></button>
+			</div>
+			<div style="display: inline-block; padding-top: 5px;">
+				<input type="text" style="background-color: transparent; border: 0.5px solid #004c93; width: 260px; margin-left: 10px; margin-top: 5px; padding-left: 5px; border-radius: 5px;" placeholder="Nhập nội dung tìm kiếm" hidden id="search_text">
+				<button class="btn btn-success btn-icon-only btn-circle btn-sm btn-thick" style="margin-left: 10px;" id="btn_search"><i class="la la-search"></i></button>
+			</div>
+		</div>
+		<div id="contenttable_div">
+			<div style="font-size: 12px; padding-left: 5px; padding-top: 10px;">
+				Số chứng từ: <b>CAHCM20051500001 - 15/05/2020</b>
+			</div>
+			<div style="font-size: 12px; padding-left: 5px; padding-top: 10px;">
+				<label style="float: left;">Kho: <span id="warehouse_id" style="font-weight: bold">Kho Cali</span></label>
+				<label style="float: right; padding-right: 10px;">Số dòng: <span id="row_numeric">3</span></label>
+			</div>
+			<div style="margin: 5px;">
+				<table id="contenttable" style="width: 100%;margin-bottom: 10px; font-size: 12px;" class="table table-striped display nowrap mobile_tbl" cellspacing="0">
+					<thead>
+					    <tr> 
+					        <th col-name="order_id">Mã order</th>
+					        <th col-name="total_price">Trọng lượng</th>
+					    </tr>
+					</thead>
+					<tbody id="tbody_contenttable"></tbody>
+				</table>
+			</div>
+		</div>
+		<div id="contenttable_list_div">
+			<div style="font-size: 12px; padding-left: 5px; padding-top: 10px;"></div>	
+				<div style="font-size: 12px; padding-left: 5px; padding-top: 10px;">
+					<label style="float: left;">Số order: <b>US20050800001</b></span></label>
+					<label style="float: right; padding-right: 10px;">Số dòng: <span id="row_numeric">2</span></label>
+				</div>
+				<div style="margin: 5px;">
+					<table id="contenttable_list" style="width: 100%;margin-bottom: 10px; font-size: 13px;" class="table table-striped display nowrap mobile_tbl" cellspacing="0">
+						<thead>
+						    <tr>			   
+						        <th col-name="total_price">Hàng hóa</th>
+						        <th col-name="sender_name">Số lượng</th>
+						        <th col-name="sender_name">Trọng lượng</th>
+						        <th col-name="sender_name">Ghi chú</th>
+						    </tr>
+						</thead>
+						<tbody id="tbody_contenttable_details"></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+
+<script src="assets/vendors/jquery-ui/jquery-ui.js"></script>
+<script src="assets/vendors/datetimepicker/jquery-ui-timepicker-addon.js"></script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var tbl 				= $('#contenttable'),
+			tblList 			= $('#contenttable_list'),
+            _columns 			= ['order_id', 'total_price'],
+            _listColumns 		= ['1', '2', '3', '4', '5'],
+			data 				= [
+								   	['US20050800001', '25kg'], 
+								   	['US20050800002', '30kg'], 
+								   	['US20050800003', '35kg'],
+								  ],
+			dataList 			= [['Ipad',  '10/ <input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 75px;" placeholder: "Nhập trọng lượng"  value="10"> (cái)', '5/ <input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 75px;" placeholder: "Nhập trọng lượng" value="5"> (kg)', '<input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 175px;" placeholder: "Ghi chú"><button class="confirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 5rem; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-right: 10px; font-weight: bold; margin-left: 10px;"><p style="margin-top: auto; margin-bottom: auto;">Xác nhận</p></button>'], 
+								   ['Bánh kẹo', '0/ <input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 75px;" placeholder: "Nhập trọng lượng"  value="0"> (cái)',  '20/ <input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 75px;" placeholder: "Nhập trọng lượng"  value="20"> (kg)', '<input type="text" style="background-color: transparent; border:none; border-bottom: 0.5px solid #004c93; width: 175px;" placeholder: "Ghi chú"><button class="confirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 5rem; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-right: 10px; font-weight: bold; margin-left: 10px;"><p style="margin-top: auto; margin-bottom: auto;">Xác nhận</p></button>'], 
+								];
+	
+        tbl.newDataTable({
+            scrollY: '100vh',
+            columnDefs: [
+            ],
+            paging: false,
+            keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            paging: false,
+            info: false,
+            buttons: [],
+            arrayColumns: _columns,
+            searching: false,
+        });
+        tbl.initComplete({
+			QMCT: 'QMCT',
+		});
+
+        tblList.newDataTable({
+            scrollY: '100vh',
+            columnDefs: [
+            ],
+            paging: false,
+            keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            paging: false,
+            info: false,
+            buttons: [],
+            arrayColumns: _listColumns,
+            searching: false,
+        });
+
+		if($(".mobile_tbl").length>0 && $(window).width()<=768){
+	        var css="";
+	        $(".mobile_tbl").each(function(i){
+	            var tblid="#"+$(this).attr("id");        
+	            $(this).find("th").each(function(){
+	                var inx=$(this).index()+1;
+	                css+=tblid+" tbody tr td:nth-child("+inx+"):before{content:\""+$(this).text()+" : \";color:#795548;}";
+	            });
+	            $("head").append("<style>@media only screen and (max-width: 768px){"+css+"}</style>");
+	        });
+	        $('#contenttable_list_div').hide();
+			//$('#contenttable_div').css({'width': '100%'});
+	    	//$('#contenttable_list_div').css({'width': '100%'});
+	    }
+	    else{
+	    	//$('#contenttable_div').css({'width': '50%'});
+	    	//$('#contenttable_list_div').css({'width': '50%'});
+	    }
+		
+		tbl.dataTable().fnAddData(data);
+		tblList.dataTable().fnAddData(dataList);
+
+		$('.sorting_1').css({'background-color': 'transparent'});
+		$('.odd').css({'background-color': '#CCFFCC'});
+		$('.even').css({'background-color': 'white'});
+
+		$(document).on('click', "#contenttable tbody tr", function(e){
+			if($(".mobile_tbl").length>0 && $(window).width()<=768){
+				$('#contenttable_div').hide();
+				$('#contenttable_list_div').hide();
+				$('#search_text').hide();
+
+				$('#contenttable_list_div').show();
+			}
+		});
+
+		$('#btn_search').on('click', function(){
+			$('#search_text').show();
+		});
+
+		var resizefunc = [];
+            $.extend( true, $.fn.dataTable.defaults, {
+                language: {
+                    info: "Số dòng: _TOTAL_",
+                    emptyTable: "------------ Không có dữ liệu hiển thị ------------",
+                    infoFiltered: "(trên _MAX_ dòng)",
+                    infoEmpty: "Số dòng: 0",
+                    search: '<span>Tìm:</span> _INPUT_',
+                    zeroRecords:    "------------ Không có dữ liệu được tìm thấy ------------",
+                    sThousands: ",",
+                    sDecimal: ".",
+                    select: {
+                        rows: {
+                            _: "Đã chọn %d dòng",
+                            0: ""
+                        }
+                    }
+                },
+                search: {
+                    regex: true
+                },
+                info: true,
+                orderClasses: false,
+                paging: false,
+                scrollY: 419,
+                scrollX: true,
+                lengthChange: false,
+                scrollCollapse: false,
+                deferRender: true,
+                processing: true,
+                autoWidth: true,
+                dom: '<"datatable-header"fl<"datatable-info-right"Bip>><"datatable-scroll-wrap"t>',
+                buttons: [
+                    {extend: 'selectAll', text: 'Chọn tất cả', className: 'btn btn-xs btn-default'},
+                    {extend: 'selectNone', text: 'Bỏ chọn', className: 'btn btn-xs btn-default'}
+                ],
+                destroy: true
+            });
+    });
+</script>

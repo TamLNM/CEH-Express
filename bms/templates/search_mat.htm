@@ -1,0 +1,81 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center" height="30"><b>Chủng loại</b></td>
+	<td>
+	<select class="catbg" style="width:120px;" name="cat_id" id="cat_id">
+<?php
+        $cat=get_data("select * from categories order by cat_name");
+        echo '<option value="">Tất cả chủng loại</option>';
+	for($i=0;$i<count($cat);$i++)
+		echo '<option value="'.$cat[$i]['cat_id'].'">'.$cat[$i]['cat_name'].'</option>';
+?>	
+	</select>
+	</td>
+	<td align="center" height="30"><b>Tên sản phẩm</b></td>
+	<td><input  onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) load_mat_page(1);" onfocus="this.select();" style="width:110px;" value=""  class="catbg" name="mat_name" type="text" id="mat_name" size="25" />
+	</td>
+	<td><input type="button" value="Tra cứu" onclick="load_mat_page(1);" name="search" class="button"></td>
+      </tr>
+      <tr><td id="search_by_sup"  colspan="4" style="padding-left:10px;padding-bottom:5px;"></td></tr>    
+	</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center">	
+<div id="matid" style="padding:5px;height:450px;overflow:auto;"></div>
+	</td></tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr><td align="center" height="30" bgcolor="#f3f3f3">
+                <?php
+                if($action->eda_decode=="input_mat" || $action->eda_decode=="mat_split" || $action->eda_decode=="mat_split_sm") {
+                    echo '<input type="button" onclick="load_add_mat();" value="Thêm mới sản phẩm"  onclick="" class="button">&nbsp;&nbsp;';
+                }
+                ?>
+      <input type="button" value="Đóng"  onclick="hidediv('searchmat');" class="button">&nbsp;&nbsp;<input type="button" value="Chọn"  onclick="selectmat();" class="button"></td>
+      </tr>
+	</table>
+	
+<script language="javascript">
+	var cur_mat_page=1;
+	var cur_mat_id='';
+	var cur_mat_name='';
+	var cur_price='';
+	var cur_msu_id='';
+	var cur_tax='';
+    var cur_vat='';
+    var cur_mat_model='';
+    var cur_mms_id='';
+    var cur_tkvt='';
+    var cur_edit_tkvt='';
+        function load_add_mat() {
+            $.get('?eda_type=ajax&eda_code=<?= md5("add_mat_quick")?>',function(data){
+               $('#matid').html(data); 
+               $('#add_cat_id').val($('#cat_id').val());
+               load_mfa();
+            });
+        }
+	function load_mat_page(p)
+	{
+		var sup=0;
+		if(document.getElementById('sup_id'))
+		{
+			if(document.getElementById('chk_sup'))
+				if(document.getElementById('chk_sup').checked)
+				sup=document.getElementById('sup_id').value;
+		}
+		load('?eda_type=ajax&eda_code=<?= md5("search_mat")?>&eda_module=<?= $action->eda_module?>&mat_name='+document.getElementById('mat_name').value+'&cat_id='+document.getElementById('cat_id').value+(sup>0?'&sup_id='+sup:'')+'&eda_page='+p,'matid','html','GET',null,'in');
+		cur_mat_page=p;
+	}
+	function selectmat()
+	{
+		if(cur_mat_id=='')
+		{
+			alert('Hãy chọn sản phẩm cần thêm');
+		}
+		else
+		{
+			hidediv('searchmat');
+			load_mat();
+		}
+	}
+</script>

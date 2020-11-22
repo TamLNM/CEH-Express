@@ -1,0 +1,94 @@
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center" width="120" height="30"><b>File dữ liệu excel</b></td>
+        <td width="260">
+            <form id="excelfrm" action="?eda_act=958153f1b8b96ec4c4eb2147429105d9&eda_code=ec2f7a7a72707997acddad74271f4e45" enctype="multipart/form-data" method="post"><input onclick="resetStep();" type="file" id="excelfile" name="excelfile" style="width:250px;"></form>
+        </td>
+        <td  height="30"><a id="templatefile" href="bms/tmp/khachhang.xlsx"><i>(Tải file dữ liệu mẫu)</i></a></td>
+    </tr>
+	<tr>
+		<td align="center" colspan="3"><span id="error"></span></td>
+	</tr>
+	<tr>
+		<td align="center" colspan="3"><img id="loading" style="display: none;" src="bms/images/loading.gif" /></td>
+	</tr>
+	<tr>
+		<td align="center" colspan="3"><span id="success"></span></td>
+	</tr>
+</table>
+<style type="text/css">
+    #progress { display:none;position:relative; width:400px; border: 1px solid #ddd; padding: 1px; border-radius: 3px;text-align: left; }
+    #bar { background-color: #B4F5B4; width:0%; height:20px; border-radius: 3px; text-align: left;}
+    #percent { position:absolute; display:inline-block; top:3px; left:48%;  text-align: left;}
+</style>
+<div id="progress">
+    <div id="bar"></div>
+    <div id="percent">0%</div >
+</div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="left">	
+            <div id="dataid" style="padding:5px;max-height:450px;width:650px;overflow:auto;"></div>
+        </td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr><td align="center" height="30" bgcolor="#f3f3f3">
+            <input type="button" value="Đóng"  onclick="hidediv('excel'); resetStep();" class="button">&nbsp;&nbsp;<input type="button" value="Tiếp theo"  onclick="nextstep();" class="button"></td>
+    </tr>
+</table>
+<script language="javascript">
+    var step=1;
+    function resetStep() {
+        step=1;
+		$('#error').html("");
+		$('#loading').hide();
+		$('#success').html(""); 
+    }
+    function nextstep() {
+        if(step===1) {
+			var fileName = $('#excelfile').val();
+			if(fileName != "") {
+				$('#error').html("Đang xử lý, xin vui lòng chờ ...");
+				$('#loading').show();
+				uploaddata();
+			} else {
+				$('#error').html("Xin vui lòng chọn file nhập liệu");
+			}
+        } 
+    }
+	
+	function uploaddata() {
+		var file_data = $('#excelfile').prop('files')[0];
+		var form = $('form#excelfrm')[0];
+		var form_data = new FormData(form);
+		form_data.append('file', file_data);                          
+		$.ajax({
+					url: '?eda_act=958153f1b8b96ec4c4eb2147429105d9&eda_code=ec2f7a7a72707997acddad74271f4e45',
+					dataType: 'json', 
+					cache: false,
+					contentType: false,
+					processData: false,
+					data: form_data,                         
+					type: 'post',
+					success: function(data){
+						if(data["false"].length > 0) {
+							$('#error').html(data["false"]); 
+							$('#loading').hide();
+							step=1;
+						} 
+						if(data["compare"].length > 0) {
+							data["compare"] = "Dữ liệu bị trùng: " + data["compare"] + "<br/>"; 
+							$('#loading').hide();
+							$('#error').html(data["compare"]); 							
+						} 
+						if(data["success"].length > 0) {
+							data["success"] = "Thêm dữ liệu thành công";
+							$('#loading').hide();
+							$('#success').html(data["success"]); 
+						}
+					}
+		 });
+	}
+</script>

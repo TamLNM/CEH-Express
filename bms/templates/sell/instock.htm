@@ -1,0 +1,295 @@
+<?php
+if ($action->eda_type != 'ajax') {
+    if (isset($return_val["dateto"])) {
+        $edate = explode("/", $return_val["dateto"]);
+        if ($edate[0] > 0 && $edate[0] <= 31 && $edate[1] > 0 && $edate[1] <= 12 && $edate[2] <= date('Y')) {
+            $edate = mktime(23, 59, 59, $edate[1], $edate[0], $edate[2]);
+        }
+    }
+    if (!isset($edate)) {
+        $edate = mktime(23, 59, 59, date('m'), date('d'), date('Y'));
+    }
+    ?>
+    <style type="text/css">
+        .tablesorter-header{background-color: #a0ddf9 !important;}
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/js/select2.min.js" defer></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/css/select2.min.css" rel="stylesheet"/>
+    <Script type="text/javascript" src="<?=ROOT_URL?>bms/common/CalendarPopup.js"></Script>
+    <script language="javaScript" id="jscal1x">
+        var cal = new CalendarPopup("calendarpopup");
+        cal.setTodayText("Hôm nay");
+        cal.showNavigationDropdowns();
+        cal.setYearSelectStartOffset(20);
+        cal.setMonthNames("Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12");
+        cal.setDayHeaders("CN", "T2", "T3", "T4", "T5", "T6", "T7");
+    </script>
+    <SCRIPT LANGUAGE="JavaScript">document.write(getCalendarStyles());</SCRIPT>
+    <DIV ID="calendarpopup" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></DIV>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td width="30" align="center">
+                <img style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/documents.png" width="18" height="18"/>        
+            </td>
+            <td  height="25"><b>Thống kê sản phẩm tồn kho</b></td>
+            <td align="right" style="padding-right:5px;"><img onclick="window.location = '?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td width="130" style="padding-left:5px;" valign=top>
+                <select class="catbg" style="width:120px;" name="mat_status" id="mat_status">
+                    <option value="">Liệt kê tất cả</option>
+                    <option value="con">Liệt kê hàng còn</option>
+                    <option value="het">Liệt kê hàng hết</option>
+                </select>
+                
+            </td>
+            <td width="125" valign=top>
+                <select multiple class="catbg" style="width:120px;" name="cat_id" id="cat_id">
+                    <option value="">Tất cả chủng loại</option>
+    <?php
+    $cat = get_data("select * from categories order by cat_name");
+    for ($i = 0; $i < count($cat); $i++)
+        echo '<option value="' . $cat[$i]['cat_id'] . '">' . $cat[$i]['cat_name'] . '</option>';
+    ?>	
+                </select>
+            </td>
+            <td width="125" valign=top>
+                <select multiple class="catbg" style="width:120px;" name="stock_id" id="stock_id">
+                    <option value="">Tất cả kho hàng</option>
+    <?php
+    $chk_mainstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+    $chk_empstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+    if (count($chk_mainstock) > 0 && count($chk_empstock) > 0) {
+        $stock = get_data("select stock_id, stock_name, user_id from stocks order by stock_name");
+    } else if (count($chk_mainstock) > 0) {
+        $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id is null or user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+    } else {
+        $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+    }
+    for ($i = 0; $i < count($stock); $i++)
+        echo '<option ' . (isset($return_val['stock_id']) ? ($return_val['stock_id'] == $stock[$i]['stock_id'] ? 'selected' : '') : '') . ' value="' . $stock[$i]['stock_id'] . '">' . $stock[$i]['stock_name'] . '</option>';
+    ?>	
+                </select>       
+            </td>  	
+            <td width="50" align="center" height="30" valign=top><b>Tên SP</b></td>
+            <td width="120" valign=top><input  onkeydown="if (event.which)
+                code = event.which;
+            else
+                code = window.event.keyCode;
+            if (code == 13)
+                load_mat_page(cur_mat_page);" onfomat="this.select();" style="width:110px;" value=""  class="catbg" name="mat_name" type="text" id="mat_name" size="25" />
+            </td>
+            <td width="70" style="padding-right:15px;" align="right" valign=top><b>Đến ngày</b></td>
+            <td width="70" valign=top>
+                <input readonly style="width:70px;" class="catbg"  onclick="cal.select(document.getElementById('dateto'), 'anchor2', 'dd/MM/yyyy');
+            if (document.getElementById('dateto').value == '') {
+                d = new Date();
+                CP_refreshCalendar(0, 1 + d.getMonth(), d.getFullYear())
+            }
+            ;
+            return false;" class="textbox" value="<?= isset($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>" onBlur="check_date(this);" name="dateto" id="dateto" type="text" />
+            </td> <td width="30"  valign=top>
+                <A href="javascript:void()" onclick="cal.select(document.getElementById('dateto'), 'anchor2', 'dd/MM/yyyy');
+            if (document.getElementById('dateto').value == '') {
+                d = new Date();
+                CP_refreshCalendar(0, 1 + d.getMonth(), d.getFullYear())
+            }
+            ;
+            return false;"><img  NAME="anchor2" ID="anchor2" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+            </td>   	
+            <td  valign=top><input type="button" value="Tra cứu" onclick="load_mat_page(1);" name="search" class="button"></td>
+            <td  height="30" style="padding-left:5px;" width="30"  valign=top>
+                <?php
+                if (check_func('instock_excel')) {
+                    ?>
+                    <img src="<?=ROOT_URL?>bms/images/icon/excel.png" height="24">
+                    <?php
+                }
+                ?>
+            </td>
+            <td   style="padding-left:5px;"  valign=top>
+                <?php
+                if (check_func('instock_excel')) {
+                    ?>
+                    <a class="cart_payment" href="javascript:void()"
+                       onclick="window.open('?eda_code=<?= md5('excel_export') ?>&eda_type=ajax&eda_module=instock&dateto=' + document.getElementById('dateto').value + '&mat_name=' + document.getElementById('mat_name').value + '&stock_id=' + $('#stock_id').val() + '&cat_id=' + $('#cat_id').val() + '&mat_status=' + document.getElementById('mat_status').value);"
+                       target="_blank"><b>Xuất Excel</b></a>
+                    <?php
+                }
+                ?>
+            </td>         
+        </tr>
+    </table>
+    <?php
+}
+?>		
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center" style="padding-left:5px;padding-right:5px;">	
+            <div id="matid">
+<?php
+if ($action->eda_code == md5('view_report'))
+    include("bms/templates/sell/search_mat_instock.htm");
+?>	
+            </div>
+        </td></tr>
+</table>
+<?php
+if ($action->eda_type != 'ajax') {
+    ?>	
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+        <tr>
+            <td style="padding-left:10px;line-height:22px;"><b>Lưu ý:</b><br> - Số lượng tồn phía sau là số lượng tồn hiện tại, số lượng tồn phía trước là số lượng tồn theo ngày<br>- Số lượng bằng "*" là sản phẩm có tách bán lẻ, sản phẩm loại này không hỗ trợ thống kê tồn theo ngày</td>
+        </tr>	
+    </table>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td  height="30" style="padding-left:5px;" width="30">
+                <img src="<?=ROOT_URL?>bms/images/icon/preview.gif" height="24">
+            </td>
+            <td width="150"  style="padding-left:5px;">
+                <a class="cart_payment" href="javascript:void()" onclick="window.open('?eda_code=<?= md5('view_report') ?>&eda_type=ajax&eda_module=sell/instock&dateto=' + document.getElementById('dateto').value + '&mat_name=' + document.getElementById('mat_name').value + '&stock_id=' + $('#stock_id').val() + '&cat_id=' + $('#cat_id').val() + '&mat_status=' + document.getElementById('mat_status').value);"><b>Xem dạng in ấn</b></a>
+            </td>      
+            <td  height="30" style="padding-left:5px;" width="30">
+                <?php
+                if (check_func('instock_excel')) {
+                    ?>
+                    <img src="<?=ROOT_URL?>bms/images/icon/excel.png" height="24">
+                    <?php
+                }
+                ?>
+            </td>
+            <td   style="padding-left:5px;">
+                <?php
+                if (check_func('instock_excel')) {
+                    ?>
+                    <a class="cart_payment" href="javascript:void()"
+                       onclick="window.open('?eda_code=<?= md5('excel_export') ?>&eda_type=ajax&eda_module=instock&dateto=' + document.getElementById('dateto').value + '&mat_name=' + document.getElementById('mat_name').value + '&stock_id=' + $('#stock_id').val() + '&cat_id=' + $('#cat_id').val() + '&cat_id=' + document.getElementById('cat_id').value + '&mat_status=' + document.getElementById('mat_status').value);"
+                       target="_blank"><b>Xuất Excel</b></a>
+                    <?php
+                }
+                ?>
+            </td> 
+            <td align="right" style="padding-right:5px;"><img  onclick="window.location = '?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table> 
+    <script language="javascript">
+        var cur_mat_page = 1;
+        function load_mat_page(p)
+        {
+            load('?eda_type=ajax&eda_act=<?= md5("sell") ?>&eda_code=<?= md5("search_mat_instock") ?>&dateto=' + document.getElementById('dateto').value + '&mat_name=' + document.getElementById('mat_name').value + '&stock_id=' + $("#stock_id").val() + '&cat_id=' + $("#cat_id").val() + '&mat_status=' + document.getElementById('mat_status').value + '&eda_page=' + p, 'matid', 'html', 'GET', null, 'Đang thống kê...',function(){
+
+var cols=0;
+var tds=[];
+var widths=[];
+$('#tbl_sort thead tr').each(function(){
+    cols=0;
+    $(this).find('th,td').each( function (i) {
+        var newcol=parseInt($(this).attr("colspan"))||1;
+        for (var i = 1; i <= newcol; i++) {
+            tds[i+cols-1]=$(this).text();
+            widths[i+cols-1]=$(this).width();
+        }
+        cols+=newcol;
+    });
+});
+if(tds.length>0){
+    var new_tr="<tr class='tr_fillter_new'>";
+for (var i = 0; i < tds.length; i++) {
+        new_tr+='<td style="padding:0px;"><input type="text" style="width:100%" placeholder="'+tds[i]+'"/></td>';
+    }
+    new_tr+="</tr>";
+    $( '#tbl_sort thead' ).append(new_tr);
+    $('#tbl_sort thead tr.tr_fillter_new th,#tbl_sort thead tr.tr_fillter_new td').each( function (i) {
+        $( 'input', this ).on( 'keyup change', function () {
+            if ( table.column(i).search() !== this.value ) {
+                table
+                    .column(i)
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+        $( 'input', this ).on( 'click', function (e) {
+            e.stopPropagation();
+        } );
+    } );
+    $('#tbl_sort').DataTable().destroy();
+    var table = $('#tbl_sort').DataTable( {
+        orderCellsTop: true,
+        fixedHeader: true,
+        paging: false
+    } );
+}
+
+
+    
+
+
+            });
+            //alert($("#cat_id").val());
+            cur_mat_page = p;
+        }
+        load_mat_page(cur_mat_page);
+        $(document).ready(function(){
+            $("#cat_id").select2({placeholder: "Tất cả loại sản phẩm"});
+            $("#stock_id").select2({placeholder: "Tất cả kho"});
+        });
+    </script>
+    <style type="text/css">
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered li{
+            display: contents;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered li.select2-selection__choice:after{
+            content:" , ";
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered{
+            margin-bottom: -10px !important;
+            padding-top: 6px;
+        }
+.tbl_box_ov{
+    width: 998px;
+    overflow-y: hidden;
+}
+.tbl_box_ov .tbl_box{
+    width: 2000px;
+}
+.select2-container--default .select2-selection--multiple{
+    padding-top:3px;
+}
+.select2-search.select2-search--inline .select2-search__field[placeholder='']{
+    display: none !important;
+}
+.select2-search.select2-search--inline .select2-search__field:not([placeholder='']){
+    display: inline-block !important;
+    position: relative;
+    top: -5px;
+}
+.tbl_tablej{
+    width: auto;
+}
+.tbl_tablej thead tr td{
+    white-space: nowrap;
+}
+#tbl_sort_filter{
+    display: none;
+}
+.tr_fillter_new td:after,.tr_fillter_new td:before,.tr_fillter_new th:after,.tr_fillter_new th:before{
+    display: none !important;
+}
+table.dataTable thead th, table.dataTable thead td{
+    border-bottom: 1px solid #00000000;
+}
+    </style>        
+    <?php
+}
+?>                

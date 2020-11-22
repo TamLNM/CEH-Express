@@ -1,0 +1,63 @@
+<?php
+include("bms/modules/cus_type.php");
+?>   
+<table width="100%" border="0" cellpadding="1" cellspacing="0">
+    <tr>
+        <td align="center" height="30" style="padding-left:5px;"><b>Mã KH </b></td>
+        <td><input onkeydown="if(chkenter(event)) load_cus_page(1);" onfocus="this.select();" style="width:75px;" value=""  class="catbg" name="cus_search_code" type="text" id="cus_search_code" size="25" />
+        </td>
+        <td align="center"><b>Tên KH </b></td>
+        <td><input  onkeydown="if(chkenter(event)) load_cus_page(1);" onfocus="this.select();" style="width:100px;" value=""  class="catbg" name="cus_search_name" type="text" id="cus_search_name" size="25" />
+        <td align="center"><b>ĐT </b></td>
+        <td><input  onkeydown="if(chkenter(event)) load_cus_page(1);" onfocus="this.select();" style="width:75px;" value=""  class="catbg" name="cus_search_tel" type="text" id="cus_search_tel" size="25" />            
+        </td>
+        <td>
+            <select class="catbg" name="search_cus_type" id="search_cus_type" style="width:95px;">
+                <option value="">Tất cả KH</option>
+                <?php
+                while (list($key, $val) = each($cus_type)) {
+                    echo '<option ' . (isset($return_val['cus_type']) ? ($return_val['cus_type'] == $key ? 'selected' : '') : '') . ' value="' . $key . '">' . $val . '</option>';
+                }
+                ?>              
+            </select>
+        </td>	
+        <td><input type="button" value="Tra cứu" onclick="load_cus_page(1);" name="search" class="button"></td>
+    </tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center">	
+            <div id="cusid" style="padding:5px;height:410px;overflow:auto;"></div>
+        </td></tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">          
+    <tr><td align="center" height="30" bgcolor="#ddd">
+            <input type="button" value="Đóng"  onclick="hidediv('searchcus');" class="button">&nbsp;&nbsp;<input type="button" value="Chọn"  onclick="selectcus();" class="button"></td>
+    </tr>
+</table>
+
+<script language="javascript">
+    var cur_page=1;
+    var cur_cus_id='';
+    var cur_cus_name='';
+    var cur_address='';
+    var cur_tel='';
+    var cur_sum_debt='';
+    function load_cus_page(p)
+    {
+        load('?eda_type=ajax&eda_code=<?= md5("search_cus") ?>&cus_code='+document.getElementById('cus_search_code').value+'&cus_type='+document.getElementById('search_cus_type').value+'&cus_name='+document.getElementById('cus_search_name').value+'&tel='+document.getElementById('cus_search_tel').value+'&eda_page='+p+'&eda_module=<?= $action->eda_module ?>','cusid','html','GET',null,'in');
+        cur_page=p;
+    }
+    function selectcus()
+    {
+        if(cur_cus_id=='')
+        {
+            alert('Hãy chọn khách hàng cần thêm');
+        }
+        else
+        {
+            hidediv('searchcus');
+            load_cus();
+        }
+    }
+</script>

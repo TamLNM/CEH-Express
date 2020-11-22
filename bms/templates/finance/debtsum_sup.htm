@@ -1,0 +1,50 @@
+<?php
+$date=strtotime( str_replace("/", "-", @$_GET['date'])." 23:59:59" );
+if($date==0)$date=time();
+?>
+<table width="98%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height="30" align="right" style="padding-left:10px;">Ngày lập: <?=date('d/m/Y',$date)?></td>
+	      </tr>
+	</table> 
+        <table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="30%" align="center" bgcolor="#afd7ff" height="25"><b>Tên nhà cung cấp</b></td>
+		<td width="35%" align="center" bgcolor="#afd7ff"><b>Địa chỉ</b></td>
+		<td width="17%" align="center" bgcolor="#afd7ff"><b>Điện thoại</b></td>
+		<td width="18%" align="center" bgcolor="#afd7ff"><b>Tổng tiền</b></td>
+		</tr>
+<?php
+	$inv=get_data("select sup.sup_name, sup.sup_id, sup.address, sup.tel,  IFNULL(sum_inv.amount,0)-IFNULL(sum_bin.amount,0)+sup.debt-IFNULL(sum_return.amount,0) amount from  supliers sup
+	left join (select i.sup_id, sum(i.amount) amount from 
+			(select inv.sup_id, sum(inv.total) amount from invoices inv where inv.created_date<=$date and inv_type=1 group by sup_id 
+				union  select bin.sup_id, sum(bin.amount) amount from budget_invoices bin, item_type itt where bin.created_date<=$date and bin.bin_type=0 and bin.item_id=itt.item_id and itt.item_type=0 and itt.budget_type='VAY'  group by bin.sup_id
+			) i group by i.sup_id
+		) sum_inv 
+	on sup.sup_id=sum_inv.sup_id
+	left join (
+			select bin.sup_id, sum(bin.amount) amount from budget_invoices bin, item_type itt where bin.created_date<=$date and ((bin.bin_type=1 and bin.item_id=itt.item_id and itt.item_type=1 and itt.budget_type='VAY') or (bin.bin_type=1 and bin.item_id=itt.item_id and itt.item_type=1 and itt.budget_type='CN')) group by bin.sup_id
+		) sum_bin  on sup.sup_id=sum_bin.sup_id 
+                left join (select inv.sup_id, sum(IFNULL(inv.total,0)) amount from mat_return_invoices inv where inv.created_date<=$date and inv.paid_type=1 group by inv.sup_id) sum_return
+	on sup.sup_id=sum_return.sup_id
+                where IFNULL(sum_inv.amount,0)-IFNULL(sum_bin.amount,0)+sup.debt-IFNULL(sum_return.amount,0)!=0");
+	$total=0;
+	for($i=0;$i<count($inv);$i++)
+	{	
+?>	
+	    <tr  style="cursor:pointer;" onmouseover="this.style.backgroundColor='yellow';" onmouseout="this.style.backgroundColor='';" onclick="window.location='?eda_act=57336afd1f4b40dfd9f5731e35302fe5&eda_code=a21acb207b0edc8da593fa6e897f8f2e&sup_id=<?=$inv[$i]['sup_id']?>&sup_name=<?=$inv[$i]['sup_name']?>';">
+		<td style="padding-left:5px;" height="25"><?= $inv[$i]['sup_name']?></td>	
+		<td style="padding-left:5px;" height="25"><?= $inv[$i]['address']?></td>
+		<td style="padding-left:5px;" height="25"><?= $inv[$i]['tel']?></td>
+		<td style="padding-right:5px;" align="right"><?= number_format($inv[$i]['amount'],0,","," ")?></td>	
+		</tr>
+
+<?php
+		$total+=$inv[$i]['amount'];
+	}
+?>	
+	    <tr>
+		<td height="25" colspan="3" align="center"><b>Tổng cộng</b></td>
+		<td style="padding-right:5px;" align="right"><b><?= number_format($total,0,","," ")?></b></td>			
+		</tr>
+	</table>

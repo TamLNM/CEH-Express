@@ -1,0 +1,126 @@
+<Script type="text/javascript" src="<?=ROOT_URL?>bms/common/CalendarPopup.js"></Script>
+<script language="javaScript" id="jscal1x">
+var cal = new CalendarPopup("calendarpopup");
+cal.setTodayText("Hôm nay");
+cal.showNavigationDropdowns();
+cal.setYearSelectStartOffset(20);
+cal.setMonthNames("Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12");
+cal.setDayHeaders("CN","T2","T3","T4","T5","T6","T7");
+</script>
+<SCRIPT LANGUAGE="JavaScript">document.write(getCalendarStyles());</SCRIPT>
+<DIV ID="calendarpopup" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></DIV>
+<form  name="frmadmin" method="post" action="?eda_act=<?=md5('finance')?>&eda_code=<?= md5('move_fund_sm')?>" style="margin:0px">
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/payment.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Lập phiếu chuyển Quỹ/Tài khoản</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td height="25" width="180" align="left"><b>(*) Người thực hiện</b></td>
+              <td width="200">
+              <select style="width:200px;" class="catbg" name="user_id" id="user_id">
+<?php
+	$usr=get_data("select user_id, user_name, full_name from users");
+	for($i=0;$i<count($usr);$i++)
+		echo '<option '.(isset($return_val['user_id'])?($return_val['user_id']==$usr[$i]['user_id']?'selected':''):($sessions->get_session('user_id')==$usr[$i]['user_id']?'selected':'')).' value="'.$usr[$i]['user_id'].'">'.$usr[$i]['full_name'].' ('.$usr[$i]['user_name'].')</option>';
+?>              
+              </select>  
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Thời gian lập</b></td>
+              <td>
+              <table  border="0" cellspacing="0" cellpadding="0">
+              <tr><td>
+              <input readonly style="width:90px;" class="catbg"  onclick="cal.select(document.getElementById('date'),'anchor1','dd/MM/yyyy');if(document.getElementById('date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;" class="textbox" value="<?= isset($return_val['date'])?$return_val['date']:gmdate('d/m/Y', time()+7*3600)?>" onBlur="check_date(this);" name="date" id="date" type="text" />
+              </td><td>
+              <A href="javascript:void()" onclick="cal.select(document.getElementById('date'),'anchor1','dd/MM/yyyy'); if(document.getElementById('date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor1" ID="anchor1" src="<?=ROOT_URL?>/bms/images/icon/calendar.gif" height="18" border="0"></A>
+              </td><td>
+              <select style="width:40px;" class="catbg" name="hour" type="text">
+<?php
+	for($i=0;$i<24;$i++)
+		echo '<option  '.(isset($return_val['date'])?($return_val['hour']==$i?'selected':''):($i==gmdate('H', time()+7*3600)?'selected':'')).' value="'.$i.'">'.str_pad($i,2,'0',STR_PAD_LEFT).'</option>';
+?>              
+			</select>
+			</td><td><b>&nbsp;:&nbsp;</b></td>
+			<td><select style="width:40px;" class="catbg" name="minute" type="text">
+<?php
+	for($i=0;$i<60;$i++)
+		echo '<option '.(isset($return_val['date'])?($return_val['minute']==$i?'selected':''):($i==gmdate('i', time()+7*3600)?'selected':'')).' value="'.$i.'">'.str_pad($i,2,'0',STR_PAD_LEFT).'</option>';
+?>              
+			</select>
+			</td></tr>
+			</table>
+              </td>
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>(*) Tải khoản chuyển đi</b></td>
+              <td>
+              <select style="width:200px;" class="catbg" name="fund_from" id="fund_from">
+              <option value="">Chọn Quỹ/Tài khoản</option>
+<?php
+	$fund_id=get_data("select * from fund order by fund_name");
+	for($i=0;$i<count($fund_id);$i++)
+		echo  '<option '.(isset($return_val['fund_from'])?($return_val['fund_from']==$fund_id[$i]['fund_id']?'selected':''):'').' value="'.$fund_id[$i]['fund_id'].'">'.$fund_id[$i]['fund_name'].(@$fund_id[$i]['acc_no']!=""?" (".$fund_id[$i]['acc_no'].")":"").'</option>';
+?>              
+              </select>               
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>(*) Số chứng từ</b></td>
+              <td>
+              <input value="<?= isset($return_val['inv_code'])?$return_val['inv_code']:''?>" style="width:200px;" class="catbg" name="inv_code" type="text" id="inv_code" size="25" />
+              </td>             
+            </tr>
+           <tr>
+              <td height="25" align="left"><b>(*) Tài khoản nhận</b></td>
+              <td>
+              <select style="width:200px;" class="catbg" name="fund_to" id="fund_to">
+              <option value="">Chọn Quỹ/Tài khoản</option>
+<?php
+	$fund_id=get_data("select * from fund order by fund_name");
+	for($i=0;$i<count($fund_id);$i++)
+		echo  '<option '.(isset($return_val['fund_to'])?($return_val['fund_to']==$fund_id[$i]['fund_id']?'selected':''):'').' value="'.$fund_id[$i]['fund_id'].'">'.$fund_id[$i]['fund_name'].(@$fund_id[$i]['acc_no']!=""?" (".$fund_id[$i]['acc_no'].")":"").'</option>';
+?>              
+              </select>                   </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>(*) Số tiền chuyển</b></td>
+              <td>
+				<input onfocus="this.select();" style="width:200px;" onkeyup="check_number(this);change_amount(this.value);" value="<?= isset($return_val['amount'])?$return_val['amount']:''?>" class="catbg" name="amount" type="text" id="amount" size="25" />              
+              </td>             
+            </tr>   
+            <tr>
+			<td></td>
+              <td height="25" align="left"  colspan="3">(<span id="docsoid"><?= isset($return_val['amount'])?doc_so($return_val['amount']):'không'?></span>  đồng)</td>             
+            </tr>                     
+            <tr>
+              <td height="25" align="left"><b>Chi tiết</b></td>
+              <td colspan="3"><textarea style="width:540px;" class="catbg" name="comment" id="comment" rows="5" cols="80"><?= isset($return_val['comment'])?$return_val['comment']:''?></textarea>
+            </tr>                         
+          </table>
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+</td></tr>
+</table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          <input style="font-weight:bold;cursor:pointer;"  class="button" type="submit" name="submit" value="Lưu phiếu chuyển" />
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>          
+   </form>
+
+<script language="javascript">
+
+function change_amount(v) {
+	load("?eda_type=ajax&eda_code=<?=md5('doc_so')?>&eda_module="+v,"docsoid","html","GET",null,"no");
+}
+</script>          

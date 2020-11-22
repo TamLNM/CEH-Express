@@ -1,0 +1,254 @@
+<?php
+if (isset($return_val["datefrom"])) {
+    $sdate = explode("/", $return_val["datefrom"]);
+    if ($sdate[0] > 0 && $sdate[0] <= 31 && $sdate[1] > 0 && $sdate[1] <= 12 && $sdate[2] <= date('Y')) {
+        $sdate = mktime(0, 0, 0, $sdate[1], $sdate[0], $sdate[2]);
+    }
+}
+if (!isset($sdate)) {
+    if (date('m') > 1)
+        $sdate = mktime(0, 0, 0, date('m') - 1, date('d'), date('Y'));
+    else
+        $sdate = mktime(0, 0, 0, 12, date('d'), date('Y') - 1);
+    $return_val["datefrom"] = date('d/m/Y', $sdate);
+}
+if (isset($return_val["dateto"])) {
+    $edate = explode("/", $return_val["dateto"]);
+    if ($edate[0] > 0 && $edate[0] <= 31 && $edate[1] > 0 && $edate[1] <= 12 && $edate[2] <= date('Y')) {
+        $edate = mktime(23, 59, 59, $edate[1], $edate[0], $edate[2]);
+    }
+}
+if (!isset($edate)) {
+    $edate = mktime(23, 59, 59, date('m'), date('d'), date('Y'));
+}
+$url_ext = '';
+if (@!empty($return_val['sup_id'])) {
+    $url_ext = "&sup_id=" . intval($return_val['sup_id']);
+} else if (@!empty($return_val['cus_id'])) {
+    $url_ext = "&cus_id=" . intval($return_val['cus_id']);
+} else if (@!empty($return_val['emp_stock_id'])) {
+    $url_ext = "&stock_id=" . intval($return_val['emp_stock_id']);
+}
+$m = get_data("select mat.mat_name, msu.msu_name from materials mat, mat_msu mms, meansure msu where mms.mms_id='" . $return_val['mms_id'] . "' and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id");
+if ($action->eda_type != 'ajax') {
+    ?>
+    <Script type="text/javascript" src="<?=ROOT_URL?>bms/common/CalendarPopup.js"></Script>
+    <script language="javaScript" id="jscal1x">
+        var cal = new CalendarPopup("calendarpopup");
+        cal.setTodayText("Hôm nay");
+        cal.showNavigationDropdowns();
+        cal.setYearSelectStartOffset(20);
+        cal.setMonthNames("Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12");
+        cal.setDayHeaders("CN","T2","T3","T4","T5","T6","T7");
+    </script>
+    <SCRIPT LANGUAGE="JavaScript">document.write(getCalendarStyles());</SCRIPT>
+    <DIV ID="calendarpopup" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></DIV>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td width="30" align="center">
+                <img style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/documents.png" width="18" height="18"/>        
+            </td>
+            <td  height="25"><b>Báo cáo chi tiết hàng xất kho nội bộ</b></td>
+            <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>
+    <table align="center" width="98%" border="0" cellspacing="0" cellpadding="0" style="margin-top:5px;">
+        <tr>
+            <td width="60"><b>Từ ngày</b></td>
+            <td width="70">
+                <input readonly style="width:70px;" class="catbg"  onclick="cal.select(document.getElementById('datefrom'),'anchor1','dd/MM/yyyy');if(document.getElementById('datefrom').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;" class="textbox" value="<?= isset($return_val['datefrom']) ? $return_val['datefrom'] : '' ?>" onBlur="check_date(this);" name="datefrom" id="datefrom" type="text" />
+            </td><td width="20">
+                <A href="javascript:void()" onclick="cal.select(document.getElementById('datefrom'),'anchor1','dd/MM/yyyy'); if(document.getElementById('datefrom').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor1" ID="anchor1" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+            </td>
+            <td width="70" style="padding-right:15px;" align="right"><b>Đến ngày</b></td>
+            <td width="70">
+                <input readonly style="width:70px;" class="catbg"  onclick="cal.select(document.getElementById('dateto'),'anchor2','dd/MM/yyyy');if(document.getElementById('dateto').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;" class="textbox" value="<?= isset($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>" onBlur="check_date(this);" name="dateto" id="dateto" type="text" />
+            </td> <td width="30">
+                <A href="javascript:void()" onclick="cal.select(document.getElementById('dateto'),'anchor2','dd/MM/yyyy'); if(document.getElementById('dateto').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor2" ID="anchor2" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+            </td>   
+            <td width="170">
+                <select class="catbg" style="width:160px;" name="stock_id" id="stock_id">
+                    <option value="">Tất cả kho hàng chuyển</option>
+                    <?php
+                    $chk_mainstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+                    $chk_empstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+                    if (count($chk_mainstock) > 0 && count($chk_empstock) > 0) {
+                        $stock = get_data("select stock_id, stock_name, user_id from stocks order by stock_name");
+                    } else if (count($chk_mainstock) > 0) {
+                        $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id is null or user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+                    } else {
+                        $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+                    }
+                    for ($i = 0; $i < count($stock); $i++)
+                        echo '<option ' . (isset($return_val['stock_id']) ? ($return_val['stock_id'] == $stock[$i]['stock_id'] ? 'selected' : '') : '') . ' value="' . $stock[$i]['stock_id'] . '">' . $stock[$i]['stock_name'] . '</option>';
+                    ?>	
+                </select>       
+            </td>    
+            <td width="170">
+                <select class="catbg" style="width:160px;" name="stock_id_to" id="stock_id_to">
+                    <option value="">Tất cả kho hàng đến</option>
+                    <?php
+                    $chk_mainstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+                    $chk_empstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+                    if (count($chk_mainstock) > 0 && count($chk_empstock) > 0) {
+                        $stock = get_data("select stock_id, stock_name, user_id from stocks order by stock_name");
+                    } else if (count($chk_mainstock) > 0) {
+                        $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id is null or user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+                    } else {
+                        $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+                    }
+                    for ($i = 0; $i < count($stock); $i++)
+                        echo '<option ' . (isset($return_val['stock_id_to']) ? ($return_val['stock_id_to'] == $stock[$i]['stock_id'] ? 'selected' : '') : '') . ' value="' . $stock[$i]['stock_id'] . '">' . $stock[$i]['stock_name'] . '</option>';
+                    ?>	
+                </select>       
+            </td>           
+            <td><input onclick="reloadreport();" type="button" value="Xem" class="button"></td>
+        </tr>
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>	
+    <?php
+} else {
+    ?>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+
+    <table align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td><b>Từ ngày:</b></td>
+            <td colspan="3">
+                <?= !empty($return_val['datefrom']) ? $return_val['datefrom'] : 'Tất cả' ?> - <?= !empty($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>
+            </td> 
+        </tr>
+        <tr>
+            <td width="150"><b>Kho hàng chuyển:</b></td>
+            <td width="250">
+                <?php
+                $stock = get_data("select stock_name from stocks where  stock_id='" . $return_val['stock_id'] . "'");
+                if (count($stock) > 0)
+                    echo $stock[0]['stock_name'];
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>    
+            <td width="150"><b>Kho hàng nhận:</b></td>
+            <td>
+                <?php
+                $stock = get_data("select stock_name from stocks where  stock_id='" . $return_val['stock_id_to'] . "'");
+                if (count($stock) > 0)
+                    echo $stock[0]['stock_name'];
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>            
+        </tr>
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>	
+    <?php
+}
+?>
+<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td height=30 style="padding-left:10px;"><b>Sản phẩm thống kê:</b> <?= $m[0]['mat_name'] ?> (<?= $m[0]['msu_name'] ?>)</td>
+    </tr>
+</table>    
+<?php
+$where = '';
+if (@!empty($return_val['stock_id'])) {
+    $where = " and inv.stock_id ='" . $return_val['stock_id'] . "'";
+}
+if (@!empty($return_val['stock_id_to'])) {
+    $where = " and inv.stock_id_to ='" . $return_val['stock_id_to'] . "'";
+}
+$where .= " and mms.mms_id='" . $return_val['mms_id'] . "'";
+$inv = get_data("select inv.stock_id, inv.stock_id_to, inv.inv_id, inv.inv_code, inv.comment, inv.created_date, usr.full_name, invd.mat_quantity from mat_move_invoices inv, users usr, mat_move_invoice_details invd, mat_msu mms, stock_mat_msu smm, materials mat  where 1=1 " . $where . " and  inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and inv.user_id=usr.user_id and inv.created_date between " . $sdate . " and " . $edate . "  order by inv.created_date desc");
+if (count($inv) == 0) {
+    echo 'Không tìm thấy sản phẩm nào';
+} else {
+    $quantity = 0;
+    ?>
+    <table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+        <tr>
+        <td width="12%" align="center" bgcolor="#afd7ff" height="25"><b>Mã phiếu</b></td>
+        <td width="16%" align="center" bgcolor="#afd7ff" height="25"><b>Kho chuyển</b></td>
+        <td width="16%" align="center" bgcolor="#afd7ff" height="25"><b>Kho nhận</b></td>
+        <td width="15%" align="center" bgcolor="#afd7ff"><b>Thời gian</b></td>
+        <td width="16%" align="center" bgcolor="#afd7ff"><b>Người lập</b></td>
+        <td align="center" bgcolor="#afd7ff"><b>Số lượng xuất</b></td>
+        </tr>
+        <?php
+        $quantity=0;
+        for ($i = 0; $i < count($inv); $i++) {
+            ?>	
+            <tr  <?= $action->eda_type != 'ajax' ? ' style="cursor:pointer;" onmouseover="this.style.backgroundColor=\'yellow\';" onmouseout="this.style.backgroundColor=\'\';" onclick="window.location=\'?eda_act=' . md5('sell') . '&eda_code=' . md5('view_mat_move') . '&eda_id=' . $inv[$i]['inv_id'] . '\';"' : '' ?>>
+            <td align="center" height="25"><?= $inv[$i]['inv_code'] ?></td>
+            <td style="padding-left:5px;">
+                <?php
+                $stock = get_data("select stock_name from stocks where  stock_id='" . $inv[$i]['stock_id'] . "'");
+                if (count($stock) > 0)
+                    echo $stock[0]['stock_name'];
+                else
+                    echo "Tất cả";
+                ?>
+            </td>   
+            <td style="padding-left:5px;">
+                <?php
+                $stock = get_data("select stock_name from stocks where  stock_id='" . $inv[$i]['stock_id_to'] . "'");
+                if (count($stock) > 0)
+                    echo $stock[0]['stock_name'];
+                else
+                    echo "Tất cả";
+                ?>
+            </td>             
+            <td align="center"><?= date('d/m/Y H:i', $inv[$i]['created_date']) ?></td>
+            <td style="padding-left:5px;"><?= $inv[$i]['full_name'] ?></td>	
+            <td style="padding-right:5px;" align="right"><?= $inv[$i]['mat_quantity'] ?></td>
+            </tr>
+            <?php
+            $quantity+=$inv[$i]['mat_quantity'];
+        }
+        ?>	
+        <tr>
+            <td colspan="5" height="25" align="center"><b>Tổng cộng</b></td>
+            <td align="right" style="padding-right:5px;"><b><?= number_format($quantity, 0, ",", " ") ?></b></td>	
+        </tr>            
+    </table>
+
+    <?php
+    if ($action->eda_type != 'ajax') {
+        ?>	
+        <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+            </tr>
+        </table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+            <tr>
+                <td  height="30" style="padding-left:5px;" width="30">
+                    <img src="<?=ROOT_URL?>bms/images/icon/preview.gif" height="24">
+                </td>
+                <td   style="padding-left:5px;">
+                    <a class="cart_payment" href="javascript:void()" onclick="window.open('?eda_code=<?= md5('view_report') ?>&eda_type=ajax&eda_module=sell/mat_move_detail&datefrom='+document.getElementById('datefrom').value+'&dateto='+document.getElementById('dateto').value+'&stock_id='+document.getElementById('stock_id').value+'&stock_id_to='+document.getElementById('stock_id_to').value+'&mms_id=<?= $return_val['mms_id'] ?><?= $url_ext ?>');"><b>Xem dạng in ấn</b></a>
+                </td>          
+                <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+            </tr>
+        </table>        
+        <?php
+    }
+}
+?>
+<script language="javascript">
+    function reloadreport() {
+        window.location='?eda_act=<?= md5('sell') ?>&eda_code=<?= md5('mat_move_detail') ?>&datefrom='+document.getElementById('datefrom').value+'&dateto='+document.getElementById('dateto').value+'&stock_id='+document.getElementById('stock_id').value+'&stock_id_to='+document.getElementById('stock_id_to').value+'&mms_id=<?= $return_val['mms_id'] ?><?= $url_ext ?>';
+    }
+</script>

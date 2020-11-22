@@ -1,0 +1,104 @@
+<?php
+
+
+$cat_query="";
+$cat_arr=array();
+if(@$_GET['cat_id']!=""){
+    $arr=explode(",", $_GET['cat_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $cat_arr[]=intval($value);
+    }
+    if(count($cat_arr)>0)
+        $cat_query= " and mat.cat_id in (".join(",",$cat_arr).") ";
+}
+
+$stock_query="";
+$stock_arr=array();
+if(@$_GET['stock_id']!=""){
+    
+    $arr=explode(",", $_GET['stock_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $stock_arr[]=intval($value);
+    }
+    if(count($stock_arr)>0)
+        $stock_query= " and invd.stock_id in (".join(",",$stock_arr).") ";
+}
+
+
+$sup_query="";
+$sup_arr=array();
+if(@$_GET['sup_id']!=""){
+    
+    $arr=explode(",", $_GET['sup_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $sup_arr[]=intval($value);
+    }
+    if(count($sup_arr)>0)
+        $sup_query= " and inv.sup_id in (".join(",",$sup_arr).") ";
+}
+$where='';
+    if(!check_func('view_input_all')) {
+        $where.=" and inv.created_user='".$sessions->get_session('user_id')."'";
+    }
+    if (!empty($return_val['keyword']) && $return_val['keyword'] != 'Mã phiếu hoặc mã nhà CC') {
+        $where.=" and (inv.inv_code='" . $return_val['keyword'] . "' or sup.sup_code='" . $return_val['keyword'] . "')";
+    }
+    else {
+    }
+
+$inv=get_data("select invd.vat,invd.amount, inv.created_date,mat.pr,mat.gai,mat.mat_model,inv.inv_code,stock.stock_name,sup.sup_name, sup.sup_id, mat.mat_name, mms.mms_id, msu.msu_name , invd.mat_quantity,invd.price,cat.cat_name from invoices inv, invoice_details invd, mat_msu mms, materials mat, categories cat, supliers sup, meansure msu,stocks stock  where inv.inv_type=1 ".$stock_query.$where." and inv.sup_id=sup.sup_id and inv.inv_id=invd.inv_id and invd.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and invd.stock_id=stock.stock_id and mms.msu_id=msu.msu_id ".$cat_query.$sup_query." and inv.created_date between ".$sdate." and ".$edate." group by sup.sup_name, mat.mat_name, mms.mms_id order by sup.sup_name, stock.stock_name");
+
+//print_r($inv);die();
+
+?>
+<div class=tbl_box_ov>
+<div class=tbl_box>
+<table align="center" width="98%" border="1" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <tr>
+        <td width="4%" align="center" bgcolor="#afd7ff" height="25"><b>Ngày nhập</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Kho</b></td>
+        <td width="2%" align="center" bgcolor="#afd7ff"><b>Chứng từ</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Mã hàng</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Tên hàng</b></td>
+        <td width="2%" align="center" bgcolor="#afd7ff"><b>ĐVT</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Số lượng</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Đơn giá</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Vat %</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Tiền Vat</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Thành tiền</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Nhà cung cấp</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff"><b>Nhóm sản phẩm</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>Gai</b></td>
+        <td width="3%" align="center" bgcolor="#afd7ff"><b>PR</b></td>
+        
+    </tr>
+    <?php
+
+    foreach ($inv as $key => $value) {
+        echo '<tr>
+            <td>'.date('d/m/Y H:i',$value['created_date']).'</td>
+            <td>'.$value['stock_name'].'</td>
+            <td>'.$value['inv_code'].'</td>
+            <td>'.$value['mat_model'].'</td>
+            <td>'.$value['mat_name'].'</td>
+            <td>'.$value['msu_name'].'</td>
+            <td>'.$value['mat_quantity'].'</td>
+            <td align=right>'.numF($value['price']).'</td>
+            <td align=center>'.$value['vat'].'%</td>
+            <td>'.numF($value['vat']*$value['price']*$value['mat_quantity']/100).'</td>
+            <td align=right>'.numF($value['amount']).'</td>
+            <td>'.$value['sup_name'].'</td>
+            <td>'.$value['cat_name'].'</td>
+            <td>'.$value['gai'].'</td>
+            <td>'.$value['pr'].'</td>
+            
+        </tr>';
+    }
+
+    ?>
+</table>
+</div>
+</div>

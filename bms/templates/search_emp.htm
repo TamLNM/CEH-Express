@@ -1,0 +1,58 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td width="110" align="center" height="30"><b>Tên Phòng/Ban</b></td>
+	<td width="160">
+	<select onchange="load_page(cur_page);" style="width:150px;" class="catbg" name="search_dept_id" type="text" id="search_dept_id">
+	<option value="">Tất cả Phòng/Ban</option>
+<?php
+	$dept=get_data("select * from dept order by dept_name");
+	for($i=0;$i<count($dept);$i++) {
+		echo '<option value="'.$dept[$i]['dept_id'].'">'.$dept[$i]['dept_name'].'</option>';
+	}
+?>	
+	</select>
+	</td>	
+	<td align="center" height="30"><b>Tên nhân viên</b></td>
+	<td><input  onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) load_page(1);" onfocus="this.select();" style="width:110px;" value=""  class="catbg" name="search_full_name" type="text" id="search_full_name" size="25" />
+	</td>
+	<td><input type="button" value="Tra cứu" onclick="load_page(1);" name="search" class="button"></td>
+      </tr>
+	</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center">	
+<div id="empid" style="padding:5px;height:410px;overflow:auto;">
+<?php
+	include("bms/templates/search_emp_result.htm");
+?>
+</div>
+	</td></tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr><td align="center" height="30" bgcolor="#f3f3f3">
+      <input type="button" value="Đóng"  onclick="hidediv('searchemp');" class="button">&nbsp;&nbsp;<input type="button" value="Chọn"  onclick="selectemp();" class="button"></td>
+      </tr>
+	</table>
+	
+<script language="javascript">
+var cur_page=1;
+var cur_user_id='';
+var cur_full_name='';
+	function load_page(p)
+	{
+		load('?eda_type=ajax&eda_code=<?= md5("search_emp")?>&full_name='+document.getElementById('search_full_name').value+'&eda_page='+p+'&dept_id='+document.getElementById('search_dept_id').value+'&eda_module=<?= $action->eda_module?>','empid','html','GET',null,'in');
+		cur_page=p;
+	}
+	function selectemp()
+	{
+		if(cur_user_id=='')
+		{
+			alert('Hãy chọn Nhân viên');
+		}
+		else
+		{
+			hidediv('searchemp');
+			load_emp();
+		}
+	}
+</script>

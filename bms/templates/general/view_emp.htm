@@ -1,0 +1,82 @@
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/emp.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Xem thông tin nhân viên</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="history.go(-1);" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<?php
+	$return_val=get_data("select u.*, d.dept_name, g.group_name from users u, dept d, groups g where u.user_id='".$action->eda_id."' and u.dept_id=d.dept_id and u.group_id=g.group_id");
+	if(count($return_val)>0)
+	{
+		$return_val=$return_val[0];
+?>        
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      <table width="100%" border="1" borderColor="#cccccc" cellspacing="5" cellpadding="5" style="border-collapse:collapse">
+            <tr>
+              <td height="25" width="160" align="left"><b>Tên nhân viên</b></td>
+              <td width="180"><?= isset($return_val['full_name'])?$return_val['full_name']:''?></td>
+              <td width="120" height="25" align="left"><b>Điện thoại</b></td>
+              <td>
+				<?= isset($return_val['tel'])?$return_val['tel']:''?>                         
+               </td>
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Tên đăng nhập</b></td>
+              <td>
+              <?= isset($return_val['user_name'])?$return_val['user_name']:''?>
+              </td>
+              <td height="25" align="left"><b>Phòng ban</b></td>
+              <td>
+			<?= isset($return_val['dept_name'])?$return_val['dept_name']:''?>
+              </td>             
+            </tr>            
+            <tr>
+              <td height="25" align="left"><b>Giới tính</b></td>
+              <td>
+              <?= $return_val['sex']==1?'Nam':'Nữ'?>
+              </td>
+              <td height="25" align="left"><b>Email</b></td>
+              <td>
+			<?= isset($return_val['email'])?$return_val['email']:''?>
+              </td>             
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Nhóm làm việc</b></td>
+              <td>
+			<?= isset($return_val['group_name'])?$return_val['group_name']:''?>
+              </td>                          
+              <td height="25" align="left"><b>Địa chỉ</b></td>
+              <td>
+			<?= isset($return_val['address'])?$return_val['address']:''?>
+              </td>                
+            </tr>                             
+            <tr>
+              <td height="25" align="left"><b>Ghi chú</b></td>
+              <td colspan="3"><?= isset($return_val['description'])?$return_val['description']:''?></td>             
+            </tr>                                   
+          </table>
+</td></tr>
+</table>
+<?php
+	}
+	else
+		echo 'Không tìm thấy nhân viên';
+?>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="history.go(-1);" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>          
+

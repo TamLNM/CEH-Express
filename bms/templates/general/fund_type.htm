@@ -1,0 +1,248 @@
+<?php
+//print_r($_SESSION);die();
+
+$dt_type=loadloop();
+//print_r(dequy_fund_type($dt_type));
+?>
+<style>
+  .add_in_treeview,.remove_in_treeview{
+    margin-left: 10px;
+  }
+  #treeview{
+    padding-bottom: 10px;
+  }
+</style>
+<link rel="stylesheet" type="text/css" href="bms/common/treeview/kendo.css"/>
+<script src="bms/common/treeview/kendo.js"></script>
+
+
+<table>
+  <tr>
+    <td width="30%" valign=top>
+      <div id="treeview"></div>
+      <button id=new_fundt>Tạo mới</button>
+    </td><td  valign="top">
+      <div id="fund_box">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">     
+        <input type="hidden" id="fund_type_id" name="fund_type_id">  
+        <input type="hidden" id="parent_id" name="parent_id">  
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                        <td height="25" width="160" align="left"><b>(*) Mã loại quỹ tài khoản</b></td>
+                        <td colspan=3><input style="width:100%;" class="catbg" name="fund_type_code" id="fund_type_code" type="text" value="<?= isset($return_val['fund_type_code']) ? $return_val['fund_type_code'] : '' ?>" /></td>                      
+                    </tr>
+                    <tr>
+                        <td height="25" width="160" align="left"><b>(*) Tên loại quỹ tài khoản</b></td>
+                        <td colspan=3><input style="width:100%;" class="catbg" name="fund_type_name" id="fund_type_name" type="text" value="<?= isset($return_val['fund_type_name']) ? $return_val['fund_type_name'] : '' ?>" /></td>                      
+                    </tr>      
+                    <tr>
+                        <td height="25" width="160" align="left"><b>(*) Mã loại tiền tệ</b></td>
+                        <td colspan=3><input style="width:100%;" class="catbg" name="ft_currency" id="ft_currency" type="text" value="<?= isset($return_val['ft_currency']) ? $return_val['ft_currency'] : '' ?>" /></td>                      
+                    </tr>
+                    <tr>
+                        <td height="25" width="160" align="left"><b>Thứ tự ưu tiên</b></td>
+                        <td colspan=3><input style="width:100%;" class="catbg" name="orderby" id="orderby" type="number" value="<?= isset($return_val['orderby']) ? $return_val['orderby'] : '' ?>" /></td>                      
+                    </tr>  
+                    <tr>
+                        <td height="25" width="160" align="left"></td>
+                        <td ><input type="radio" class=view_debt name="view_debt" checked value=1> Xem chi tiết công nợ</td>
+                        <td height="25" width="160" align="left"></td>
+                        <td ><input type="radio" class=view_debt name="view_debt" value=0> Không xem chi tiết công nợ</td>     
+                    </tr>
+                    <tr>
+                        <td height="25" align="left"><b>Ghi chú</b></td>
+                        <td colspan="3"><textarea  style="width:500px;" class="catbg" name="description" type="text" id="description" cols="80" rows="4"><?= isset($return_val['description']) ? $return_val['description'] : '' ?></textarea></td>             
+                    </tr>
+                    <tr>
+                        <td height="25" align="left"><button id=updatein>Thêm mới</button></td>
+                        <td colspan="3"></td>             
+                    </tr>                                 
+                </table>
+                <?= !empty($err_msg) ? '<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>' . $err_msg . '</b><br></font></td></tr></table>' : '' ?> 
+
+            </td></tr>
+    </table>
+      </div>
+    </td>
+  </tr>
+</table>
+
+<script>
+$("#treeview").kendoTreeView({
+  dragAndDrop: true,
+  dataSource: <?php echo json_encode($dt_type);?>,
+  select:function(e){
+    selected = treeview_left.select();
+    var data=treeview_left.dataItem(e.node);
+    console.log("selected:",$("#treeview_tv_active > div > .k-in").html(),data);
+    $(".add_in_treeview").remove();
+    $(".remove_in_treeview").remove();
+    $(e.node).find(" > div:first-child").append("<button fundt_id='"+data.fund_type_id+"' class=add_in_treeview>+</button> <button fundt_id='"+data.fund_type_id+"' class=remove_in_treeview>x</button>");
+    $(".add_in_treeview").data("data",data);
+    $("#parent_id").val(0);
+//alert($("#updatein").attr("fundt_id"))
+    var fund_type_id=data.fund_type_id;
+          $.ajax({
+                url: '?eda_act=<?= md5('ajax');?>&eda_code=<?= md5('load_fund_type');?>',
+                type: 'post',
+                data:{"key":fund_type_id},
+                dataType: 'json',
+                contentType: 'application/x-www-form-urlencoded',
+                success: function (data) {
+                  $("#fund_type_id").val(data.fund_type_id);
+                  $("#fund_type_name").val(data.fund_type_name);
+                  $("#fund_type_code").val(data.fund_type_code);
+                  $("#orderby").val(data.orderby);
+                  $("#ft_currency").val(data.ft_currency);
+                  $("#description").val(data.description);
+                  $("#updatein").html("Cập nhật");
+                  $("#updatein").attr("fundt_id",data.fund_type_id);
+                  $("#parent_id").val(data.parent_id);
+                  $(".view_debt[value='"+data.view_debt+"']").prop("checked",true);
+                }
+                
+            });
+  }
+});
+
+function tree_dragend(e) {
+              console.log("Drag end sourceNode = ", e.sourceNode, "dropPosition = ", e.dropPosition, "destinationNode = ", e.destinationNode);
+              
+              //var destinationTreeview = $( e.destinationNode ).parentsUntil( "k-treeview" );
+              //console.log("destinationTreeview = ", destinationTreeview);
+              
+              var destinationTreeviewDOMElement = $( e.destinationNode ).closest( "div.k-treeview" );
+              console.log("destinationTreeviewDOMElement = ", destinationTreeviewDOMElement);
+              
+              console.log("destinationTreeview = ", treeview_left);
+              var data=treeview_left.dataSource.data();
+              console.log("destinationTreeviewData = ", treeview_left.dataSource.data());
+              $("#updatein").attr("fundt_id",data.fund_type_id);
+            }
+            
+            var treeview_left = $("#treeview").data("kendoTreeView");
+            treeview_left.bind("dragend", tree_dragend);
+
+$(document).ready(function(){
+
+
+treeview_left.expand(".k-item");
+  $(document).on("click",".add_in_treeview",function(){
+    $("#updatein").html("Thêm mới");
+    $("#fund_type_id").val(0);
+    $("#parent_id").val($(this).attr("fundt_id"));
+  });
+
+  $(document).on("click","#new_fundt",function(){
+    $("#updatein").html("Thêm mới");
+    $("#fund_type_id").val(0);
+    $("#parent_id").val(0);
+  });
+
+
+
+
+
+
+$(document).on("click",".remove_in_treeview",function(){
+  var ok=confirm("Bạn muốn xóa danh mục này ?!");
+  if(!ok)
+    return false;
+  var fund_type_id=$(this).attr("fundt_id");
+
+  $.ajax({
+                url: '?eda_act=<?= md5('ajax');?>&eda_code=<?= md5('rmv_fund_type');?>',
+                type: 'post',
+                data:{"fund_type_id":fund_type_id},
+                dataType: 'json',
+                contentType: 'application/x-www-form-urlencoded',
+                success: function (data) {
+                  console.log("dtgk:",data);
+                  if(data.success){
+                    alert(data.success);
+                    location.reload();
+                  }
+                  if(data.deny){
+                    alert(data.deny);
+                  }
+                }
+                
+            });
+});
+
+
+
+
+
+
+
+$(document).on("click","#updatein",function(){
+
+var frm={};
+frm['fund_type_id']=parseInt($("#fund_type_id").val())||0;
+frm['parent_id']=parseInt( $("#parent_id").val())||0;
+frm['fund_type_name']=$("#fund_type_name").val();
+frm['fund_type_code']=$("#fund_type_code").val();
+frm['orderby']=$("#orderby").val();
+frm['ft_currency']=$("#ft_currency").val();
+frm['description']=$("#description").val();
+frm['view_debt']=$(".view_debt:checked").attr("value");
+console.log(frm);
+if(frm['fund_type_id']==0){
+            $.ajax({
+                url: '?eda_act=<?= md5('ajax');?>&eda_code=<?= md5('add_fund_type');?>',
+                type: 'post',
+                data:frm,
+                dataType: 'json',
+                contentType: 'application/x-www-form-urlencoded',
+                success: function (data) {
+                  //console.log("dtgk:",data);
+                  if(data.success){
+                    alert(data.success);
+                    location.reload();
+                  }
+                  if(data.deny){
+                    alert(data.deny);
+                  }
+                }
+                
+            });
+}
+else
+{
+            $.ajax({
+                url: '?eda_act=<?= md5('ajax');?>&eda_code=<?= md5('update_fund_type');?>',
+                type: 'post',
+                data:frm,
+                dataType: 'json',
+                contentType: 'application/x-www-form-urlencoded',
+                success: function (data) {
+                  //console.log("dtgk:",data);
+                  if(data.success){
+                    alert(data.success);
+                    location.reload();
+                  }
+                  if(data.deny){
+                    alert(data.deny);
+                  }
+                }
+                
+            });
+}
+            
+
+});
+
+
+
+
+
+
+
+
+
+});
+
+</script>
+

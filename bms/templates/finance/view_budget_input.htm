@@ -1,0 +1,201 @@
+<?php
+	$return_url=unserialize($sessions->get_session('return_url'));
+	if($action->eda_type!='ajax')
+	{
+?>	
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/payment.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Xem phiếu thu</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="<?= $action->eda_code==md5('budget_input_finish')?'window.location=\'?eda_act='.md5('finance').'&eda_code='.md5('budget_input').'\'':'window.location=\''.$return_url['budget_report'].'\';'?>;" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<?php
+	}
+	$bin=get_data("select * from budget_invoices where bin_id='".$action->eda_id."'");
+	if(count($bin)>0)
+	{
+		$return_val=$bin[0];
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding:10px;">        
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td height="25" width="180" align="left"><b>Người thu</b></td>
+              <td width="200">
+<?php
+	$usr=get_data("select full_name from users where user_id='".$return_val['user_id']."'");
+	if(count($usr)>0)
+		echo $usr[0]['full_name'];
+	else
+		echo "Không xác định";
+?>                    
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Thời gian lập</b></td>
+              <td>
+              <?= date('d/m/Y H:i',$return_val['created_date'])?>
+              </td>
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Khoản thu</b></td>
+              <td>
+<?php
+	$item=get_data("select item_name from item_type where item_id='".$return_val['item_id']."'");
+	if(count($item)>0)
+		echo $item[0]['item_name'];
+	else
+		echo "Không xác định";
+?>               
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>(*) Số chứng từ</b></td>
+              <td>
+              <?= isset($return_val['bin_code'])?$return_val['bin_code']:''?>
+              </td>             
+            </tr>
+           <tr>
+              <td height="25" align="left"><b> Người nộp tiền</b></td>
+              <td>
+<?php
+	if(!empty($return_val['cus_id']))
+	{
+		$cus=get_data("select cus_name from customers where cus_id='".$return_val['cus_id']."'");
+		if(count($cus)>0)
+			echo $cus[0][0];
+		else
+			echo "Không xác định";	
+	}
+	else if(!empty($return_val['sup_id']))
+	{
+		$sup=get_data("select sup_name from supliers where sup_id='".$return_val['sup_id']."'");
+		if(count($sup)>0)
+			echo $sup[0][0];
+		else
+			echo "Không xác định";		
+	}
+	else if(!empty($return_val['emp_id']))
+	{
+		$usr=get_data("select full_name from users where user_id='".$return_val['emp_id']."'");
+		if(count($usr)>0)
+			echo $usr[0]['full_name'];
+		else
+			echo "Không xác định";
+	}
+	else
+		echo $return_val['user_name'];
+?>
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Số tiền thu</b></td>
+              <td>
+				<?= isset($return_val['amount'])?number_format($return_val['amount'],0,'',' '):''?>          
+              </td>             
+            </tr>   
+            <tr>
+              <td height="25" align="left"><b>Quỹ/Tài khoản nhận</b></td>
+              <td>
+              <?php
+				$fund=get_data("select fund_name from fund where fund_id='".$return_val['fund_id']."'");
+				if(count($fund)>0)
+					echo $fund[0]['fund_name'];
+				else
+					echo "Không xác định";              
+              ?>
+              </td>
+              <td colspan="2" style="padding-left:20px;">(Đã nhận đủ: <?=doc_so($return_val['amount'])?> đồng)</td>
+            </tr>                       
+            <tr>
+              <td height="25" align="left"><b>Chi tiết</b></td>
+              <td colspan="3"><?= isset($return_val['comment'])?$return_val['comment']:''?>
+            </tr>                         
+          </table>
+</td></tr>
+</table>
+<?php
+	}
+	else
+		echo 'Không tìm thấy phiếu thu';
+?>		
+<?php
+	if($action->eda_type!='ajax')
+	{
+		if(empty($return_val['invd_id'])&&empty($return_val['oinv_id'])) {
+?>	
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+<tr><td style="padding-left:20px;"><b>Người tạo: </b>
+<?php
+	$usr=get_data("select full_name from users where user_id='".$return_val['created_user']."'");
+	if(count($usr)>0)
+		echo $usr[0]['full_name'];
+	else
+		echo "Không xác định";	
+?>		
+</td><tr>	
+	      <tr>
+		<td height=5 ><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	     </table>
+	   <table width="100%"  border="0" cellpadding="0" cellspacing="0">   
+	      <tr>
+                <?php
+                if (check_func('del_budget_input')) {
+                ?>                    
+		<td height="25" width="20" style="padding-left:20px;"><img src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" height="18"></td>
+		<td width="100" style="padding-left:5px;cursor:pointer;" onclick="del_input(<?= $action->eda_id?>)"><a class="cart_payment" href="javascript:void()"><b>Xoá phiếu thu</b></a></td>
+                <?php
+                }
+                ?>
+                <?php
+                if (check_func('edit_budget_input')) {
+                ?>                 
+		<td width="20" style="padding-left:20px;"><img src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" height="18"></td>
+		<td style="padding-left:5px;" onclick="edit_input(<?= $action->eda_id?>)"><a class="cart_payment" href="javascript:void()"><b>sửa phiếu thu</b></a></td>
+                <?php
+                }
+                ?>                
+	      </tr>	      	      
+	</table>
+ <script language="javascript">
+ 	function del_input(id)
+ 	{
+ 		if(id>0)
+ 		{
+ 			c=confirm("Bạn có chắc chắn muốn xoá phiếu thu này không?");
+ 			if(c)
+ 				window.location="?eda_act=<?= md5('finance')?>&eda_code=<?= md5('budget_input_del')?>&eda_id="+id;
+ 		}
+ 		else
+ 			alert('Không tìm thấy phiếu thu');
+ 	}
+ 	function edit_input(id)
+ 	{
+ 		if(id>0)
+ 		{
+			window.location="?eda_act=<?= md5('finance')?>&eda_code=<?= md5('budget_input_edit')?>&eda_id="+id;
+ 		}
+ 		else
+ 			alert('Không tìm thấy phiếu thu');
+ 	} 	
+ </script>	
+<?php
+	}
+?> 
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;" width="30">
+          <img src="<?=ROOT_URL?>/bms/images/icon/preview.gif" height="24">
+          </td>
+          <td   style="padding-left:5px;">
+          <a class="cart_payment" href="?eda_code=<?= md5('view_report')?>&eda_type=ajax&eda_module=finance/view_budget_input&eda_id=<?= $action->eda_id?>" target="_blank"><b>Xem dạng in ấn</b></a>
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="<?= $action->eda_code==md5('budget_input_finish')?'window.location=\'?eda_act='.md5('finance').'&eda_code='.md5('budget_input').'\'':'window.location=\''.$return_url['budget_report'].'\';'?>;" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>          
+ <?php
+ 	}
+ ?>

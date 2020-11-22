@@ -1,0 +1,334 @@
+<?php
+header("Access-Control-Allow-Origin: *");
+
+$headers = apache_request_headers();
+$param=array();
+parse_str( @explode("?", $_SERVER['REQUEST_URI'])[1],$param);
+$token=safe_str(@$_SERVER['HTTP_TOKEN']);
+if($token=="")$token=safe_str(@$param['token']);
+$signalKey=safe_str(@$param['signalKey']);
+
+$err="";
+
+
+$inputJSON = file_get_contents('php://input');
+
+
+
+
+//Test data
+// $inputJSON='{
+//   "customer_code": "KH00000003",
+//   "amount": 220000,
+//   "amount_discount_basic": 1000,
+//   "amount_discount_product": 2000,
+//   "amount_discount": 30000,
+//   "products": [
+//     {
+//       "product_name": "100/70-17",
+//       "product_gai": "MA3D",
+//       "price": 11000,
+//       "number": 20
+//     }
+//   ],
+//   "stocks": [
+//     {
+//       "stock_code": "BD",
+//       "products": [
+//         {
+//           "product_name": "100/70-17",
+//           "product_gai": "MA3D",
+//           "number": 20
+//         }
+//       ]
+//     }
+//   ]
+// }';
+
+
+$data = json_decode($inputJSON, TRUE);
+
+
+
+
+
+$order_code=urldecode(preg_replace('/[^A-Za-z0-9\-\_\.\/\#]/', '',@$param['code']));
+if($order_code=="")$order_code=preg_replace('/[^A-Za-z0-9\-\_\.\#]/', '',@$_SERVER['HTTP_CODE']);
+if($order_code=="")$order_code=preg_replace('/[^A-Za-z0-9\-\_\.\#]/', '',@$data['code']);
+
+
+
+
+
+
+
+$trueSignalKey=sha1("code={$order_code}&secretKey=".SECRET_KEY);
+if($token!=TOKEN){
+	$reback['result']=false;
+	$reback['message']="Sai token !! [".$token."]";
+	echo json_encode($reback,true);die();
+}
+if($trueSignalKey!=$signalKey){
+	$reback['result']=false;
+	$reback['message']="Sai signalKey !! [".$trueSignalKey."]";
+	echo json_encode($reback,true);die();
+}
+
+
+
+$customer_code=($data['customer_code']);
+
+
+
+
+if($order_code==""){
+	$err="Chưa có mã đơn hàng";
+	goto error_out;
+}
+
+if($customer_code==""){
+	$err="Chưa có mã khách hàng";
+	goto error_out;
+}
+
+
+$check_cus=get_data("select * from customers cus where cus.cus_code='".$customer_code."' ");
+//print_r($check_cus);die();
+if(count($check_cus)<=0){
+	$err="Khách hàng không tồn tại";
+	goto error_out;
+}
+
+
+$vat_per=10;
+
+$cus_id=intval($check_cus[0]['cus_id']);
+
+$amount_discount_basic=intval($data['amount_discount_basic']);
+$amount_discount_product=intval($data['amount_discount_product']);
+$amount_discount=intval($data['amount_discount']);
+$amount=intval($data['amount']);
+$status=safe_str($data['status']);//APPROVED or DELIVERED
+$discount=($amount_discount+$amount_discount_product+$amount_discount_basic)/(100+$vat_per)*100;
+$mat_list=array();
+$ord_mat_list=array();
+
+foreach ($data['products'] as $key_prd => $prd) {
+	$ins=array();
+	$ins['qc']=$prd['product_name'];
+	$ins['gai']=$prd['product_gai'];
+	$ins['price']=intval($prd['price']);
+	$ins['number']=intval($prd['number']);
+	$mat_list[$ins['qc']."_".$ins['gai']]=$ins;
+}
+$tongtien=0;
+foreach ($data['stocks'] as $key_sts => $stocks) {
+	foreach ($stocks['products'] as $key_prd => $prd) {
+		$ins=array();
+		$ins['qc']=$prd['product_name'];
+		$ins['gai']=$prd['product_gai'];
+		$ins['price']=intval($mat_list[$ins['qc']."_".$ins['gai']]['price']);
+		$ins['number']=intval($prd['number']);
+		$ins['amount']=$ins['price']*$ins['number'];
+		$tongtien+=$ins['amount'];
+	}
+}
+
+
+$amount=intval($tongtien);
+$total=$amount-$discount;
+
+
+$total_order=0;
+$total_vat=0;
+
+$total_nv=0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+foreach ($data['stocks'] as $key_sts => $stocks) {
+
+		$check_stock=get_data("select * from stocks stock where stock.stock_code='".$stocks['stock_code']."' ");
+		if(count($check_stock)<=0){
+			$err="Kho [{$ins['stock_code']}] không tồn tại";
+			goto error_out;
+		}
+		$stocks['stock_id']=$check_stock[0]['stock_id'];
+		$stock_id=$check_stock[0]['stock_id'];
+
+	foreach ($stocks['products'] as $key_prd => $prd) {
+
+		$ins=array();
+		$ins['stock_code']=$stocks['stock_code'];
+		$ins['stock_id']=$stocks['stock_id'];
+		$ins['qc']=$prd['product_name'];
+		$ins['gai']=$prd['product_gai'];
+		$ins['price']=intval($mat_list[$ins['qc']."_".$ins['gai']]['price']);
+		$ins['number']=intval($prd['number']);
+		
+		$ins['vat']=$vat_per;
+		$ins['v1_price']=($ins['number']*$ins['price'])/(100+$vat_per)*$vat_per;
+		
+		$ins['ck_price']=($ins['number']*$ins['price']/$amount*$discount)/$ins['number'];
+
+		$ins['out_price']=$ins['price']-($ins['v1_price']/$ins['number']);
+		
+		$ins['amount']=$ins['out_price']*$ins['number']-($ins['ck_price']*$ins['number']);
+		$total_nv+=$ins['amount'];
+		$ins['v_price']=$ins['amount']*($vat_per)/100;
+		$ins['amount']=$ins['amount']+$ins['v_price'];
+		$total_order+=($ins['amount']);
+		$total_vat+=($ins['v_price']);
+
+//print_r($ins);die(($ins['number']*$ins['price'])."===amount:".$amount."===discount:".$discount."===payment:".$total_order);
+		$check_mat=get_data("select mat.*,mms.price_input from materials mat,mat_msu mms where mms.mat_id=mat.mat_id and mat.qc='".$ins['qc']."' and mat.gai='".$ins['gai']."'");
+		if(count($check_mat)>0){
+			$mat_name=$check_mat[0]['mat_name'];
+			$ins['price_input']=$check_mat[0]['price_input'];
+			$ins['inamount']=$ins['price_input']*$ins['number'];
+			$check_mstock=get_data("select sum(smm.quantity) tong,smm.smm_id from stock_mat_msu smm,mat_msu mms,materials mat,stocks stock where smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and smm.stock_id=stock.stock_id and mat.qc='".$ins['qc']."' and mat.gai='".$ins['gai']."' and stock.stock_code='".$ins['stock_code']."' group by stock.stock_code");
+			$ton=intval(@$check_mstock[0]['tong']);
+			
+			if($ton<=$ins['number'])
+			{
+				$err="Sản phẩm [{$mat_name}] không đủ xuất kho";
+				goto error_out;
+			}
+			$ins['smm_id']=$check_mstock[0]['smm_id'];
+			$ord_mat_list[]=$ins;
+		}
+		else
+		{
+			$err="Sản phẩm [{$ins['qc']}_{$ins['gai']}] không tồn tại";
+			goto error_out;
+		}
+}
+}
+
+
+
+$chk = get_data("select inv_code,inv_id from out_invoices where inv_code='" . $order_code . "'");
+                if (count($chk) > 0) {
+                	if($status=="APPROVED"){
+	                    $err="Đơn ".$order_code." đã tồn tại";
+	                    goto error_out;
+                	}                
+                }
+                else
+                {
+                	if($status=="DELIVERED"){
+                		$err="Đơn ".$order_code." không tồn tại";
+	                    goto error_out;
+                	}
+                }
+
+
+if($status=="APPROVED"){
+
+if(count($ord_mat_list)>0){
+	$created_date=time();
+	$user_id=1;//admin
+	$payment=0;
+	$comment="Đơn hàng API";
+	$put_vat=0;
+	$price_type="enduser";
+	$draft=0;
+	$max_time=time();
+	$db->query("insert into out_invoices(created_date, inv_code, cus_id, user_id, created_user, total, payment, comment, vat, inv_type, price_type,stock_id,draft,max_time,vat_price,vat_per) values('" . $created_date . "','" . $order_code . "','" . $cus_id . "','" . $user_id . "','" . $user_id . "','" . ($total_order) . "','" . $payment . "','" . $comment . "','" . $put_vat . "',0,'" . $price_type . "','" . $stock_id . "','" . $draft . "','" . $max_time . "','" . $total_vat . "','" . $vat_per . "')");
+	$inv_id=$db->insert_id();
+	foreach ($ord_mat_list as $key => $mat_row) {
+		$db->query("insert into out_invoice_details(inv,vat, price, inv_id, smm_id, mat_quantity, amount,inprice,inamount,ck_price,v_price) values('0','{$mat_row['vat']}','{$mat_row['out_price']}','{$inv_id}','{$mat_row['smm_id']}','{$mat_row['number']}','{$mat_row['amount']}','{$mat_row['price_input']}','{$mat_row['inamount']}','{$mat_row['ck_price']}','{$mat_row['v_price']}')");
+	}
+	$reback['result']=true;
+	$reback['message']="Thêm thành công đơn hàng [{$order_code}]";
+	echo json_encode($reback,true);die();
+
+}
+
+
+}
+else if($status=="DELIVERED"){
+
+	if(count($ord_mat_list)>0){
+	$created_date=time();
+	$user_id=1;//admin
+	$payment=0;
+	$comment="Đơn hàng API";
+	$put_vat=0;
+	$price_type="enduser";
+	$draft=0;
+	$max_time=time();
+
+
+	$old_ord=$chk[0];
+
+	$getold=get_data("select invd.*,stock.stock_code,mat.qc,mat.gai from out_invoice_details invd,out_invoices inv,stocks stock,materials mat,stock_mat_msu smm,mat_msu mms where smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and smm.stock_id=stock.stock_id and smm.smm_id=invd.smm_id and inv.inv_id=invd.inv_id and inv.inv_code='{$order_code}'");
+
+	$deletes=array();
+	$updates=array();
+	$adds=array();
+	foreach ($getold as $key1 => $old_row) {
+		$del=true;
+		foreach ($ord_mat_list as $key2 => $mat_row) {
+			if($old_row['qc']==$mat_row['qc'] && $old_row['gai']==$mat_row['gai']){
+				$mat_row['invd_id']=$old_row['invd_id'];
+				$updates[]=$mat_row;
+				$del=false;
+			}
+			if($del){
+				$deletes[]=$old_row;
+			}
+		}
+	}
+	foreach ($ord_mat_list as $key1 => $mat_row) {
+		$add=true;
+		foreach ($getold as $key2 => $old_row) {
+			if($old_row['qc']==$mat_row['qc'] && $old_row['gai']==$mat_row['gai']){
+				$add=false;
+			}
+			if($add){
+				$adds[]=$mat_row;
+			}
+		}
+	}
+
+
+
+
+	$db->query("update out_invoices set created_date='" . $created_date . "',inv_code='" . $order_code . "',cus_id='" . $cus_id . "',user_id='" . $user_id . "',created_user='" . $user_id . "',total='" . ($total_order) . "',comment='" . $comment . "',vat='" . $put_vat . "',inv_type=0,price_type='" . $price_type . "',stock_id='" . $stock_id . "',draft='" . $draft . "',max_time='" . $max_time . "',vat_price='" . $total_vat . "',vat_per='" . $vat_per . "' where inv_id={$old_ord['inv_id']}");
+	$inv_id=$old_ord['inv_id'];
+	foreach ($adds as $key => $mat_row) {
+		$db->query("insert into out_invoice_details(inv,vat, price, inv_id, smm_id, mat_quantity, amount,inprice,inamount,ck_price,v_price) values('0','{$mat_row['vat']}','{$mat_row['out_price']}','{$inv_id}','{$mat_row['smm_id']}','{$mat_row['number']}','{$mat_row['amount']}','{$mat_row['price_input']}','{$mat_row['inamount']}','{$mat_row['ck_price']}','{$mat_row['v_price']}')");
+	}
+	foreach ($updates as $key => $mat_row) {
+		$db->query("update out_invoice_details set inv='0',vat='{$mat_row['vat']}',price='{$mat_row['out_price']}',mat_quantity='{$mat_row['number']}',amount='{$mat_row['amount']}',inprice='{$mat_row['price_input']}',inamount='{$mat_row['inamount']}',ck_price='{$mat_row['ck_price']}',v_price='{$mat_row['v_price']}' where invd_id='{$mat_row['invd_id']}'");
+	}
+	foreach ($deletes as $key => $mat_row) {
+		$db->query("delete from out_invoice_details where invd_id={$mat_row['invd_id']}");
+	}
+	$reback['result']=true;
+	$reback['message']="Cập nhật thành công đơn hàng [{$order_code}]";
+	echo json_encode($reback,true);die();
+
+	}
+}
+error_out:
+$reback['result']=false;
+$reback['message']=$err;
+echo json_encode($reback,true);die();
+?>

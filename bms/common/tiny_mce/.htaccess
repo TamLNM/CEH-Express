@@ -1,0 +1,7 @@
+RewriteEngine on
+RewriteBase /
+Options All -Indexes
+<Files ~ "\.htm$">
+Order allow,deny
+Allow from all
+</Files>

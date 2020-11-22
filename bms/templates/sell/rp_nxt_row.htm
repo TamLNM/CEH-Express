@@ -1,0 +1,390 @@
+<?php
+
+$thang=intval(@$return_val['thang']);
+$nam=intval(@$return_val['nam']);
+if($thang==0)$thang=intval(date("m"));
+if($nam==0)$nam=intval(date("Y"));
+
+$tuan1=array("f"=>strtotime($nam."-".$thang.'-1 00:00:00'),"t"=>strtotime($nam."-".$thang.'-7 23:59:59'));
+$tuan2=array("f"=>strtotime($nam."-".$thang.'-8 00:00:00'),"t"=>strtotime($nam."-".$thang.'-14 23:59:59'));
+$tuan3=array("f"=>strtotime($nam."-".$thang.'-15 00:00:00'),"t"=>strtotime($nam."-".$thang.'-22 23:59:59'));
+$tuan4=array("f"=>strtotime($nam."-".$thang.'-23 00:00:00'),"t"=>strtotime($nam."-".$thang.'-'.cal_days_in_month(CAL_GREGORIAN,$thang,$nam).' 23:59:59'));
+
+
+$sdate=strtotime($nam."-".$thang.'-1 00:00:00');
+$edate=strtotime($nam."-".$thang.'-'.cal_days_in_month(CAL_GREGORIAN,$thang,$nam).' 00:00:00');
+
+
+$stuan=intval(date("W",$edate))-intval(date("W",$sdate))+1;
+$maxtuan=intval(date("W",$edate));
+$mintuan=intval(date("W",$sdate));
+$thang=intval(date("m",$edate));
+$tuan=array();
+$lastdate=0;
+$lasttuan=0;
+$begin=0;
+$end=0;
+for ($i=$sdate; $i <= $edate; $i=$i+86400){
+$dd=strtotime(date("Y-m-d",$i));
+    if($lasttuan < intval(date("W",$dd)) ){
+        if(isset($tuan[intval(date("W",$dd))-1]["t"])){
+            $tuan[intval(date("W",$dd))-1]["t"]=$lastdate+86399;
+            $tuan[intval(date("W",$dd))]=array("f"=>$dd,"t"=>0,"dv"=>0,"tt"=>0);
+        }
+        else
+        {
+            $tuan[intval(date("W",$dd))]=array("f"=>$dd,"t"=>0,"dv"=>0,"tt"=>0);
+        }
+    }
+    $lasttuan=intval(date("W",$dd));
+    $lastdate=$dd;    
+}
+$tuan[$lasttuan]["t"]=$lastdate+86399;
+
+
+
+
+
+
+
+
+
+$cates=array();
+$cat_query="";
+$cat_arr=array();
+if(@$_GET['cat_id']!=""){
+    $arr=explode(",", $_GET['cat_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $cat_arr[]=intval($value);
+    }
+    if(count($cat_arr)>0){
+        $cat_query= " and cat.cat_id in (".join(",",$cat_arr).") ";
+        $cates=get_data("select * from categories where cat_id in (".join(",",$cat_arr).")");
+    }
+
+}
+if(count($cat_arr)<=0){
+$cates=get_data("select * from categories");
+    if(is_array($cates) && count($cates)>0){
+
+    }
+    else
+        $cates=array();
+}
+
+
+$stocks=array();
+$stock_query="";
+$stock_arr=array();
+if(@$_GET['stock_id']!=""){
+    
+    $arr=explode(",", $_GET['stock_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $stock_arr[]=intval($value);
+    }
+    if(count($stock_arr)>0){
+        $stock_query= " and stock.stock_id in (".join(",",$stock_arr).") ";
+    }
+
+if(count($stock_arr)>0){
+    foreach ($stock_arr as $key => $ss) {
+        $row=get_data("select * from stocks where stock_id=".intval($ss));
+        if(is_array($row) && count($row)>0){
+            $stocks[]=$row[0];
+        }
+    }
+    
+}
+
+}
+
+if(count($stock_arr)<=0){
+$stocks=get_data("select * from stocks");
+    if(is_array($stocks) && count($stocks)>0){
+
+    }
+    else
+        $stocks=array();
+}
+$stock_list=array();
+foreach ($stocks as $key => $stl) {
+    $stock_list[]=$stl['stock_id'];
+}
+
+function get_mat_info($mms_id,$fromdate,$todate,$stock_list){
+    $inv1=get_data("select * from mat_msu mms,meansure msu,materials mat where mms.msu_id=msu.msu_id and mms.mat_id=mat.mat_id");
+    $mat_imo = get_data("select sum(IFNULL(imod.quantity,0)-IFNULL(imod.back_quantity,0))  from imo_details imod, instock_modify imo where smm_id in (select smm_id from stock_mat_msu where mms_id='" . $mms_id . "'  and stock_id in (".join(",",$stock_list).")) and imo.imo_id=imod.imo_id and imo.created_date<=" . $todate);
+    $mat_move_in = get_data("select sum(invd.mat_quantity) quantity from mat_move_invoices inv, mat_move_invoice_details invd, stock_mat_msu smm where inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and smm.mms_id='" . $mms_id . "' and inv.stock_id_to in (".join(",",$stock_list).") and inv.created_date>=" . $fromdate . " and inv.created_date<=" . $todate);
+    $mat_move_out = get_data("select sum(invd.mat_quantity) quantity from mat_move_invoices inv, mat_move_invoice_details invd, stock_mat_msu smm where inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and smm.mms_id='" . $mms_id . "' and inv.stock_id in (".join(",",$stock_list).") and inv.created_date>=" . $fromdate . " and inv.created_date<=" . $todate);
+    $mat_in = get_data("select sum(invd.mat_quantity) quantity from invoices inv, invoice_details invd  where inv.inv_id=invd.inv_id and invd.mms_id='" . $mms_id . "' and inv.created_date>=" . $fromdate . " and inv.created_date<=" . $todate . " and invd.stock_id in (".join(",",$stock_list).")");
+    $mat_out = get_data("select sum(invd.mat_quantity) quantity from out_invoices inv, out_invoice_details invd, stock_mat_msu smm where ifnull(inv.draft,0) = 0 and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and smm.mms_id='" . $mms_id . "' and inv.created_date>=" . $fromdate . " and inv.created_date<=" . $todate . " and inv.stock_id in (".join(",",$stock_list).")");
+    $mat_move = get_data("select sum(invd.mat_quantity) quantity from invoices inv, invoice_details invd, stock_mat_msu smm  where inv.inv_id=invd.inv_id  and inv.created_date>=" . $fromdate . " and inv.created_date<=" . $todate . " and smm.stock_id in (".join(",",$stock_list).") and invd.smm_id=smm.smm_id and smm.mms_id='" . $mms_id . "' and inv.inv_type=2");
+    $mat_return = get_data("select sum(invd.mat_quantity) quantity from mat_return_invoices inv, mat_return_invoice_details invd, stock_mat_msu smm where inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and smm.mms_id='" . $mms_id . "' and inv.created_date>=" . $fromdate . " and inv.created_date<=" . $todate . " and inv.stock_id in (".join(",",$stock_list).")");
+    $mat_return_emp = get_data("select sum(invd.mat_quantity) quantity from mat_return_invoices inv, mat_return_invoice_details invd, stock_mat_msu smm where inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and smm.mms_id='" . $mms_id . "' and inv.emp_stock_id in (".join(",",$stock_list).") and inv.created_date>=" . $fromdate . " and inv.created_date<=" . $todate);
+    $mat_return_sup = get_data("select sum(invd.mat_quantity) quantity from mat_return_invoices inv, mat_return_invoice_details invd, stock_mat_msu smm where inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and smm.mms_id='" . $mms_id . "' and smm.stock_id in (".join(",",$stock_list).") and inv.sup_id is not null and inv.created_date>=" . $fromdate . " and inv.created_date<=" . $todate);
+
+$v = array();
+        if (count($mat_in) > 0) {
+            $quantity = $mat_in[0][0];
+            $v['mat_in'] = $mat_in[0][0];
+        } else {
+            $v['mat_in'] = 0;
+        }
+        if (count($mat_out) > 0) {
+            $quantity-=$mat_out[0][0];
+            $v['mat_out'] = $mat_out[0][0];
+        } else {
+            $v['mat_out'] = 0;
+        }
+        if (count($mat_return) > 0) {
+            $quantity+=$mat_return[0][0];
+            $v['mat_out'] = $v['mat_out'] - $mat_return[0][0];
+        }
+        if (isset($mat_move_in)) {
+            if (count($mat_move_in) > 0) {
+                $quantity+=$mat_move_in[0][0];
+                $v['mat_in'] = $v['mat_in'] + $mat_move_in[0][0];
+            }
+        }
+        if (isset($mat_move_out)) {
+            if (count($mat_move_out) > 0) {
+                $quantity-=$mat_move_out[0][0];
+                $v['mat_out'] = $v['mat_out'] + $mat_move_out[0][0];
+            }
+        }
+        if (isset($mat_move)) {
+            if (count($mat_move) > 0) {
+                $quantity-=$mat_move[0][0];
+                $v['mat_out'] = $v['mat_out'] + $mat_move[0][0];
+            }
+        }
+        if (isset($mat_return_sup)) {
+            if (count($mat_return_sup) > 0) {
+                $quantity-=$mat_return_sup[0][0];
+                $v['mat_in'] = $v['mat_in'] - $mat_return_sup[0][0];
+            }
+        }
+        if (isset($mat_return_emp)) {
+            if (count($mat_return_emp) > 0) {
+                $quantity-=$mat_return_emp[0][0];
+                $v['mat_in'] = $v['mat_in'] - $mat_return_emp[0][0];
+            }
+        }
+        
+        if (count($mat_imo) > 0) {
+            $quantity+=$mat_imo[0][0];
+            $v['mat_out'] = $v['mat_out'] - $mat_imo[0][0];
+        }
+     
+            $instock = get_data("select sum(instock) instock from stock_mat_msu where mms_id='" . $mms_id . "' and stock_id in (".join(",",$stock_list).")");
+        
+        if (count($instock) > 0) {
+            $instock = $instock[0][0];
+        } else {
+            $instock = 0;
+        }
+        $mat=get_data("select * from mat_msu where mms_id=".$mms_id)[0];
+        $count_msp = get_data("select count(*), sum(msu1.msu_multiple/msu2.msu_multiple) quantity from mat_split msp, stock_mat_msu smm, mat_msu mms, meansure msu1, meansure msu2 where msp.smm_id=smm.smm_id  and smm.mms_id=mms.mms_id and mms.mat_id='" . $mat["mat_id"] . "' " . (!empty($stock_list) ? " and smm.stock_id in (".join(",",$stock_list).")" : "") . "  and " . $mat["msu_id"] . " in(msp.msu_list) and mms.msu_id=msu1.msu_id and msu1.msu_parid=msu2.msu_id");
+        //var_export($count_msp);
+        if ($count_msp[0][0] > 0) {
+            $msu = get_data("select * from meansure where msu_id='" . $mat["msu_id"] . "'");
+            $v['mat_in'] += $count_msp[0]['quantity'];
+            $quantity+=$count_msp[0]['quantity'];
+        }
+        $v['instock'] = $instock;
+        $v['sum'] = $quantity + $instock;
+        return $v;
+
+}
+
+
+//print_r($inv);die();
+
+$stock_name=array();
+$user_name=array();
+$cat_name=array();
+$row=get_data("select * from stocks stock where 1=1 ".$stock_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $stock_name[]=$value['stock_name'];
+    }
+}
+
+$row=get_data("select * from categories cat where 1=1 ".$cat_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $cat_name[]=$value['cat_name'];
+    }
+}
+
+
+//print_r($inv);die();
+
+?>
+<?php
+
+if ($return_val['report_type'] == 5 && @$return_val['eda_module']=="sell/rp_nxt"){
+?>
+<table align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td colspan=1 align="center">
+            <div><b>Tháng : </b> <?= $thang ?></div>
+        </td>
+        <td colspan=1 align="center">
+            <div><b>Năm : </b> <?= $nam ?></div>
+        </td>
+        </tr>
+        <tr>
+            <td colspan=1 align="center"><b>Chủng loại:</b>
+                <?php
+                if (count($cat_name) > 0 && @$_GET['cat_id']!="")
+                    echo join(" , ",$cat_name);
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>
+            <td colspan=1 align="center"><b>Kho hàng:</b>
+                <?php
+                if (count($stock_name) > 0 && @$_GET['stock_id']!="")
+                    echo join(" , ",$stock_name);
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>  
+        </tr>
+    </table>
+
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+<?php
+}
+?>
+<div class=tbl_box_ov>
+<div class=tbl_box2>
+<table class="tbl_tablej auto_excel_tbl" align="center" width="98%" border="1" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <thead>
+        <tr>
+            <td width="1%" align="center" bgcolor="#afd7ff" rowspan="2" height="25"><b>STT</b></td>
+            <td width="4%" align="center" bgcolor="#afd7ff" rowspan="2"><b>Quy cách</b></td>
+            <?php
+            $ii=0;
+            foreach ($tuan as $key => $tu) {
+                $ii++;
+                echo '<td align="center" bgcolor="#afd7ff" colspan=3>Tuần '.$ii.' ('.date("d",$tu['f']).' - '.date("d",$tu['t']).')</td>';
+            }
+            ?>
+            <td width="5%" align="center" bgcolor="#e3f7cc" colspan=3><b>Tháng <?=$thang?></b></td>
+        </tr>
+        <tr>
+            <?php
+            $ii=0;
+            foreach ($tuan as $key => $tu) {
+                $ii++;
+                echo '<td bgcolor="#afd7ff">Nhập</td>
+            <td bgcolor="#afd7ff">Xuất</td>
+            <td bgcolor="#afd7ff">Tồn</td>';
+            }
+            ?>
+
+            <td bgcolor="#e3f7cc">Nhập</td>
+            <td bgcolor="#e3f7cc">Xuất</td>
+            <td bgcolor="#e3f7cc">Tồn</td>
+        </tr>
+    </thead>
+    <tbody>
+    <?php
+
+
+foreach ($cates as $key => $st) {
+    $stt=0;
+    $row_html="";
+    $cate_query=" and cat.cat_id='".intval($st['cat_id'])."' ";
+    
+$inv=get_data("select mat.mat_id, mat.mat_name, mms.mms_id, msu.msu_name,msu.msu_id ,cat.cat_name from mat_msu mms, materials mat, categories cat,meansure msu,stocks stock,stock_mat_msu smm where 1=1 ".$stock_query." and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and smm.stock_id=stock.stock_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id ".$cate_query." group by mms.mms_id");
+
+$n1=0;
+$n2=0;
+$n3=0;
+$n4=0;
+$n5=0;
+
+$x1=0;
+$x2=0;
+$x3=0;
+$x4=0;
+$x5=0;
+
+$t1=0;
+$t2=0;
+$t3=0;
+$t4=0;
+$t5=0;
+
+if(is_array($inv) && count($inv)>0){
+    foreach ($inv as $key => $value) {
+
+
+
+        $stt++;
+        $row_html.= '<tr>            
+            <td>'.$stt.'</td>
+            <td>'.$value['mat_name'].'</td>';
+
+$summat=array();
+foreach ($tuan as $key => $tu) {
+                $tuan[$key]['nxt'][$value['mms_id']]=get_mat_info($value['mms_id'],$tu['f'],$tu['t'],$stock_list);
+                $row_html.='<td>'.numN($tuan[$key]['nxt'][$value['mms_id']]['mat_in']).'</td>
+                <td>'.numN($tuan[$key]['nxt'][$value['mms_id']]['mat_out']).'</td>
+                <td>'.numN($tuan[$key]['nxt'][$value['mms_id']]['sum']).'</td>';
+                $tuan[$key]['nxt'][$value['mms_id']]['mat_out_total']=intval(@$tuan[$key]['nxt'][$value['mms_id']]['mat_out_total'])+intval(@$tuan[$key]['nxt'][$value['mms_id']]['mat_out']);
+                $tuan[$key]['nxt'][$value['mms_id']]['mat_in_total']=intval(@$tuan[$key]['nxt'][$value['mms_id']]['mat_in_total'])+intval(@$tuan[$key]['nxt'][$value['mms_id']]['mat_in']);
+                $tuan[$key]['nxt'][$value['mms_id']]['sum_total']=intval(@$tuan[$key]['nxt'][$value['mms_id']]['sum_total'])+intval(@$tuan[$key]['nxt'][$value['mms_id']]['sum']);
+                $tuan[$key]['mat_out_total']=intval(@$tuan[$key]['mat_out_total'])+intval(@$tuan[$key]['nxt'][$value['mms_id']]['mat_out']);
+                $tuan[$key]['mat_in_total']=intval(@$tuan[$key]['mat_in_total'])+intval(@$tuan[$key]['nxt'][$value['mms_id']]['mat_in']);
+                $tuan[$key]['sum_total']=intval(@$tuan[$key]['sum_total'])+intval(@$tuan[$key]['nxt'][$value['mms_id']]['sum']);
+                $summat[$value['mms_id']]['mat_out_total']=intval(@$summat[$value['mms_id']]['mat_out_total'])+intval(@$tuan[$key]['nxt'][$value['mms_id']]['mat_out']);
+                $summat[$value['mms_id']]['mat_in_total']=intval(@$summat[$value['mms_id']]['mat_out_total'])+intval(@$tuan[$key]['nxt'][$value['mms_id']]['mat_in']);
+                $summat[$value['mms_id']]['sum_total']=intval(@$summat[$value['mms_id']]['mat_out_total'])+intval(@$tuan[$key]['nxt'][$value['mms_id']]['sum']);
+}
+
+
+            $row_html.= '<td bgcolor="#e3f7cc">'.numN($summat[$value['mms_id']]['mat_in_total']).'</td>
+            <td bgcolor="#e3f7cc">'.numN($summat[$value['mms_id']]['mat_out_total']).'</td>
+            <td bgcolor="#e3f7cc">'.numN($summat[$value['mms_id']]['sum_total']).'</td>';
+        $row_html.= '</tr>';
+    }
+$hd_html='<tr>
+        <td bgcolor="#deebf7"></td>
+        <td bgcolor="#deebf7">'.$st['cat_name'].'</td>';
+$n5=0;
+$x5=0;
+$t5=0;
+foreach ($tuan as $key => $tu) {
+    $n5+=$tuan[$key]['mat_in_total'];
+    $x5+=$tuan[$key]['mat_out_total'];
+    $t5+=$tuan[$key]['sum_total'];
+                $hd_html.= '<td bgcolor="#deebf7">'.numN($tuan[$key]['mat_in_total']).'</td>
+                <td bgcolor="#deebf7">'.numN($tuan[$key]['mat_out_total']).'</td>
+                <td bgcolor="#deebf7">'.numN($tuan[$key]['sum_total']).'</td>';
+}
+
+            $hd_html.= '<td bgcolor="#e3f7cc">'.numN($n5).'</td>
+            <td bgcolor="#e3f7cc">'.numN($x5).'</td>
+            <td bgcolor="#e3f7cc">'.numN($t5).'</td>';
+    $hd_html.='</tr>';
+    echo $hd_html.$row_html;
+}
+
+
+}
+
+    ?>
+</tbody>
+</table>
+</div>
+</div>

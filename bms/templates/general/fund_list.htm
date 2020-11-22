@@ -1,0 +1,191 @@
+<style type="text/css">
+	#fund_tbl tbody td{
+		padding: 0px 5px;
+	}
+	#fund_tbl tbody td:first-child{
+		border: transparent;
+	}
+	.tr_row td:first-child{
+		position: relative;
+		padding-left: 20px;
+	}
+	.tr_haschild td:first-child:before{
+		content: "";
+		display: inline-block;
+		width: 24px;
+		height: 24px;
+		background-image: url('bms/common/treeview/32px.png');
+		background-position: 188px -4px;
+		vertical-align: middle;
+		position: relative;
+		left: -24px;
+	}
+	.tr_nochild td:first-child:before{
+		content: "";
+		display: inline-block;
+		width: 24px;
+		height: 24px;
+		background-image: url('bms/common/treeview/32px.png');
+		background-position: -68px -4px;
+		vertical-align: middle;
+		position: relative;
+		left: -24px;
+	}
+	.bib{
+		position: relative;
+		left: -24px;
+	}
+	.pc{
+		display: inline-block;
+		width: 24px;
+		height: 24px;
+		background-image: url('bms/common/treeview/32px.png');
+		background-position: 28px 0px;
+		vertical-align:middle;
+		float: left;
+	}
+	.nopc{
+		background: transparent;
+	}
+	.tr_row:hover{
+		background: #e3e3e3;
+		cursor: pointer;
+	}
+</style>
+<link rel="stylesheet" type="text/css" href="bms/common/jstree/themes/default/style.min.css"/>
+<script src="bms/common/jstree/jstree.min.js"></script>
+<table width="998" border="0" cellpadding="0" cellspacing="0">
+        <tbody>
+            <tr>       
+                <td valign="top" align="left" bgcolor="#ffffff">
+                          <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tbody><tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="bms/images/icon/wallet_icon.png" width="18" height="18">        
+          </td>
+          <td height="25"><b>Danh sách loại Quỹ/Tài khoản</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="bms/images/icon/back.gif" height="18"></td>
+        </tr>
+        </tbody></table>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	      <tbody><tr>
+		<td height="5"><img src="bms/images/spacer.gif" height="5"></td>
+	      </tr>
+	</tbody></table>    
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+	<td align="center">	
+<div id="cusid">
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tbody><tr>
+	<td align="center">	
+<div id="empid">
+
+	<table width="100%" id="fund_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0" style="border-collapse:collapse">
+	    <thead>
+	    <tr>
+		<td width="15%" align="center" bgcolor="#afd7ff"><b>Tài khoản</b></td>
+		<td width="" align="center" bgcolor="#afd7ff" height="25"><b>Tên tài khoản</b></td>
+		<td width="20%" align="center" bgcolor="#afd7ff"><b>Ngoại tệ</b></td>
+		<td width="15%" align="center" bgcolor="#afd7ff"><b>Loại tài khoản</b></td>	
+		<td width="5%" align="center" bgcolor="#afd7ff"><b>Tài khoản mẹ</b></td>
+		<td width="5%" align="center" bgcolor="#afd7ff"><b>Bậc tài khoản</b></td>		
+		</tr>
+	</thead>
+		<tbody>
+		<?php
+		$fdata=loadloop();
+
+function dequy_fund_type2($item,$parent=array(),$hash=0){
+                            $html=array();
+                            if(count($item)>0)
+                            {
+                                
+                              foreach ($item as $key => $ite) {
+                              	
+                                  $ite['fund_type_name']=str_repeat("&nbsp;",$hash)." [".$ite['fund_type_code']."] ".$ite['fund_type_name'];
+                                  $ite['fund_type_code']=str_repeat("<i class=pc></i>",$hash+1)."<b class=bib>".$ite['fund_type_code']."</b>";
+                                  $ite['parent']=$parent;
+                                  $ite['bac']=$hash;
+                                  $html[]=$ite;
+                                  if(count($ite['items'])>0)
+                                  {
+                                      $html=array_merge($html,dequy_fund_type2($ite['items'],$ite,$hash+1));
+                                  }
+                              }
+                                
+                            }
+                            return $html;
+}
+
+
+
+$fundt=dequy_fund_type2($fdata);
+		foreach ($fundt as $key => $value) {
+	echo '<tr class="tr_row '.(count($value['items'])>0?'tr_haschild':'tr_nochild').' '.(@count(@$value['parent']['items'])>1?'tr_multi':'').'" p_id='.intval($value['parent_id']).' bac="'.$value['bac'].'">
+	<td>'.$value['fund_type_code'].'</td>
+	<td>'.$value['fund_type_name'].'</td>
+	<td>'.$value['ft_currency'].'</td>
+	<td>'.($value['view_debt']==1?"Tài khoản công nợ":"Không chi tiết").'</td>
+	<td>'.preg_replace('/[^0-9]/', '', @$value['parent']['fund_type_code']).'</td>
+	<td>'.$value['ft_level'].'</td>
+	</tr>';
+}
+		?>
+	    
+	</tbody></table>
+</div>
+	</td></tr>
+</tbody></table>		
+
+</div>
+	</td></tr>
+</tbody></table>
+	
+          	
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+<script type="text/javascript">
+	
+$(document).ready(function(){
+
+function tblini(){
+	var obac=0;
+	var back={};
+	var detrol=0;
+	$(".tr_row").each(function(){
+
+		var bac=parseInt($(this).attr("bac"))||0;
+		var p_id=parseInt($(this).attr("p_id"))||0;
+		var mul=$(this).hasClass("tr_multi");
+		if(!mul){
+			detrol=bac;
+		}
+		if(bac>0 && !mul){
+			$(this).find("td .pc").last().addClass("nopc");
+		}
+		if(detrol){
+			$(back).find("td .pc").eq(detrol).addClass("nopc");
+		}
+		if(bac!=obac){
+			
+			console.log(obac,back,$(back).find("td .pc").last().html());
+			if(bac<obac)
+			$(back).find("td .pc").last().addClass("nopc");
+			obac=bac;
+			detrol=0;
+		}
+		back=this;
+	});
+	$(back).find("td .pc").last().addClass("nopc");
+}
+tblini();
+
+
+
+});
+
+</script>

@@ -1,0 +1,81 @@
+<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <tr>
+        <td  align="center" bgcolor="#afd7ff" height="25"><b>Thống kê theo chủng loại sản phẩm</b></td>
+        <td width="14%" align="center" bgcolor="#afd7ff"><b>Tổng số lượng</b></td>
+    <?php
+    $chk_priv=check_func('view_input_price');
+    if ($chk_priv) {
+    ?>           
+        <td width="16%" align="center" bgcolor="#afd7ff"><b>Đơn giá</b></td>
+        <td width="16%" align="center" bgcolor="#afd7ff"><b>Tổng tiền</b></td>
+        <td width="16%" align="center" bgcolor="#afd7ff"><b>Tiền VAT</b></td>
+        <?php
+    }
+        ?>
+    </tr>
+    <?php
+    $where='';
+    if(!check_func('view_input_all')) {
+        $where.=" and inv.created_user='".$sessions->get_session('user_id')."'";
+    }    
+    if (!empty($return_val['keyword']) && $return_val['keyword'] != 'Mã phiếu hoặc mã nhà CC') {
+        $where.=" and (inv.inv_code='" . $return_val['keyword'] . "' or sup.sup_code='" . $return_val['keyword'] . "')";
+        $inv = get_data("select cat.cat_name, mat.mat_name, mms.mms_id, msu.msu_name, sum(invd.mat_quantity) quantity,invd.price, sum(invd.amount) total,sum(invd.vat*invd.price*invd.mat_quantity/100) vat_pr from invoices inv, invoice_details invd, mat_msu mms, materials mat, categories cat, meansure msu, supliers sup  where inv.inv_type=1 and  inv.inv_id=invd.inv_id and invd.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id and mms.msu_id=msu.msu_id and inv.sup_id=sup.sup_id " . $where . " group by mat.mat_name, mms.mms_id order by inv.created_date desc");
+    } else {
+        $inv = get_data("select cat.cat_name, mat.mat_name, mms.mms_id, msu.msu_name, sum(invd.mat_quantity) quantity,invd.price, sum(invd.amount) total,sum(invd.vat*invd.price*invd.mat_quantity/100) vat_pr from invoices inv, invoice_details invd, mat_msu mms, materials mat, categories cat, meansure msu  where inv.inv_type=1 " . (!empty($return_val['stock_id']) ? "  and inv.stock_id=" . $return_val['stock_id'] : "") .$where. " and  inv.inv_id=invd.inv_id and invd.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id " . (!empty($return_val['cat_id']) ? "  and cat.cat_id=" . $return_val['cat_id'] : "") . (!empty($return_val['sup_id']) ? " and inv.sup_id='" . $return_val['sup_id'] . "' " : "") . " and inv.created_date between " . $sdate . " and " . $edate . "  and mms.msu_id=msu.msu_id group by cat.cat_name, mat.mat_name, mms.mms_id order by cat.cat_name, mat.mat_name");
+    }
+    $total = 0;
+    $quantity = 0;
+    $total_cat = 0;
+    $quantity_cat = 0;
+    $total_vat = 0;
+    $t_v = 0;
+    $str = '';
+    for ($i = 0; $i < count($inv); $i++) {
+        $str.='<tr onmouseover="this.style.backgroundColor=\'yellow\';"  onmouseout="this.style.backgroundColor=\'\';">
+		<td style="padding-left:5px;" height="25"> - ' . $inv[$i]['mat_name'] . ($action->eda_type!='ajax'?'<a class="cart_payment" href="?eda_act='. md5('sell') .'&eda_code='. md5('input_mat_detail') .'&datefrom='.$return_val['datefrom'].'&dateto='.$return_val['dateto'].'&cat_id='.$return_val['cat_id'].'&sup_id='.$return_val['sup_id'].'&keyword='.$return_val['keyword'].'&stock_id='.$return_val['stock_id'].'&mms_id='.$inv[$i]['mms_id'].'" target="_blank"> (chi tiết)</a>':'').'</td>
+		<td align="center">' . number_format($inv[$i]['quantity'], 0, ",", " ") . ' ' . $inv[$i]['msu_name'] . '</td>';
+        if ($chk_priv) {
+		$str.= '<td align="right" style="padding-right:5px;">' . number_format($inv[$i]['price'], 0, ",", " ") . '</td>';
+        $str.= '<td align="right" style="padding-right:5px;">' . number_format($inv[$i]['total'], 0, ",", " ") . '</td>';
+        $str.= '<td align="right" style="padding-right:5px;">' . number_format($inv[$i]['vat_pr'], 0, ",", " ") . '</td>';
+        }
+	$str.= '</tr>';
+        $total+=$inv[$i]['total'];
+        $quantity+=$inv[$i]['quantity'];
+        $total_cat+=$inv[$i]['total'];
+        $quantity_cat+=$inv[$i]['quantity'];
+        $total_vat += $inv[$i]['vat_pr'];
+        $t_v += $inv[$i]['vat_pr'];
+        if ($inv[$i]['cat_name'] != ($i < count($inv) - 1 ? $inv[$i + 1]['cat_name'] : '')) {
+            echo '<tr style="background-Color:#eeeeee;">
+			<td style="padding-left:5px;" height="25"><b>' . $inv[$i]['cat_name'] . '</b></td>
+			<td align="center"><b>' . number_format($quantity_cat, 0, ",", " ") . '</b></td>';
+            if ($chk_priv) {
+			echo '<td align="right" style="padding-right:5px;"></td>';
+            echo '<td align="right" style="padding-right:5px;"><b>' . number_format($total_cat, 0, ",", " ") . '</b></td>';
+            echo '<td align="right" style="padding-right:5px;"><b>' . number_format($t_v, 0, ",", " ") . '</b></td>';
+            }
+            echo '</tr>';
+            echo $str;
+            $str = '';
+            $total_cat = 0;
+            $t_v = 0;
+            $quantity_cat = 0;
+        }
+    }
+    ?>	
+    <?php
+    if ($chk_priv) {
+    ?>
+    <tr style="background-Color:#dddddd;">
+        <td height="25" align="center"><b>Tổng cộng</b></td>
+        <td align="center"><b><?= number_format($quantity, 0, ",", " ") ?></b></td>
+        <td></td>
+        <td align="right" style="padding-right:5px;"><b><?= number_format($total, 0, ",", " ") ?></b></td>
+        <td align="right" style="padding-right:5px;"><b><?= number_format($total_vat, 0, ",", " ") ?></b></td>
+    </tr>
+    <?php
+    }
+    ?>
+</table>

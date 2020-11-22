@@ -1,0 +1,72 @@
+<?php $data=get_data("select * from warehouse_type order by warehouse_type_id, warehouse_type_code, warehouse_type_code"); ?>
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/warehouse_type.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Quản lý Loại kho</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+
+<div style="margin: 10px;" id="div_contenttable">
+	<input hidden id="table_name" value="warehouse_type">
+	<table id="contenttable" class="table table-striped display nowrap" cellspacing="0" style="width: 99.5%">
+		<thead>
+			<tr>
+				<th class="editor-cancel" col-name="STT" width="10%">STT</th>
+				<th col-name="warehouse_type_id"></th>
+				<th col-name="warehouse_type_code">Mã loại kho</th>
+				<th col-name="warehouse_type_name">Loại kho</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php $index = 1; 
+				for($i=0; $i < count($data); $i++){?>	
+				<tr>
+					<td contenteditable="true" align="center"><?=$index++;?></td>
+					<td contenteditable="true" align="center"><?=$data[$i]['warehouse_type_id'];?></td>
+					<td contenteditable="true" align="center"><?=$data[$i]['warehouse_type_code'];?></td>
+					<td contenteditable="true" align="center"><?=$data[$i]['warehouse_type_name'];?></td>
+				</tr>
+			<?php } ?>
+		</tbody>
+	</table>
+</div>
+
+<?php
+	include("bms/templates/add_row_popup.htm");
+?>
+
+<input id="editor-input" hidden="">
+
+<script type="text/javascript">
+	$(document).ready(function () {
+		var tbl 			= $('#contenttable'),
+			_columns 		= ['STT', 'warehouse_type_id', 'warehouse_type_code', 'warehouse_type_name'];
+
+		var dataTbl = tbl.newDataTable({
+			scrollY: '55vh',
+			columnDefs: [
+				{ type: "num", className: "text-center", targets: _columns.indexOf('STT') },
+				{ className: "text-center", targets: _columns.getIndexs(['warehouse_type_code', 'warehouse_type_name'])},
+				{ className: "hiden-input", targets: _columns.getIndexs(['warehouse_type_id'])},
+			],
+			order: [[ _columns.indexOf('STT'), 'asc' ]],
+			paging: false,
+			keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            arrayColumns: _columns,
+		});
+		tbl.editableTableWidget();
+		tbl.initComplete({
+			ADD: 'ADD',
+			SAVE: 'SAVE',
+			DELETE: 'DELETE'
+		});
+});
+</script>

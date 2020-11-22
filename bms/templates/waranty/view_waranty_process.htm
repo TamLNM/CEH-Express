@@ -1,0 +1,282 @@
+<?php
+$return_url=unserialize($sessions->get_session('return_url'));
+if($action->eda_type!='ajax')
+{
+?>	
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/waranty_in.png" width="18" height="18"/>
+          </td>
+          <td  height="25"><b>Phiếu xử lý bảo hành - Dịch vụ</b></td>
+        <td align="right" style="padding-right:5px;">
+            <img onclick="<?= isset($return_url['waranty_process'])?'window.location=\''.$return_url['waranty_process'].'\'':'window.location=\''.$return_url['waranty_man'].'\';'?>" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/>
+        </td>
+        </tr>
+        </table>       
+<?php
+	}
+	$return_val=get_data("select inv.*, usr.full_name from waranty_invoices inv, users usr where inv.inv_id='".$action->eda_id."' and inv.user_id=usr.user_id");
+	if(count($return_val)>0)
+	{
+		$return_val=$return_val[0];	
+?>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding:10px;">        
+      <table width="780" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td height="25" width="180" align="left"><b>Người nhận</b></td>
+              <td width="200"><?= $return_val['full_name']?></td>
+              <td height="25" width="110" align="left" style="padding-left:20px;"><b>Thời gian nhận</b></td>
+              <td><?= date('d/m/Y H:i',$return_val['created_date'])?></td>
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Bộ phận xử lý</b></td>
+              <td><?php
+               if(!empty($return_val['dept_id'])) {
+                   $store=get_data("select dept_name from waranty_dept where dept_id='".$return_val['dept_id']."' limit 1");
+                   if(count($store)>0) {
+                       echo $store[0]['dept_name'];
+                   } else {
+                       echo 'Không xác định';
+                   }
+               } else {
+                       echo 'Không xác định';
+               }
+               ?></td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Số phiếu</b></td>
+              <td>          
+              <?= $return_val['inv_code']?>
+              </td>             
+            </tr>
+            <tr>
+              <td height="25" width="180" align="left"><b>Người xử lý</b></td>
+              <td width="200"><?php 
+              $user_accept=get_data("select full_name from users where user_id='".$return_val['user_accept']."'");
+              if(count($user_accept)>0) {
+                $user_accept['full_name']=$user_accept[0]['full_name'];
+              } else {
+                  $user_accept['full_name']="Chưa xử lý";
+              }
+              echo $user_accept['full_name'];
+              ?></td>
+              <td height="25" width="110" align="left" style="padding-left:20px;"><b>Thời gian xử lý</b></td>
+              <td><?= date('d/m/Y H:i',$return_val['accept_date'])?></td>
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Tên khách hàng</b></td>
+              <td><?= $return_val['cus_name']?></td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Điện thoại</b></td>
+              <td>
+              <?= $return_val['tel']?>
+              </td>
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>Địa chỉ</b></td>
+              <td colspan="3"><?= $return_val['address']?></td>
+            </tr>
+             <tr>
+              <td height="25" align="left"><b>Ghi chú</b></td>
+              <td colspan="3"><?= isset($return_val['comment'])?$return_val['comment']:''?></td>
+            </tr> 
+          </table>
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height="40"><b>DANH SÁCH SẢN PHẨM - DỊCH VỤ</b></td>
+		<td align="right"></td>
+	      </tr>
+	</table>
+	<table width="780"  border="1" cellpadding="0" cellspacing="0" bordercolor="#333"  style="border-collapse:collapse;">
+	    <tr>
+                <td width="40" align="center" bgcolor="#666" style="color:#fff;"><b>STT</b></td>
+		<td width="220" align="center" bgcolor="#666" style="color:#fff;" height="25"><b>Sản phẩm - Dịch vụ</b></td>
+                <td width="50" align="center" bgcolor="#666" style="color:#fff;"><b>Loại</b></td>
+                <td width="50" align="center" bgcolor="#666" style="color:#fff;"><b>SL</b></td>
+		<td width="160" align="center" bgcolor="#666" style="color:#fff;"><b>Hiện trạng/Xử lý</b></td>
+                <td width="130" align="center" bgcolor="#666" style="color:#fff;"><b>Trạng thái</b></td>
+                <td  align="center" bgcolor="#666" style="color:#fff;"><b>Chi phí</b></td>
+		</tr>
+<?php
+	$mat=get_data("select warnd.*, matd.msu_name, matd.created_date from (select * from waranty_invoice_details where inv_id='".$return_val['inv_id']."') warnd left join (select mat.mat_name,  msu.msu_name, oinvd.invd_id, inv.created_date from stock_mat_msu smm, mat_msu mms, materials mat, meansure msu, out_invoices inv, out_invoice_details oinvd where oinvd.inv_id=inv.inv_id and oinvd.smm_id=smm.smm_id and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id) matd on warnd.oinvd_id=matd.invd_id");
+        $wstatus=array("Chờ xử lý","Chờ BH - Sửa","Chờ trả","Hoàn thành");
+        $total=0;
+	for($i=0;$i<count($mat);$i++)
+	{
+                $sv=get_data("select * from waranty_services where invd_id=".$mat[$i]['invd_id']);
+                $m=get_data("select * from waranty_materials where invd_id=".$mat[$i]['invd_id']);
+                $total+=$mat[$i]['service_fee'];
+?>	
+		<tr>
+                    <td align="center" <?=count($sv)>0||count($m)>0?'rowspan="2"':''?>><?=$i+1?>.</td>
+		<td style="padding-left:5px;" height="25">
+		<?= $mat[$i]['mat_name']?>
+                    <?= empty($mat[$i]['serial'])?'':'<br/><span style="font-size:11px;">(Serial: '.$mat[$i]['serial'].")</span>"?>
+		</td>
+                <td align="center"><?= $mat[$i]['service_type']?></td>
+		<td align="center"><?= number_format($mat[$i]['mat_quantity'],0,'',' ')?> <?= $mat[$i]['msu_name']?></td>
+                <td align="center"><?= $mat[$i]['warn_desc']?></td>
+                <td align="center">
+                <?= $wstatus[$mat[$i]['warn_status']]?>
+                    <span style="font-size:11px;">
+                    <?=$mat[$i]['warn_status']==2?'<br/>Hẹn trả: '.$mat[$i]['inv_date']:''?>
+                    <?=$mat[$i]['warn_status']==3&&!empty($mat[$i]['return_date'])?'<br/>Ngày trả: '.date('d/m/Y',$mat[$i]['return_date']):''?>
+                    </span>
+                </td>
+                <td style="padding-right:15px;" align="right"><?=number_format($mat[$i]['service_fee'],0,".",",")?></td>
+                </tr>
+<?php
+            if(count($sv)>0||count($m)>0){
+?>
+		<tr>
+		<td style="padding:10px;" height="25" colspan="6">
+<?php
+                if(count($sv)>0) {
+?>
+	<table width="100%"  border="1" cellpadding="0" cellspacing="0" bordercolor="#999"  style="border-collapse:collapse;margin-bottom:10px;">
+	    <tr>
+                <td width="40" align="center" bgcolor="#ddd"><b>STT</b></td>
+		<td width="220" align="center" bgcolor="#ddd" height="25"><b>Tên dịch vụ kèm theo</b></td>
+		<td width="340" align="center" bgcolor="#ddd"><b>Mô tả</b></td>
+                <td  align="center" bgcolor="#ddd"><b>Phí dịch vụ</b></td>
+		</tr>
+<?php
+    for($k=0;$k<count($sv);$k++) {
+        $total+=$sv[$k]['service_fee'];
+?>
+                <tr>
+                <td  align="center" ><?=$k+1?>.</td>
+		<td  style="padding-left:5px;" height="25"><?=$sv[$k]['service_name']?></td>
+		<td  style="padding-left:5px;"><?=$sv[$k]['service_desc']?></td>
+                <td  style="padding-right:5px;" align="right"><?=number_format($sv[$k]['service_fee'],0,".",",")?></td>
+		</tr>
+<?php
+    }
+?>
+        </table>
+<?php
+                }
+?>
+<?php
+                if(count($m)>0) {
+?>
+	<table width="100%"  border="1" cellpadding="0" cellspacing="0" bordercolor="#999"  style="border-collapse:collapse">
+	    <tr>
+                <td width="40" align="center" bgcolor="#ddd"><b>STT</b></td>
+		<td width="220" align="center" bgcolor="#ddd" height="25"><b>Tên thiết bị thay thế</b></td>
+		<td width="80" align="center" bgcolor="#ddd"><b>Trạng thái</b></td>
+                <td width="80" align="center" bgcolor="#ddd"><b>Bảo hành</b></td>
+                <td width="80" align="center" bgcolor="#ddd"><b>Số lượng</b></td>
+                <td width=100" align="center" bgcolor="#ddd"><b>Đơn giá</b></td>
+                <td  align="center" bgcolor="#ddd"><b>Thành tiền</b></td>
+		</tr>
+<?php
+    for($k=0;$k<count($m);$k++) {
+?>
+                <tr>
+                <td align="center" ><?=$k+1?>.</td>
+		<td style="padding-left:5px;" height="25"><?=$m[$k]['mat_name']?></td>
+		<td style="padding-left:5px;"><?=$m[$k]['mat_status']?></td>
+                <td style="padding-left:5px;"><?=$m[$k]['waranty']?></td>
+                <td align="center"><?=$m[$k]['quantity']?></td>
+                <td style="padding-right:5px;" align="right"><?=$m[$k]['price']?></td>
+                <td style="padding-right:5px;" align="right"><?=number_format($m[$k]['quantity']*$m[$k]['price'],0,".",",")?></td>
+		</tr>
+<?php
+$total+=$m[$k]['quantity']*$m[$k]['price'];
+    }
+?>
+        </table>
+<?php
+                }
+?>
+		</td>
+                </tr>
+<?php
+            }
+	}
+?>    
+	</table>
+</td></tr>
+<tr><td align="right" style="padding-right:20px;">
+        <b>Tổng cộng: <span id="totalfee"><?=  number_format($total,0,".",",")?></span>đ</b>
+    </td>
+</tr>
+<?php
+if($action->eda_type!='ajax')
+{
+?>
+<tr><td style="padding-left:20px;"><b>Người thay đổi cuối cùng: </b>
+<?php
+	$usr=get_data("select full_name from users where user_id='".$return_val['created_user']."'");
+	if(count($usr)>0)
+		echo $usr[0]['full_name'];
+	else
+		echo "Không xác định";	
+?>		
+</td><tr>
+<?php
+	}
+?>
+</table>
+<?php
+	}
+	else
+		echo 'Không tìm thấy phiếu bảo hành';
+?>	
+<?php
+if($action->eda_type!='ajax')
+{
+?>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5 ><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	     </table>
+	   <table width="100%"  border="0" cellpadding="0" cellspacing="0">   
+	      <tr>
+		<td width="20" style="padding-left:20px;"><img src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" height="18"/></td>
+		<td width="120" style="padding-left:5px;" onclick="edit_output(<?= $action->eda_id?>)"><a class="cart_payment" href="javascript:void()"><b>Xử lý</b></a></td>
+		<td width="20" style="padding-left:20px;"><img src="<?=ROOT_URL?>/bms/images/icon/waranty_out.png" height="18"/></td>
+		<td style="padding-left:5px;" onclick="waranty('<?=$return_val['inv_code']?>')"><a class="cart_payment" href="javascript:void()"><b>Trả bảo hành - Dịch vụ</b></a></td>
+	      </tr>
+	      <tr>
+		<td height=5 colspan="4"><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>	      	      
+	</table>
+ <script language="javascript">
+ 	function edit_output(id)
+ 	{
+ 		if(id>0)
+ 		{
+			window.location="?eda_act=<?= md5('waranty')?>&eda_code=<?= md5('waranty_process')?>&eda_id="+id;
+ 		}
+ 		else
+ 			alert('Không tìm thấy phiếu bảo hành');
+ 	}
+ 	function waranty(c)
+ 	{
+		window.location="?eda_act=<?= md5('waranty')?>&eda_code=<?= md5('waranty_out')?>&inv_code="+c;
+ 	}
+ </script>	
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;" width="30">
+          <img src="<?=ROOT_URL?>/bms/images/icon/preview.gif" height="24">
+          </td>
+          <td   style="padding-left:5px;">
+          <a class="cart_payment" href="?eda_code=<?= md5('view_report')?>&eda_type=ajax&eda_module=waranty/view_waranty_process&eda_id=<?= $action->eda_id?>" target="_blank"><b>Xem dạng in ấn</b></a>
+          </td>
+        <td align="right" style="padding-right:5px;">
+            <img onclick="<?= isset($return_url['waranty_process'])?'window.location=\''.$return_url['waranty_process'].'\'':'window.location=\''.$return_url['waranty_man'].'\';'?>" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/>
+        </td>
+        </tr>
+        </table>       
+<?php
+	}                
+?>

@@ -1,0 +1,81 @@
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/cal.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Quản lý đơn vị tính</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>        
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td height="40" style="padding-left:20px;"><input type="button" value="Thêm đơn vị tính mới" onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('msu_add')?>';" name="add" class="button"></td>
+      </tr>
+	</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td style="padding-left:20px;">	
+		<table width="100%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td height="25"  align="center" bgcolor="#afd7ff"><b>Tên đơn vị tính</b></td>
+		<td width="30%" align="center" bgcolor="#afd7ff"><b>Tỷ lệ</b></td>
+		<td width="10%" align="center" bgcolor="#afd7ff"><b>Sửa</b></td>
+		<td width="10%" align="center" bgcolor="#afd7ff"><b>Xoá</b></td>		
+		</tr>
+<?php
+	$msu=get_data("select * from meansure where msu_parid is null order by msu_name");
+	if(count($msu)>0)
+	for($i=0;$i<count($msu);$i++)
+	{
+?>		
+		<tr style="background-Color:#eeeeee;">
+		<td  height="25" style="padding-left:5px;"><?= $msu[$i]['msu_name']?></td>
+		<td width="30%" align="center"></td>	
+		<td width="10%" align="center">
+		<a href="?eda_act=<?=md5('general')?>&eda_code=<?= md5('msu_edit')?>&eda_id=<?= $msu[$i]['msu_id']?>" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" width="16" border="0"></a>
+		</td>
+		<td width="10%" align="center" height="25">
+		<a href="javascript:void()" onclick="if(confirm('Bạn có chắc chắn muốn xoá đơn vị tính này không?'))window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('msu_del')?>&eda_id=<?= $msu[$i]['msu_id']?>';" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="16" border="0"></a>
+		</td>
+	    </tr>
+<?php    
+		$submsu=get_data("select * from meansure where msu_parid='".$msu[$i]['msu_id']."' order by msu_name");
+		if(count($submsu)>0)
+		for($j=0;$j<count($submsu);$j++)
+		{
+?>		
+			<tr>
+			<td height="25" style="padding-left:5px;"> - <?= $submsu[$j]['msu_name']?></td>
+			<td align="center">1 <?= $submsu[$j]['msu_name']?> = <?=$submsu[$j]['msu_multiple']?> <?= $msu[$i]['msu_name']?></td>	
+			<td align="center">
+			<a href="?eda_act=<?=md5('general')?>&eda_code=<?= md5('msu_edit')?>&eda_id=<?= $submsu[$j]['msu_id']?>" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" width="16" border="0"></a>
+			</td>
+			<td align="center" height="25">
+			<a href="javascript:void()" onclick="if(confirm('Bạn có chắc chắn muốn xoá đơn vị tính này không?'))window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('msu_del')?>&eda_id=<?= $submsu[$j]['msu_id']?>';" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="16" border="0"></a>
+			</td>
+			</tr>
+<?php
+		}	    
+	}
+?>	    
+	</table>
+	</td></tr>
+</table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>   	
+

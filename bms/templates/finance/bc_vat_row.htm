@@ -1,0 +1,75 @@
+	<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="12%" align="center" bgcolor="#afd7ff" height="25"><b>Đơn hàng nhập</b></td>
+		<td width="16%" align="center" bgcolor="#afd7ff"><b>Tổng VAT</b></td>
+		</tr>
+<?php
+$date = '';
+if (!empty($sdate) && !empty($sdate) && $sdate<=$edate){
+    //$date = ' AND inv.created_date bewe '.$edate;
+    $date = ' AND inv.created_date between '.$sdate.' AND '.$edate;
+}
+
+$inv=get_data("select inv.*,sum(invd.price*invd.vat/100) vat_price from invoice_details invd,invoices inv where inv.inv_id=invd.inv_id ".$date."");
+
+
+$total=0;
+foreach ($inv as $key => $row) {
+	# code...
+
+	?>
+	    <tr>
+		<td align="center" height="25"><?= $row['inv_code']?></td>
+        <td style="padding-left:5px;"><?= number_format(floatval(@$row['vat_price']),0,","," ")?></td>
+		</tr>
+
+<?php
+		$total+=floatval(@$row['vat_price']);
+	}
+?>
+	
+	    <tr>
+		<td colspan="1" height="25" align="center"><b>Tổng cộng</b></td>
+		<td align="" style="padding-left:5px;"><b><?= number_format($total,0,","," ")?></b></td>
+            </tr>
+	</table>
+	<br>
+		<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="12%" align="center" bgcolor="#afd7ff" height="25"><b>Đơn hàng xuất</b></td>
+		<td width="16%" align="center" bgcolor="#afd7ff"><b>Tổng VAT</b></td>
+		<td width="16%" align="center" bgcolor="#afd7ff"><b>VAT nhập</b></td>
+		<td width="16%" align="center" bgcolor="#afd7ff"><b>[VAT bán]-[VAT nhập]</b></td>
+		</tr>
+<?php
+
+$inv=get_data("select inv.*,sum(invd.price*invd.vat/100) r_vat_price,sum(invd2.price*invd2.vat/100) vat_in from out_invoice_details invd,out_invoices inv,invoice_details invd2 where invd2.invd_id=invd.inv and inv.inv_id=invd.inv_id ".$date."");
+
+
+$total=0;
+$total2=0;
+$total3=0;
+foreach ($inv as $key => $row) {
+	$row['vat_price']=$row['vat_price']+$row['r_vat_price'];
+	?>
+	    <tr>
+		<td align="center" height="25"><?= $row['inv_code']?></td>
+        <td style="padding-left:5px;"><?= number_format(floatval(@$row['vat_price']),0,","," ")?></td>
+        <td style="padding-left:5px;"><?= number_format(floatval(@$row['vat_in']),0,","," ")?></td>
+        <td style="padding-left:5px;"><?= number_format(floatval(@$row['vat_price'])-floatval(@$row['vat_in']),0,","," ")?></td>
+		</tr>
+
+<?php
+		$total+=floatval(@$row['vat_price']);
+		$total2+=floatval(@$row['vat_in']);
+		$total3+=(floatval(@$row['vat_price'])-floatval(@$row['vat_in']));
+	}
+?>
+	
+	    <tr>
+		<td colspan="1" height="25" align="center"><b>Tổng cộng</b></td>
+		<td align="" style="padding-left:5px;"><b><?= number_format($total,0,","," ")?></b></td>
+		<td align="" style="padding-left:5px;"><b><?= number_format($total2,0,","," ")?></b></td>
+		<td align="" style="padding-left:5px;"><b><?= number_format($total3,0,","," ")?></b></td>
+            </tr>
+	</table>

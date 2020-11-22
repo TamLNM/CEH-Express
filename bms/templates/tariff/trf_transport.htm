@@ -1,0 +1,270 @@
+<?php $data 			= get_data("select * from trf_transport order by trf_trs_code, trf_trs_name"); ?>
+<?php $warehouse_list   = get_data("select * from warehouse order by warehouse_code, warehouse_name"); ?>
+<?php $currency_list   	= get_data("select * from currency order by currency_code, currency_name"); ?>
+
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/trf_transport.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Biểu cước vận chuyển</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+
+<div style="margin: 10px;" id="div_contenttable">
+	<input hidden id="table_name" value="trf_transport">
+	<div style="width: 978px;">
+		<table id="contenttable" class="table table-striped display nowrap" cellspacing="0" style="width: 99.5%">
+			<thead>
+				<tr>
+					<th class="editor-cancel" col-name="STT" width="10%">STT</th>
+					<th col-name="trf_trs_id"></th>
+					<th col-name="trf_trs_code">Mã biểu cước</th>
+					<th col-name="trf_trs_name">Tên biểu cước</th>
+					<th col-name="warehouse_id_dep"></th>
+					<th col-name="warehouse_code_dep"></th>
+					<th col-name="warehouse_name_dep" style="min-width: 225px">Kho đi</th>
+					<th col-name="warehouse_id_des"></th>
+					<th col-name="warehouse_code_des"></th>
+					<th col-name="warehouse_name_des" style="min-width: 225px">Kho đến</th>
+					<th col-name="currency_id"></th>
+					<th col-name="currency_code"></th>
+					<th col-name="currency_name" style="min-width: 150px">Loại tiền</th>
+					<th col-name="vat">VAT</th>
+					<th class="editor-cancel data-type-checkbox" col-name="include_vat">Bao gồm VAT</th>
+					<th col-name="air_freight_rates">Cước hàng không</th>
+					<th col-name="sea_freight_rates">Cước đường biển</th>
+					<th col-name="road_freight_rates">Cước đường bộ</th>
+					<th col-name="iron_freight_rates">Cước đường sắt</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php $index = 1; 
+					for($i=0; $i < count($data); $i++){ ?>	
+					<tr>
+						<td contenteditable="true" align="center"><?=$index++;?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['trf_trs_id'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['trf_trs_code'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['trf_trs_name'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['warehouse_id_dep'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['warehouse_code_dep'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['warehouse_name_dep'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['warehouse_id_des'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['warehouse_code_des'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['warehouse_name_des'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['currency_id'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['currency_code'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['currency_name'];?></td>
+						<td contenteditable='true' align='center'><?=$data[$i]['vat'];?></td>
+						<td contenteditable='true' align='center'>
+							<label class="checkbox checkbox-success">
+								<input type="checkbox" <?=$data[$i]['include_vat'] == 1 ? 'checked' : '';?>>
+								<span class="input-span"></span>
+							</label>
+						</td>
+						<td contenteditable='true' align='center'>
+							<?=($data[$i]['air_freight_rates'] ? $data[$i]['air_freight_rates'] : '');?>		
+						</td>
+						<td contenteditable='true' align='center'>
+							<?=($data[$i]['sea_freight_rates'] ? $data[$i]['sea_freight_rates'] : '');?>		
+						</td>
+						<td contenteditable='true' align='center'>
+							<?=($data[$i]['road_freight_rates'] ? $data[$i]['road_freight_rates'] : '');?>		
+						</td>
+						<td contenteditable='true' align='center'>
+							<?=($data[$i]['iron_freight_rates'] ? $data[$i]['iron_freight_rates'] : '');?>		
+						</td>
+					</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<?php
+	include("bms/templates/add_row_popup.htm");
+?>
+
+<input id="editor-input" hidden="">
+
+<div id="cell-context" class="btn-group" style="padding-top: 12px;">
+    <ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<div id="cell-context-2" class="btn-group" style="padding-top: 12px;">
+    <ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<div id="cell-context-3" class="btn-group" style="padding-top: 12px;">
+    <ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function () {
+		var tbl 			= $('#contenttable'),
+			_columns 		= ['STT', 'trf_trs_id', 'trf_trs_code', 'trf_trs_name', 'warehouse_id_dep', 'warehouse_code_dep', 'warehouse_name_dep', 'warehouse_id_des', 'warehouse_code_des', 'warehouse_name_des', 'currency_id', 'currency_code', 'currency_name', 'vat', 'include_vat', 'air_freight_rates', 'sea_freight_rates', 'road_freight_rates', 'iron_freight_rates'],
+			warehouseList 	= [],
+			currencyList    = [];
+
+		var dataTbl = tbl.newDataTable({
+			scrollY: '55vh',
+			columnDefs: [
+				{ type: "num", className: "text-center", targets: _columns.indexOf('STT') },
+				{ className: "text-center", targets: _columns.getIndexs(['trf_trs_code', 'trf_trs_name', 'warehouse_name_dep', 'warehouse_name_des', 'currency_name', 'vat', 'include_vat', 'air_freight_rates', 'sea_freight_rates', 'road_freight_rates', 'iron_freight_rates'])},
+				{ className: "hiden-input", targets: _columns.getIndexs(['trf_trs_id', 'warehouse_id_dep', 'warehouse_code_dep', 'warehouse_id_des', 'warehouse_code_des', 'currency_id', 'currency_code', ])},
+			],
+			order: [[ _columns.indexOf('STT'), 'asc' ]],
+			paging: false,
+			keys: true,
+            autoFill: {
+                focus: 'focus',
+            },
+            select: true,
+            rowReorder: false,
+            arrayColumns: _columns,
+		});
+		tbl.editableTableWidget();
+		tbl.initComplete({
+			ADD: 'ADD',
+			SAVE: 'SAVE',
+			DELETE: 'DELETE'
+		});
+
+		<?php for($i = 0; $i < count($warehouse_list); $i++){ ?>
+			warehouseList.push({
+				'warehouse_code'	: <?="'".$warehouse_list[$i]['warehouse_code']."'";?>,
+				'warehouse_name'	: <?="'".$warehouse_list[$i]['warehouse_name']."'";?>,
+				'warehouse_id'  	: <?="'".$warehouse_list[$i]['warehouse_id']."'";?>,
+				
+			});
+		<?php } ?>
+
+		<?php for($i = 0; $i < count($currency_list); $i++){ ?>
+			currencyList.push({
+				'currency_code'	: <?="'".$currency_list[$i]['currency_code']."'";?>,
+				'currency_name'	: <?="'".$currency_list[$i]['currency_name']."'";?>,
+				'currency_id'  	: <?="'".$currency_list[$i]['currency_id']."'";?>,
+				
+			});
+		<?php } ?>
+
+		tbl.setExtendDropdown({
+			target: "#cell-context",
+			source: warehouseList,
+			colIndex: _columns.indexOf("warehouse_name_dep"), 
+			onSelected: function(cell, value){ 
+				var warehouse_name= '', warehouse_id = '';
+				for (i = 0; i < warehouseList.length; i++){
+					if (warehouseList[i].warehouse_code == value){
+						warehouse_name  = warehouseList[i].warehouse_name;
+						warehouse_id    = warehouseList[i].warehouse_id;
+						i 			    = warehouseList.length;
+					}
+				}
+				tbl.DataTable().cell(cell).data(warehouse_name).draw(false);
+
+				var tempCell = cell;
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_name_dep");
+				tbl.DataTable().cell(tempCell).data(warehouse_name).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_code_dep");
+				tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_id_dep");
+				tbl.DataTable().cell(tempCell).data(warehouse_id).draw(false);
+
+				var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+				if(!crRow.hasClass("addnew")){
+		        	tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+	        	}	
+			}
+		});	
+
+		tbl.setExtendDropdown({
+			target: "#cell-context-2",
+			source: warehouseList,
+			colIndex: _columns.indexOf("warehouse_name_des"), 
+			onSelected: function(cell, value){ 
+				var warehouse_name= '', warehouse_id = '';
+				for (i = 0; i < warehouseList.length; i++){
+					if (warehouseList[i].warehouse_code == value){
+						warehouse_name  = warehouseList[i].warehouse_name;
+						warehouse_id    = warehouseList[i].warehouse_id;
+						i 			    = warehouseList.length;
+					}
+				}
+				tbl.DataTable().cell(cell).data(warehouse_name).draw(false);
+
+				var tempCell = cell;
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_name_des");
+				tbl.DataTable().cell(tempCell).data(warehouse_name).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_code_des");
+				tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_id_des");
+				tbl.DataTable().cell(tempCell).data(warehouse_id).draw(false);
+
+				var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+				if(!crRow.hasClass("addnew")){
+		        	tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+	        	}	
+			}
+		});	
+
+		tbl.setExtendDropdown({
+			target: "#cell-context-3",
+			source: currencyList,
+			colIndex: _columns.indexOf("currency_name"), 
+			onSelected: function(cell, value){ 
+				var currency_name= '', currency_id = '';
+				for (i = 0; i < currencyList.length; i++){
+					if (currencyList[i].currency_code == value){
+						currency_name  = currencyList[i].currency_name;
+						currency_id    = currencyList[i].currency_id;
+						i 			   = currencyList.length;
+					}
+				}
+
+				var tempCell = cell;
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("currency_name");
+				tbl.DataTable().cell(tempCell).data(currency_name).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("currency_code");
+				tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("currency_id");
+				tbl.DataTable().cell(tempCell).data(currency_id).draw(false);
+
+				var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+				if(!crRow.hasClass("addnew")){
+		        	tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+	        	}	
+			}
+		});	
+
+		tbl.on('change', 'tbody tr td input[type="checkbox"]', function(e){
+        	var inp = $(e.target);
+        	if(inp.is(":checked")){
+        		inp.attr("checked", "");
+        		inp.val("1");
+        	}else{
+        		inp.removeAttr("checked");
+        		inp.val("0");
+        	}
+
+        	var crCell = inp.closest('td');
+        	var crRow = inp.closest('tr');
+        	var eTable = tbl.DataTable();
+
+        	eTable.cell(crCell).data(crCell.html()).draw(false);
+        	if(!crRow.hasClass("addnew")){
+	        	eTable.row(crRow).nodes().to$().addClass("editing");
+        	}
+        });
+	});
+</script>

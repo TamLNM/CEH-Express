@@ -1,0 +1,51 @@
+      
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td width="80" align="center" height="30"><b>Mã nhà CC</b></td>
+        <td width="80"><input onfocus="this.select();" onkeydown="if(chkenter(event)) load_sup_page(1);" onfocus="this.select();" style="width:70px;" value=""  class="catbg" name="sup_search_code" type="text" id="sup_search_code" size="25" />        
+        <td width="80" align="center" height="30"><b>Tên nhà CC</b></td>
+        <td width="105"><input onfocus="this.select();" onkeydown="if(chkenter(event)) load_sup_page(1);" onfocus="this.select();" style="width:100px;" value=""  class="catbg" name="sup_search_name" type="text" id="sup_search_name" size="25" />
+        <td width="30" align="center" height="30"><b>ĐT</b></td>
+        <td width="95"><input onfocus="this.select();" onkeydown="if(chkenter(event)) load_sup_page(1);" onfocus="this.select();" style="width:90px;" value=""  class="catbg" name="sup_search_tel" type="text" id="sup_search_tel" size="25" />                    
+        </td>
+        <td ><input type="button" value="Tra cứu" onclick="load_sup_page(1);" name="search" class="button"></td>
+    </tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center">	
+            <div id="supid" style="padding:5px;height:410px;overflow:auto;">
+                <?php
+                include("bms/templates/search_sup_result.htm");
+                ?>
+            </div>
+        </td></tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">   
+    <tr><td align="center" height="30" bgcolor="#ddd">
+            <input type="button" value="Đóng"  onclick="hidediv('searchsup');" class="button">&nbsp;&nbsp;<input type="button" value="Chọn"  onclick="selectsup();" class="button"></td>
+    </tr>
+</table>
+<script language="javascript">
+    var cur_sup_page=1;
+    var cur_sup_id='';
+    var cur_sup_name='';
+    var cur_taikhoan='';
+    function load_sup_page(p)
+    {
+        load('?eda_type=ajax&eda_code=<?= md5("search_sup") ?>&sup_name='+document.getElementById('sup_search_name').value+'&sup_code='+document.getElementById('sup_search_code').value+'&sup_tel='+document.getElementById('sup_search_tel').value+'&eda_page='+p,'supid','html','GET',null,'in');
+        cur_page=p;
+    }
+    function selectsup()
+    {
+        if(cur_sup_id=='')
+        {
+            alert('Hãy chọn nhà cung cấp');
+        }
+        else
+        {
+            hidediv('searchsup');
+            load_sup();
+        }
+    }
+</script>

@@ -1,0 +1,49 @@
+<?php
+	$mfa_table=get_data("select * from manufactures where FIND_IN_SET(".$action->eda_id.",cat_list)>0 order by mfa_name");
+	$i=0;
+	$st='';
+	$line=ceil(count($mfa_table)/5);
+	if (!isset($return_val['mfa']))
+	{
+		if(!empty($action->eda_cid))
+		{
+			$mfa=get_data("select mfa_id from mfa_mat where mat_id='".$action->eda_cid."'");
+			for($q=0;$q<count($mfa);$q++)
+			$return_val['mfa'][$q]=$mfa[$q][0];
+		}
+		else
+			$return_val['mfa']=array();
+	}
+	if(count($mfa_table)>0)
+	{
+		$st.= '<table width="100%" border="0" cellspacing="0" cellpadding="0">';
+		for($j=0;$j<$line;$j++)
+		{
+			$st.= '<tr>';
+			for($k=0;$k<5;$k++)
+			{
+				$st.= '<td width="20%" height="25">';
+				if($i<count($mfa_table))
+				{
+					$st.='<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr>';
+					$chk="";
+					for($t=0;$t<count($return_val['mfa']);$t++)
+					{
+						if($mfa_table[$i]["mfa_id"]==$return_val['mfa'][$t])
+							$chk="checked";
+					}
+					$st.= '<td width="20"><input value="'.$mfa_table[$i]["mfa_id"].'" '.$chk.' type="checkbox" name="mfa[]" id="mfa_'.$i.'"></td>';
+					$st.= '<td style="cursor:pointer;" onclick="document.getElementById(\'mfa_'.$i.'\').checked=!document.getElementById(\'mfa_'.$i.'\').checked;">';
+					$st.= $mfa_table[$i]["mfa_name"]."</td></tr></table>";
+				}
+				else
+					$st.="&nbsp;";
+				$st.= '</td>';
+				$i++;
+			}
+			$st.= '</tr>';
+		}			
+		$st.= '</table>';
+	}
+	echo $st;
+?>

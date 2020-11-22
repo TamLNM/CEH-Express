@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^api/([A-Za-z0-9]+)$ ./?eda_code=api&load=$1

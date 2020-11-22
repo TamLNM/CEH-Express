@@ -1,0 +1,67 @@
+	<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="12%" align="center" bgcolor="#afd7ff" height="25"><b>Tên tài khoản</b></td>
+		<td width="16%" align="center" bgcolor="#afd7ff"><b>Số tài khoản</b></td>
+          <td width="18%" align="center" bgcolor="#afd7ff"><b>Tiền Ban Đầu</b></td>
+		<td width="18%" align="center" bgcolor="#afd7ff"><b>Tổng Thu</b></td>
+		<td width="18%" align="center" bgcolor="#afd7ff"><b>Tổng Chi</b></td>
+		<td  align="center" bgcolor="#afd7ff"><b>Tồn</b></td>
+		</tr>
+<?php
+$date = '';
+if (!empty($sdate) && !empty($sdate) && $sdate<=$edate){
+    $date = ' AND bin.created_date <= '.$edate;
+}
+$tongthu=0;
+$tongchi=0;
+$inv=get_data("SELECT fu.fund_id,fu.fund_name ,fu.acc_no,fu.sum,fu.amount FROM  fund fu
+                              WHERE 1=1 ".(!empty($return_val['fund_from'])? " AND fu.fund_id=".$return_val['fund_from']:'')
+                              ."");
+        $total = 0;
+	foreach ($inv as $key => $row) {
+		$inv_tong=get_data("SELECT fu.fund_name ,fu.acc_no,fu.sum,fu.amount,sum(case 
+        when bin.bin_type = 0
+        then bin.amount
+        else 0 
+    end) tongthu,
+    sum(case 
+        when bin.bin_type = 1
+        then bin.amount
+        else 0 
+    end) tongchi
+                              FROM  fund fu left join budget_invoices bin on bin.fund_id=fu.fund_id
+                              WHERE 1=1 "." AND fu.fund_id=".$row['fund_id'].$date."");
+		$inv_tong=@$inv_tong[0];
+
+
+
+
+$ck_add=get_data("SELECT sum(amount) FROM  fund_invoices fui WHERE fui.fund_to=".$row['fund_id']." and fui.created_date <= ".$edate."");
+$ck_rmv=get_data("SELECT sum(amount) FROM  fund_invoices fui WHERE fui.fund_from=".$row['fund_id']." and fui.created_date <= ".$edate."");
+$inv_tong['tongthu']=floatval(@$inv_tong['tongthu'])+floatval(@$ck_add[0][0]);
+$inv_tong['tongchi']=floatval(@$inv_tong['tongchi'])+floatval(@$ck_rmv[0][0]);
+$tongthu+=$inv_tong['tongthu'];
+$tongchi+=$inv_tong['tongchi'];
+$tong=floatval(@$inv_tong['tongthu'])-floatval(@$inv_tong['tongchi'])+$row['amount'];
+	?>
+	    <tr>
+		<td align="center" height="25"><?= $row['fund_name']?></td>
+		<td align="center"><?= $row['acc_no']?></td>
+		<td style="padding-left:5px;"><?= number_format($row['amount'],0,","," ")?></td>
+        <td style="padding-left:5px;"><?= number_format(floatval(@$inv_tong['tongthu']),0,","," ")?></td>
+		<td style="padding-left:5px;"><?= number_format(floatval(@$inv_tong['tongchi']),0,","," ")?></td>
+		<td align="right" style="padding-right:5px;"><?= number_format($tong,0,","," ")?></td>
+		</tr>
+
+<?php
+		$total+=$tong;
+	}
+?>
+	
+	    <tr>
+		<td colspan="3" height="25" align="center"><b>Tổng cộng</b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($tongthu,0,","," ")?></b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($tongchi,0,","," ")?></b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($total,0,","," ")?></b></td>
+            </tr>
+	</table>

@@ -1,0 +1,749 @@
+/*
+Author: Manes
+createdate: 30/05/2018
+*/
+
+$break-sm: 736px;
+$break-xs: 414px;
+$primary-color: #afafaf;
+$primary-background: #e5e6eb;
+$info-color: #000;
+$focus-color: rgba(81, 203, 238, 1);
+$background-color: #fff;
+$uncheck-color: #fff;
+$active-color: green;
+$deactive-color: red;
+$hexfontsize: 1.5vw;
+$bayfontsize: 15px;
+$fontsize: 0.8em;
+$color-d: #000;
+$color-l: #fff;
+$font-color: #000;
+
+@import 'structure';
+@import 'modal';
+@import 'icons';
+@import 'tabs';
+
+.m-res-font{
+	font-size: $fontsize + 0.2;
+}
+
+.m-resize-wrapper{	
+	resize: both;
+	position: relative;
+	height: 400px;
+	text-align: center;
+	overflow: auto;
+	offset: bottom;	
+}
+
+#welcome{
+	left: 15%;
+  	padding: 5px;
+  	text-align: center;
+  	width: 70%;
+  	border-bottom: 2px solid $primary-color;
+  	position: relative;
+  	span{
+  		font-weight: bold;
+  		color: $color-l;
+  	}
+
+  	&:before{
+  		content: "";
+  		left: -10%;
+  		top: 0;
+  		z-index: -1;
+  		position: absolute;
+  		height: 100%;
+  		width: 80%;
+  		background-color: lighten($tally-primary, 5%);
+  		transform: skew(30deg);
+  	}
+  	&:after{
+  		content: "";
+  		right: -10%;
+  		z-index: -2;
+  		top: 0;
+  		position: absolute;
+  		height: 100%;
+  		width: 80%;
+  		background-color: lighten($tally-primary, 5%);
+  		transform: skew(-30deg);
+  	}
+
+  	#logout{			
+		position: absolute;
+		top: 0px;
+		right: 0px;
+		background-color: $primary-background;
+		height: 100%;
+		padding: 10px 3px;
+		vertical-align: center;
+	}
+}
+
+.m-cell-picked{
+	.m-table-block1 div{
+		background: darken($primary-background, 40%)!important;
+		transition: background 0.5s ease-in-out;
+	}
+}
+
+.m-tech-block {
+  	position: relative;
+  	top: 0;
+  	bottom: 0;
+  	left: 0;
+  	right: 0;  	
+}
+
+.m-arrow-up{
+	position: relative;
+	top: 0.5vw;
+	float: right;
+	margin-right: 0.3vw;
+	display: inline-block;
+	width: $fontsize/1.5!important;
+	height: $fontsize+0.3;
+	background-color: $active-color;
+	transition: background-color 0.3s ease-in-out;
+	&:before{
+		content: "";
+		position: absolute;
+		top: -$fontsize/2.2;
+		left: -$fontsize / 3;
+		width: 0;
+		height: 0;
+		border-bottom: $fontsize/1.5 solid $active-color;
+		border-left: $fontsize/1.5 solid transparent;
+		border-right: $fontsize/1.5 solid transparent;
+		transition: border-bottom-color 0.3s ease-in-out;
+	}
+}
+.m-arrow-down{	
+	position: relative;
+	top: -0.5vw;
+	float: right;
+	margin-right: 0.3vw;
+	display: inline-block;
+	width: $fontsize/1.5!important;
+	height: $fontsize+0.3;
+	background-color: $deactive-color;
+	transition: background-color 0.3s ease-in-out;
+	&:before{
+		content: "";
+		position: absolute;
+		bottom: -$fontsize/2.2;
+		left: -$fontsize / 3;
+		width: 0;
+		height: 0;
+		border-top: $fontsize/1.5 solid $deactive-color;
+		border-left: $fontsize/1.5 solid transparent;
+		border-right: $fontsize/1.5 solid transparent;
+		transition: border-bottom-color 0.3s ease-in-out;
+	}	
+}
+
+.m-hex-picked{
+	background-color: darken($primary-background, 40%)!important;
+	color: #fff;	
+	transition: margin-left 0.2s,background-color 0.3s,color 0.3s!important;
+	&:before, &:after{
+		border-left-color: darken($primary-background, 40%)!important;
+		border-right-color: darken($primary-background, 40%)!important;		
+		transition: border-right-color 0.3s, border-left-color 0.3s!important;
+	}
+}
+
+.m-hex-picked-success{
+	background-color: lighten($active-color, 15%);
+	color: #fff;
+	transition: margin-left 0.2s,background-color 0.3s,color 0.3s;
+	&:before, &:after{
+		border-left-color: lighten($active-color, 15%);
+		border-right-color: lighten($active-color, 15%);
+		transition: border-right-color 0.3s, border-left-color 0.3s;
+	}
+}
+
+.m-hex-picked-crash{
+	background-color: lighten($deactive-color, 15%);
+	color: #fff;
+	transition: margin-left 0.2s,background-color 0.3s,color 0.3s;
+	&:before, &:after{
+		border-left-color: lighten($deactive-color, 15%);
+		border-right-color: lighten($deactive-color, 15%);
+		transition: border-right-color 0.3s, border-left-color 0.3s;
+	}
+}
+
+.m-checkbox-btn{	
+	display: none;
+	&:checked {			
+		+ label{			
+			background-color: $primary-background!important;
+			color: darken($primary-color, 40%);			
+			transition: background-color 0.2s ease-in-out, color 0.2s;			
+			&:before{
+				background-color: $active-color;				
+				transition: background-color 0.2s;
+			}
+		}			
+	}	
+	+label{
+		cursor: pointer;
+		border: 1px solid $primary-color;
+		padding: 5px 15px;
+		background-color: $uncheck-color;
+		position: relative;
+		font-size: $fontsize * 1.5;
+		&:before{
+			content: "";
+			position: absolute;
+			width: 8px;
+			height: 8px;
+			top: 10%;
+			right: 5%;
+			border-radius: 50%;
+			border: 1px solid $primary-color;
+			background-color: $deactive-color;
+		}
+	}
+}
+
+.m-btn{
+	display: inline-block;
+	border: 1px solid $primary-color;
+	padding: 5px 10px;
+	background-color: $primary-background;
+	position: relative;
+	font-size: $fontsize * 1.5;
+	cursor: pointer;
+	&:after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: $primary-background;
+		border-radius: 10rem;
+		z-index: -2;
+	}
+	
+	&:hover {
+		color: #fff;		
+	}
+}
+
+.m-input{
+	@extend .m-btn;	
+	width: 15%;	
+}
+
+#m-block-bay{
+	.m-tech-header{
+		height: auto;background-color: $primary-background;
+		.m-corner-setting{
+			top: 1.5%;
+			right: 1%;
+		}
+		#selectbay, #filter{
+			padding: 5px;
+			border: 2px inset;
+			background: $tally-primary;
+			input, button, label, span, select{
+				border: 2px outset;
+			}
+			label{
+				margin-bottom: 0px!important;
+			}
+			select{
+				padding: 5px 10px;
+			}
+		}
+	}
+	#m-block-table{
+		height: 70vmin;
+		top: 12%;
+	}
+}
+
+.m-block-table{
+	position: relative;
+	// width: 400px;
+	overflow: hidden;
+	padding-left: 2em;
+	$height: 50px;
+	$width: 50px;
+	thead{
+		position: relative;
+		display: block;
+		overflow: visible;
+		th{
+			height: $height;
+			width: $width;
+
+			&:nth-child(1){
+				width: 35px;
+				height: $height;
+				position: relative;
+	  			display: block;
+	  			padding-top: 20px;
+	  			margin-right: 0!important;
+			}
+		}
+	}
+	tbody{
+		position: relative;
+		display: block;
+		overflow: auto;
+		td{
+			width: $width;
+			height: $height;
+			&:nth-child(1){
+				width: 35px;
+				display: flex!important;
+				flex-direction: column;
+				justify-content: center;
+				height: $height;
+				position: relative;
+				text-align: center;
+				font-weight: bold;
+				border: none!important;
+				display: block;
+			}
+		}
+	}
+}
+
+.m-lockrow{
+	visibility: hidden;
+}
+
+.main-tab{
+	box-shadow: none!important;
+}
+
+.onfocus{
+	border: 1px solid $focus-color;
+	box-shadow: inset 0px 0px 5px $focus-color;
+}
+
+.m-w100{
+	width: 100%;
+	max-width: 100%;
+}
+
+#bay-new{
+	display: none;
+}
+
+#tempCont{
+	display: inline-block;
+	#tempCont-content{
+		display: none;
+	}
+}
+
+.m-disable{
+	&:after{
+		border-bottom: 0px!important;
+	}
+}
+
+#loadshipcorver{
+	position: relative;
+	display: inline-block;
+	width: 20%;
+}
+
+#loadship{
+	display: inline-block;
+	select{
+		padding: 5px 10px;
+		min-width: 100%;
+		option{
+			
+		}
+	}
+}
+
+.m-tech-body{
+	height: 82%;
+}
+
+#content-area{
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	display: none;	
+}
+
+#content-area-header{
+	height: 15%;
+}
+
+#content-area-content{
+	height: 85%;	
+	overflow-x: hidden;
+	overflow-y: auto;
+	max-height: 85%;
+	.content-area-item{
+		display: inline-block;
+		position: relative;
+		border: 1px solid $primary-color;
+		margin: 2px;
+		width: 15%;
+	}
+}
+
+.m-flex-temp{
+	display: flex;
+	flex-direction: row;
+	position: relative;
+	// flex-basis: 33.3333%;
+	// height: 33.333333%;
+	.lamdai{
+		flex-basis: 5%;
+		// display: flex;
+		// flex-direction: column;
+		// justify-content: flex-start;
+		padding-bottom: 25px;
+		visibility: hidden;
+		font-weight: bold;
+		padding-right: 10px;
+		overflow: auto;
+		div{
+			height: 66.4px;
+			display: flex;
+			// margin-bottom: 1px;
+			span{
+				margin: auto;
+			}
+		}
+	}
+	@media only screen and (min-width:1000px){
+		.lamdai{
+			flex-basis: 5%;
+			// display: flex;
+			// flex-direction: column;
+			// justify-content: flex-start;
+			padding-bottom: 50px;
+			visibility: hidden;
+			font-weight: bold;
+			padding-right: 10px;
+			// div{
+			// 	height: 66.4px;
+			// 	// margin-bottom: 1px;
+			// 	span{
+			// 		margin: auto;
+			// 	}
+			// }
+		}
+  	}
+	.m-resize-content{
+		flex-basis: 95%;
+	}
+	.m-temp-block{
+		position: absolute;
+		top: -35px;
+		color: darken(#cecece, 30%);
+		display: inline-block;
+		width: 40%;
+		font-weight: bold;
+		border-bottom: 2px solid #cecece;
+		span{
+			font-weight: bold;
+		}
+	}
+}
+
+#search-content{
+	display: flex;
+	flex-direction: row;
+	#search-type{
+		input{
+			height: 80%;
+			margin: auto;
+			flex-basis: 30%;
+		}
+		label{
+			color: #fff;
+			font-weight: bold;
+			flex-basis: 70%;
+			text-align: left;
+		}
+	}
+}
+
+.m-hidden{
+	display: none;
+	width: 1%;
+}
+
+.m-row-num{
+	td{
+		height: 20px!important;
+		text-align: center;
+		border: none!important;
+		background: transparent!important;
+		&:after{
+			content: ''!important;
+		}
+	}
+}
+
+#function-sector{
+	border: 1px ridge #cecece;
+	padding: 0.5em;
+}
+
+.content-area-item{
+	$cellheight: 100%;
+	overflow: hidden;
+	.m-table-block1{					
+		height: $cellheight / 3;
+		#status{
+			display: inline-block;
+			position: relative;
+			left: 5px;
+		}					
+		div{
+			position: relative;
+			left: -1vw;						
+			top: -2px;
+			border-right: 1px solid $primary-color;
+			border-bottom: 1px solid $primary-color;
+			width: 95%;
+			padding-left: 1vw;
+			transform: skew(-30deg);
+			display: inline-block;		
+			span{
+				display: inline-block;							
+				font-weight: bold;
+				font-size: $fontsize;
+				&:nth-child(1){
+					display: inline-block;
+					width: 11%;							
+					font-weight: bold;
+					transform: skew(30deg);	
+				}
+				&:nth-child(2){
+					position: absolute;
+					top: 0.8vw;
+					right: -2vw;
+					transform: skew(30deg);	
+				}
+			}						
+		}										
+	}
+
+	.m-table-block2{
+		@extend .m-table-block1;
+		span{						
+			display: inline-block;
+			text-align: left;
+			@for $i from 1 through 4{
+				&:first-child:nth-last-child(#{$i}),
+				&:first-child:nth-last-child(#{$i}) ~ span{
+					width: (100% / $i);
+				}
+			}	
+		}
+	}
+
+	.m-table-block3{
+		@extend .m-table-block1;
+		span{
+			display: inline-block;
+			text-align: left;
+			@for $i from 1 through 4{
+				&:first-child:nth-last-child(#{$i}),
+				&:first-child:nth-last-child(#{$i}) ~ span{
+					width: (100% / $i);
+				}
+			}	
+		}
+	}
+}
+
+// --------------------------virtual keyboard
+$primary-color: #4c6c8b;
+	$second-color: #0B4660;
+	$second-background: rgba(11,70,96,0.5);
+	$third-color: #337AB7;
+	$third-background: rgba(51,122,183,0.2);
+	$primary-background: #EEEEEE;
+	$info-color: #000;
+	$focus-color: rgba(81, 203, 238, 1);
+	$background-color: #fff;
+.m-flex-list{
+	// main paletes
+	padding: 1em;
+	max-height: calc(100% - 100px);
+	min-height: calc(100% - 100px);
+	padding-left: 0.3em;
+	overflow-y: auto;
+	overflow-x: hidden;
+	.m-tech-row{
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		align-content: center;
+		align-items: center;
+		cursor: pointer;
+		background: $third-background;
+		border: 1px solid $third-color;
+		border-radius: 6px;
+		margin-bottom: 1.5em;
+		padding: 5px 5px 2px 5px;
+		color: #fff;
+		position: relative;
+		transition: all linear 0.2s;
+		.m-tech-row-item{
+			font-size: 0.8em;
+			@media screen and (max-width: 1000px){
+				font-size: 0.5em;
+			}
+			margin-left: 0.5em;
+			display: flex;
+			flex-wrap: nowrap;
+			flex-direction: row;
+			justify-content: center;
+			span{
+				padding-right: 0.5em;
+				padding-left: 0.5em;
+				border-right: 1px ridge;
+				color: black;
+				font-weight: bold;
+			}
+		}
+		&:last-child{
+			margin-bottom: 0px;
+		}
+		&:hover{
+			transition: all 0.2s linear;
+			transform: perspective(100px) rotateX(10deg);
+			box-shadow: 0 4px 15px rgba(255,255,255,0.7);
+		}
+		.m-tech-row-title{
+			font-size: 1.4em;
+			@media screen and (max-width: 1000px){
+				font-size: 0.8em;
+			}
+			background: $third-color;
+			height: 100%;
+			width: 100%;
+			min-height: 100%;
+			flex-basis: 35%;
+			color: #fff;
+			padding-right: 0.5em;
+			text-align: right;
+			border-top-left-radius: 6px;
+			border-bottom-left-radius: 6px;
+			margin: -5px -5px -2px -5px;
+			span{
+				display: block;
+				font-weight: bold;
+			}
+		}
+		.m-tech-row-status{
+
+		}
+		@media screen and (max-width: 1000px){
+			.m-spinner{
+				transform: scale(0.7)!important;
+			}
+			.m-spinner-2{
+				transform: scale(0.7)!important;
+				left: 0;
+				top: 0;
+			}
+		}
+		
+	}
+}
+
+#virtual-keyboard-content{
+	position: fixed;
+	display: none;
+	top: 30%;
+	background: lighten($second-background, 40%);
+	padding: 15px;
+	z-index: 10;
+	left: 32.5%;
+	width: 35%;
+	height: 50%;
+	max-height: 45%;
+}
+
+.m-virtual-keyboard{
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	justify-content: space-evenly;
+	span{
+		flex-basis: 30%;
+		font-weight: bold;
+		cursor: pointer;
+		height: 20%;
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		font-size: 1.5em;
+		border: 1px ridge $third-color;
+		background: lighten($third-color, 15%);
+		&:hover{
+			box-shadow: 0 0 10px #fff;
+			background: lighten($third-background, 15%);
+			border: lighten($third-color, 15%);
+		}
+	}
+}
+
+.m-onfocus{
+	animation-name: fucking;
+	animation-duration: 1s;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+}
+
+.m-search-active{
+	background: lighten($second-background, 15%)!important;
+}
+
+
+@keyframes fucking{
+	0%, 100%{
+		background: rgba(34,255,0,0.5);
+	}
+	50%{
+		background: rgba(255,255,255,0.4);
+	}
+}
+
+@keyframes clipMe {
+	0%, 100% {
+		width: 90%;
+		height: 20%;		
+	}
+	50% {
+		width: 20%;
+		height: 90%;
+	}
+}
+
+body {
+  position: relative;
+  background-color: $background-color;
+}
+

@@ -1,0 +1,163 @@
+<?php
+if (isset($return_val["datefrom"])) {
+    $sdate = explode("/", $return_val["datefrom"]);
+    if ($sdate[0] > 0 && $sdate[0] <= 31 && $sdate[1] > 0 && $sdate[1] <= 12 && $sdate[2] <= date('Y')) {
+        $sdate = mktime(0, 0, 0, $sdate[1], $sdate[0], $sdate[2]);
+    }
+}
+if (!isset($sdate)) {
+    if (date('m') > 1)
+        $sdate = mktime(0, 0, 0, date('m') - 1, date('d'), date('Y'));
+    else
+        $sdate = mktime(0, 0, 0, 12, date('d'), date(Y) - 1);
+    $return_val["datefrom"] = date('d/m/Y', $sdate);
+}
+if (isset($return_val["dateto"])) {
+    $edate = explode("/", $return_val["dateto"]);
+    if ($edate[0] > 0 && $edate[0] <= 31 && $edate[1] > 0 && $edate[1] <= 12 && $edate[2] <= date('Y')) {
+        $edate = mktime(23, 59, 59, $edate[1], $edate[0], $edate[2]);
+    }
+}
+if (!isset($edate)) {
+    $edate = mktime(23, 59, 59, date('m'), date('d'), date('Y'));
+}
+?>
+<?php
+if ($action->eda_code == md5('view_report')) {
+    ?>
+    <table align="center" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td width="60" height="25"><b>Từ ngày</b></td>
+            <td width="70">
+                <?= !empty($return_val['datefrom']) ? $return_val['datefrom'] : 'Tất cả' ?>
+            </td>
+            <td width="70" style="padding-right:15px;" align="right"><b>Đến ngày</b></td>
+            <td width="70">
+                <?= !empty($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>
+            </td>
+            <td style="padding-left:20px;"> 		
+                <b>Số phiếu BH: </b><?= !empty($return_val['inv_code']) ? $return_val['inv_code'] : 'Tất cả' ?>
+            </td>
+            <td style="padding-left:20px;"> 		
+                <b>Điện thoại: </b><?= !empty($return_val['tel']) ? $return_val['tel'] : 'Tất cả' ?>
+            </td>
+
+        </tr>
+        <tr>
+            <td  height="25" colspan="4">
+                <b>Tên KH bao gồm</b>: <?= !empty($return_val['cus_name']) ? $return_val['cus_name'] : 'Tất cả' ?>
+            </td>
+            <td  colspan="2" style="padding-right:15px;">
+                <b>Địa chỉ bao gồm</b>: <?= !empty($return_val['address']) ? $return_val['address'] : 'Tất cả' ?>
+            </td>
+        </tr>        
+    </table>
+    <?php
+}
+?>
+<table align="center" width="100%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse;margin-top:5px;">
+    <tr>
+        <td width="4%" align="center" bgcolor="#afd7ff" height="25"><b>STT</b></td>
+        <td  align="center" bgcolor="#afd7ff" height="25"><b>Phiếu bảo hành</b></td>
+        <td width="10%" align="center" bgcolor="#afd7ff"><b>Số lượng</b></td>
+        <td width="20%" align="center" bgcolor="#afd7ff"><b>Serial</b></td>		
+        <td width="15%" align="center" bgcolor="#afd7ff"><b>Trạng thái BH</b></td>
+        <td width="12%" align="center" bgcolor="#afd7ff"><b>Xử lý (ngày)</b></td>
+        <td width="13%" align="center" bgcolor="#afd7ff"><b>Hoàn thành (ngày)</b></td>
+    </tr>
+    <?php
+    if (!isset($return_val['cus_id'])) {
+        $return_val['cus_id'] = '';
+    }
+    $where = "";
+    if ($action->eda_decode == 'waranty_process') {
+        $act = md5('waranty_process');
+    } else if ($action->eda_decode == 'waranty_out') {
+        $act = md5('waranty_out');
+    } else {
+        $act = md5('view_waranty_in');
+    }
+    if(isset($return_val['warn_status'])) {
+        if($return_val['warn_status']!=-1) {
+            $where.=" and inv.inv_id in(select distinct inv_id from waranty_invoice_details where warn_status in(".$return_val['warn_status'].")) ";
+        }
+    }
+    if (!empty($return_val['tel'])) {
+        $where.=" and inv.tel like '%" . $return_val['tel'] . "%'";
+    }
+    if (!empty($return_val['cus_name'])) {
+        $where.=" and inv.cus_name like '%" . $return_val['cus_name'] . "%'";
+    }
+    if (!empty($return_val['address'])) {
+        $where.=" and inv.address like '%" . $return_val['address'] . "%'";
+    }
+    $inv = get_data("select inv.*, usr.full_name from waranty_invoices inv, users usr where inv.created_date between " . $sdate . " and " . $edate . $where . (!empty($return_val['cus_id']) ? ' and inv.cus_id=' . $return_val['cus_id'] : '') . (!empty($return_val['inv_code']) ? " and inv.inv_code like '%" . $return_val['inv_code'] . "'" : "") . " and inv.created_user=usr.user_id order by inv.created_date desc");
+    $total = 0;
+    $warnstatus = array("Đang xử lý", "Gửi BH - Sửa", "Sẳn sàng trả", "Đã trả xong", "Trả lại");
+    for ($i = 0; $i < count($inv); $i++) {
+        $invd = get_data("select * from waranty_invoice_details where inv_id='" . $inv[$i]['inv_id'] . "'");
+        ?>	
+        <tr  style="cursor:pointer;background-Color:#eee;" <?php if ($action->eda_code != md5('view_report')) echo 'onmouseover="this.style.backgroundColor=\'yellow\';" onmouseout="this.style.backgroundColor=\'#eeeeee\';" onclick="window.location=\'?eda_act=' . md5('waranty') . '&eda_code=' . $act . '&eda_id=' . $inv[$i]['inv_id'] . '\';"' ?> >
+            <td align="center" style="background-Color:#fff;" rowspan="<?=count($invd)+1?>"><?= $i + 1 ?></td>
+            <td colspan="6" style="padding-left:5px;line-height:22px;" height="25">
+                <div style="float:right;margin-right:10px;">
+                <?php
+                $tmp = get_data("select full_name from users where user_id='" . $inv[$i]['user_accept'] . "'");
+                if (count($tmp) > 0) {
+                    $user_accept = $tmp[0]['full_name'];
+                } else {
+                    $user_accept = "Chưa xử lý";
+                }
+                $tmp = get_data("select full_name from users where user_id='" . $inv[$i]['user_id'] . "'");
+                if (count($tmp) > 0) {
+                    $full_name_get = $tmp[0]['full_name'];
+                } else {
+                    $full_name_get = "Chưa xử lý";
+                }
+                ?>    
+                 Người tiếp nhận: <?=$full_name_get?>
+                 <br/>Người xử lý cuối: <?=$user_accept?>
+                </div>
+                <b><?= $inv[$i]['cus_name'] ?></b> (<?= empty($inv[$i]['tel']) ? '' : 'Điện thoại: ' . $inv[$i]['tel'] . ' - ' ?>Địa chỉ: <?= $inv[$i]['address'] ?>)
+                <br/> Người nhận BH: <?= $inv[$i]['full_name'] ?> (Ngày nhận: <?= date('d/m/Y H:i', $inv[$i]['created_date']) ?>  - Số phiếu:<b> <?= $inv[$i]['inv_code'] ?></b>)
+            </td>
+        </tr>
+
+        <?php
+        //$invd=get_data("select mat.mat_name, invd.*, msu.msu_name from waranty_invoice_details invd, mat_msu mms, materials mat,  meansure msu, out_invoice_details oinvd, stock_mat_msu smm where invd.inv_id='".$inv[$i]['inv_id']."' and invd.oinvd_id=oinvd.invd_id and oinvd.smm_id=smm.smm_id and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id");
+        for ($j = 0; $j < count($invd); $j++) {
+            ?>
+            <tr>
+                <td  style="padding-left:5px;" height="25"><?= $invd[$j]['mat_name'] ?></td>
+                <td align="center"><?= $invd[$j]['mat_quantity'] ?></td>
+                <td align="center"><?= $invd[$j]['serial'] ?></td>
+                <td align="center">
+                    <?php
+                    echo $warnstatus[$invd[$j]['warn_status']];
+                    if ($invd[$j]['warn_status'] > 1) {
+                        echo ($invd[$j]['warn_status'] >= 2 ? '<br/>Hẹn trả: ' . $invd[$j]['inv_date'] . ($invd[$j]['warn_status'] > 2 && (!empty($invd[$j]['return_date'])) ? '<br/>Trả ngày: ' . (!empty($invd[$j]['return_date']) ? date('d/m/Y', $invd[$j]['return_date']) : '') : '') : '');
+                    }
+                    $invdate = time();
+                    if ($invd[$j]['warn_status'] >= 2 && (!empty($invd[$j]['inv_date']))) {
+                        $invdate = explode('/', $invd[$j]['inv_date']);
+                        $invdate = mktime(23, 59, 59, $invdate[1], $invdate[0], $invdate[2]);
+                    }
+                    ?>
+                </td>
+                <td align="center"><?= ceil(($invdate - $inv[$i]['created_date']) / (24 * 3600)) ?></td>
+                <td align="center"><?= ($invd[$j]['warn_status'] >= 2 && !empty($invd[$j]['return_date']) ? ceil(($invd[$j]['return_date'] - $inv[$i]['created_date']) / (24 * 3600)) : '||') ?></td>
+            </tr>
+            <?php
+        }
+    }
+    ?>	
+</table>
+<table align="center" width="98%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+    <tr>
+        <td height="10">
+            <img src="<?=ROOT_URL?>bms/images/spacer.gif" height="10"/>
+        </td>        
+    </tr>
+</table>
+
+

@@ -1,0 +1,79 @@
+<center>
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/mankey.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Phân quyền quản trị hệ thống</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+        <form method="POST" action="?eda_act=<?=md5('general')?>&eda_code=<?=md5('permission')?>">
+  <table width="100%" border="0" bgcolor='#ffffff' cellspacing="0" cellpadding="0">
+    <tr>
+      <td style="padding-bottom:5px; padding-left:5px;padding-right:5px;">
+			 <table  border="0" width="100%" cellspacing="0" cellpadding="0">
+					<tr>
+					  <td  height="40" width="80"><b>Chọn nhóm:</b></td>
+					  <td width="180">
+						<select onchange="load_user();" style="width:150px;" class="catbg" name="group_id" type="text" id="group_id">
+						<option value="">Chọn nhóm làm việc</option>
+					<?php
+						$group=get_data("select * from groups order by group_name");
+						for($i=0;$i<count($group);$i++) {
+							echo '<option '.(isset($return_val['group_id'])?($return_val['group_id']==$group[$i]['group_id']?'selected':''):'').' value="'.$group[$i]['group_id'].'">'.$group[$i]['group_name'].'</option>';
+						}
+					?>	
+						</select>					  
+					  </td>
+ 					  <td height="25" width="130"><b>Chọn tên đăng nhập:</b></td>
+ 					  <td>
+						<select onchange="load_permission();" style="width:150px;" class="catbg" name="user_id" type="text" id="user_id">
+						<option value="">Chọn tên đăng nhập</option>
+					<?php
+						$user=get_data("select * from users where group_id='".(isset($return_val['group_id'])?$return_val['group_id']:0)."' order by user_name");
+						for($i=0;$i<count($user);$i++) {
+							echo '<option '.(isset($return_val['user_id'])?($return_val['user_id']==$user[$i]['user_id']?'selected':''):'').' value="'.$user[$i]['user_id'].'">'.$user[$i]['full_name']."(".$user[$i]['user_name'].')</option>';
+						}
+					?>	
+						</select>	 					  
+ 					  </td>
+					</tr>
+					</table>
+	 <?=$err_msg!=""?'<table width="100%" border="0"><tr><td valign="top" style="padding-left:padding-top:10px;10px;padding-bottom:10px;font-family:Arial;font-size:12px;color:red;"><b>'.$err_msg.'</b></td> </tr></table>':''?>  					
+					<div id="permission_id">
+<?php
+	if(!empty($return_val['group_id'])) {
+		include("bms/templates/general/permission_detail.htm");
+	}
+?>					
+					</div>						    
+	</td>
+    </tr>
+  </table>
+        </form>            
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+</center>
+<script language="javascript">
+	function load_user() {
+		eda_request=load("?eda_type=ajax&eda_code=<?=md5('load_user')?>&eda_id="+document.getElementById("group_id").value,"user_id","listbox","GET",null,"no");
+		load_permission();
+	}
+	function load_permission() {
+		eda_request=load("?eda_type=ajax&eda_code=<?=md5('load_permission')?>&group_id="+document.getElementById("group_id").value+"&user_id="+document.getElementById("user_id").value,"permission_id","html","GET",null,"Đang tải dữ liệu...");
+	}
+	function checkall_permission() {
+		for(i=0;i< document.forms[0].elements['fmenu_id[]'].length;i++) {
+			if(document.forms[0].elements['fmenu_id[]'][i].disabled==false) {		
+				document.forms[0].elements['fmenu_id[]'][i].checked=document.getElementById('checkall_id').checked;
+			}
+		}
+	}
+</script>

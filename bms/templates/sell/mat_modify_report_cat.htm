@@ -1,0 +1,41 @@
+<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <tr>
+        <td width="60%" align="center" bgcolor="#afd7ff" height="25"><b>Thống kê theo chủng loại sản phẩm</b></td>
+        <td width="20%" align="center" bgcolor="#afd7ff"><b>Đơn vị tính</b></td>
+        <td width="20%" align="center" bgcolor="#afd7ff"><b>Tổng số lượng điều chỉnh</b></td>
+    </tr>
+    <?php
+    $where='';
+    $where.=(!empty($return_val['cat_id']) ? "  and cat.cat_id=" . $return_val['cat_id'] : "");
+    $where.=(!empty($return_val['stock_id']) ? "  and smm.stock_id=" . $return_val['stock_id'] : "");
+    $where.=(!empty($return_val['user_id']) ? " and inv.user_id='" . $return_val['user_id'] . "' " : "");
+    $inv = get_data("select cat.cat_name, mat.mat_name, mms.mms_id, msu.msu_name, sum(imod.quantity-imod.back_quantity) quantity from instock_modify imo, imo_details imod, mat_msu mms, materials mat, stock_mat_msu smm, categories cat, meansure msu  where imo.imo_id=imod.imo_id and imod.smm_id=smm.smm_id and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id " . $where. " and imo.created_date between " . $sdate . " and " . $edate . "  and mms.msu_id=msu.msu_id group by cat.cat_name, mat.mat_name, mms.mms_id order by cat.cat_name, mat.mat_name");
+    $total = 0;
+    $quantity = 0;
+    $quantity_cat = 0;
+    $str = '';
+    for ($i = 0; $i < count($inv); $i++) {
+        $str.='<tr onmouseover="this.style.backgroundColor=\'yellow\';"  onmouseout="this.style.backgroundColor=\'\';">
+		<td style="padding-left:5px;" height="25"> - ' . $inv[$i]['mat_name'] . ($action->eda_type!='ajax'?'<a class="cart_payment" href="?eda_act='. md5('sell') .'&eda_code='. md5('mat_modify_detail') .'&datefrom='.$return_val['datefrom'].'&dateto='.$return_val['dateto'].'&cat_id='.$return_val['cat_id'].'&stock_id='.$return_val['stock_id'].'&user_id='.$return_val['user_id'].'&mms_id='.$inv[$i]['mms_id'].'" target="_blank"> (chi tiết)</a>':'').'</td>
+		<td align="center">' .  $inv[$i]['msu_name'] . '</td>
+		<td align="right" style="padding-right:5px;">' . number_format($inv[$i]['quantity'], 0, ",", " ") . '</td>
+		</tr>';
+        $quantity+=$inv[$i]['quantity'];
+        $quantity_cat+=$inv[$i]['quantity'];
+        if ($inv[$i]['cat_name'] != ($i < count($inv) - 1 ? $inv[$i + 1]['cat_name'] : '')) {
+            echo '<tr style="background-Color:#eeeeee;">
+			<td style="padding-left:5px;" height="25"><b>' . $inv[$i]['cat_name'] . '</b></td>
+                        <td></td>
+			<td align="right" style="padding-right:5px;"><b>' . number_format($quantity_cat, 0, ",", " ") . '</b></td>
+			</tr>';
+            echo $str;
+            $str = '';
+            $quantity_cat = 0;
+        }
+    }
+    ?>	
+    <tr style="background-Color:#dddddd;">
+        <td height="25" align="center" colspan="2"><b>Tổng cộng</b></td>
+        <td align="right" style="padding-right:5px;"><b><?= number_format($quantity, 0, ",", " ") ?></b></td>
+    </tr>
+</table>

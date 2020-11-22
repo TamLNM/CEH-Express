@@ -1,0 +1,87 @@
+<?php
+	$user=get_data("select * from users where 1=1 ".(!empty($_GET['dept_id'])?" and dept_id='".$_GET['dept_id']."'":"")." ".(!empty($_GET['full_name'])?" and full_name like '%".$_GET['full_name']."%'":"")." order by full_name  limit ".(14*($action->eda_page-1)).",14");
+	$user_count=get_data("select count(*) from users  where 1=1 ".(!empty($_GET['dept_id'])?" and dept_id = '".$_GET['dept_id']."'":"")." ".(!empty($_GET['full_name'])?" and full_name like '%".$_GET['full_name']."%'":""));
+	$user_count=$user_count[0][0];
+?>
+	<table width="100%" id="user_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="10%" align="center" bgcolor="#afd7ff"><b>Chọn</b></td>
+		<td width="20%" align="center" bgcolor="#afd7ff" height="25"><b>Tên truy cập</b></td>
+		<td align="center" bgcolor="#afd7ff"><b>Họ và tên</b></td>
+		<td width="20%" align="center" bgcolor="#afd7ff"><b>Phòng ban</b></td>
+		<td width="20%" align="center" bgcolor="#afd7ff"><b>Điện thoại</b></td>
+		</tr>
+<?php
+	if(count($user)>0)
+	for($i=0;$i<count($user);$i++)
+	{
+            $dept=get_data("select dept_name from dept where dept_id='".$user[$i]['dept_id']."'");
+            $dept=$dept[0]['dept_name'];
+?>		
+		<tr ondblclick="cur_user_id='<?= $user[$i]['user_id']?>';cur_full_name='<?= $user[$i]['full_name']?>';selectemp();" style="cursor:pointer;" onclick="document.getElementById('select_user_<?= $i?>').checked=true;cur_user_id='<?= $user[$i]['user_id']?>';cur_full_name='<?= $user[$i]['user_name']?>';" onmouseover="this.style.backgroundColor='yellow';" onmouseout="this.style.backgroundColor='';">
+		<td align="center" height="25"><input name="select_user" id="select_user_<?= $i?>" type="radio" value="<?= $user[$i]['user_id']?>"/></td>
+		<td align="center"><?= $user[$i]['user_name']?></td>
+		<td style="padding-left:5px;"><?= $user[$i]['full_name']?></td>
+		<td style="padding-left:5px;"><?= $dept?></td>
+		<td style="padding-left:5px;"><?= $user[$i]['tel']?></td>
+	    </tr>
+<?php
+	}
+?>	    
+	</table>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0"  style="border-collapse:collapse">
+	    <tr><td height="25" align="center">	
+<?php	
+			if($user_count>0)
+			{
+				if(!isset($page_dis))
+					$page_dis=false;
+			 	if($page_dis==false)
+			 	{
+					echo '<b>Trang: </b>';
+					$page=ceil($user_count/14);
+					$start_page=$action->eda_page-10;
+					echo ' <a class="cart_payment" href="javascript:load_page(1);">';
+					if($action->eda_page==1)
+						echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+					echo "1";
+					if($action->eda_page==1)
+					echo "</b></font>";
+					echo '</a> ';							
+					if($start_page<2)
+						$start_page=1;
+					else
+						echo " ... ";
+					$end_page=$action->eda_page+9;
+					if($end_page>$page)
+						$end_page=$page-1;						
+					for($i=$start_page;$i<$end_page;$i++)
+					{
+						echo ' <a class="cart_payment" href="javascript:load_page('.($i+1).');">';
+						if($action->eda_page==$i+1)
+							echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+						echo ($i+1);
+						if($action->eda_page==$i+1)
+						echo "</b></font>";
+						echo '</a> ';
+					}
+					if($action->eda_page+10<$page)
+						echo " ... ";
+					if($page>1)
+					{
+						echo ' <a class="cart_payment" href="javascript:load_page('.$page.');">';
+						if($action->eda_page==$page)
+							echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+						echo ($page);
+						if($action->eda_page==$page)
+						echo "</b></font>";
+						echo '</a> ';							
+					}
+				}
+			}
+			else
+				echo '<table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td>Không có nhân viên nào được tìm thấy</td></tr></table>';	
+?>	
+	</td></tr>
+	</table>				
+		

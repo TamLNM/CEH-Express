@@ -1,0 +1,105 @@
+<?php $data = get_data("select * from warehouse order by warehouse_code, warehouse_name"); ?>
+
+<iframe id="searchempiframe" style="display:none;"></iframe>
+<div id="searchempdiv" style="display:none;/">
+    <table  style="border-color: #004c93" bgcolor="#ffffff" width="650" border="0" height="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height="25" valign=top align=center width="100%">
+                <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+                    <tr>
+                        <td width="91%" height="25" id="searchuserhead" background="<?=ROOT_URL?>bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('searchemp',event);" style="color:white;"><b>&nbsp;&nbsp;Chọn kho </b></td>
+                        <td width="5%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif" style="padding-right:2px;">
+                            <img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>bms/images/close.gif" width="21" height="21" onclick="removeBlurUIBelow();">
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+                <div id="searchempid"  style="max-width: 750px; margin: 10px;">
+                    <table id="contenttable" class="table table-striped display nowrap" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th class="editor-cancel" col-name="STT" width="10%">STT</th>
+                                <th col-name="warehouse_id"></th>
+                                <th col-name="warehouse_type_name" style="min-width: 150px;">Loại kho</th>
+                                <th col-name="warehouse_code">Mã kho</th>
+                                <th col-name="warehouse_name">Tên kho</th>
+                                <th class="editor-cancel" col-name="nation_name" style="min-width: 150px;">Quốc gia</th>
+                                <th col-name="nation_id"></th>
+                                <th col-name="nation_code"></th>
+                                <th class="editor-cancel" col-name="city_name" style="min-width: 200px;">Tỉnh/ Thành phố</th>
+                                <th col-name="city_id"></th>
+                                <th col-name="city_code"></th>
+                                <th class="editor-cancel" col-name="district_name" style="min-width: 150px;">Quận/ Huyện</th>
+                                <th col-name="district_id"></th>
+                                <th col-name="district_code"></th>
+                                <th class="editor-cancel data-type-address" col-name="address_show">Địa chỉ</th>
+                                <th class="editor-cancel data-type-address" col-name="address">Địa chỉ</th>
+                                <th col-name="warehouse_type_id"></th>
+                                <th col-name="warehouse_type_code"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $index = 1; 
+                                for($i=0; $i < count($data); $i++){?>   
+                                <tr>
+                                    <td contenteditable="true" align="center"><?=$index++;?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['warehouse_id'];?></td>
+                                    <td contenteditable="true" align="center" width="20%"><?=$data[$i]['warehouse_type_name'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['warehouse_code'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['warehouse_name'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['nation_name'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['nation_id'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['nation_code'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['city_name'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['city_id'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['city_code'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['district_name'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['district_id'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['district_code'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['address'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['address'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['warehouse_type_id'];?></td>
+                                    <td contenteditable="true" align="center"><?=$data[$i]['warehouse_type_code'];?></td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+                    </table> 
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" height="30" bgcolor="#ddd">
+                <input type="button" value="Chọn"  onclick="chooseAddRow();" class="button">
+                <input type="button" value="Đóng"  onclick="removeBlurUIBelow();" class="button">&nbsp;&nbsp;
+            </td>
+        </tr>
+    </table>
+</div>   
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var tbl             = $('#contenttable'),
+            _columns        = ['STT', 'warehouse_id', 'warehouse_type_name', 'warehouse_code', 'warehouse_name', 'nation_name', 'nation_id', 'nation_code', 'city_name', 'city_id', 'city_code', 'district_name', 'district_id', 'district_code', 'address_show', 'address', 'warehouse_type_id', 'warehouse_type_code'];
+        var dataTbl = tbl.newDataTable({
+            scrollY: '55vh',
+            columnDefs: [
+                { type: "num", className: "text-center", targets: _columns.indexOf('STT') },
+                { className: "text-center", targets: _columns.getIndexs(['warehouse_type_name', 'warehouse_code', 'warehouse_name', 'nation_name', 'city_name', 'district_name', 'address_show'])},
+                { className: "hiden-input", targets: _columns.getIndexs(['warehouse_id', 'nation_id', 'nation_code', 'city_id', 'city_code', 'district_id', 'district_code', 'address', 'warehouse_type_id', 'warehouse_type_code'])},
+            ],
+            order: [[ _columns.indexOf('STT'), 'asc' ]],
+            paging: false,
+            keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            arrayColumns: _columns,
+            buttons: [],
+        });
+    });
+</script>

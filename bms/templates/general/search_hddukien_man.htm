@@ -1,0 +1,113 @@
+<?php
+	$hddukien=get_data("select ch.*,stock.stock_name from caidat_hoadon ch,stocks stock where stock.stock_id=ch.stock_id ".(!empty($_GET['stock_name'])?" and stock_name like '%".$_GET['stock_name']."%'":"")." order by stock_name ".($action->eda_code!=md5('view_report')?" limit ".((14*($action->eda_page-1)).",14"):''));
+        if($action->eda_code!=md5('view_report')) {
+            $hddukien_count=get_data("select count(*) from caidat_hoadon  where 1=1 ".(!empty($_GET['stock_name'])?" and stock_name like '%".$_GET['stock_name']."%'":""));
+            $hddukien_count=$hddukien_count[0][0];
+        }
+?>
+	<table width="100%" id="hddukien_tbl" border="1" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse;<?=$action->eda_code!=md5('view_report')?'':'margin-top:10px;'?>">
+	    <tr>
+                <?php
+                if($action->eda_code==md5('view_report')) {
+                    echo '<td width="8%" align="center" bgcolor="#afd7ff" height="25"><b>STT</b></td>';
+                }
+                ?>                
+                <td width="12%" align="center" bgcolor="#afd7ff" height="25"><b>Tên kho</b></td>
+				<td width="20%" align="center" bgcolor="#afd7ff" height="25"><b>Ký hiệu hóa đơn</b></td>
+				<td align="center" bgcolor="#afd7ff"><b>Số bắt đầu</b></td>
+				<td width="15%" align="center" bgcolor="#afd7ff"><b>Số kết thúc</b></td>
+				<td width="25%" align="center" bgcolor="#afd7ff"><b>Số hiện tại</b></td>
+		                <?php
+		                if($action->eda_code!=md5('view_report')) {
+		                ?>                   
+				<td width="5%" align="center" bgcolor="#afd7ff"><b>Sửa</b></td>
+				<td width="5%" align="center" bgcolor="#afd7ff"><b>Xoá</b></td>	
+		                <?php
+		                }
+		                ?>                
+		</tr>
+<?php
+	if(count($hddukien)>0)
+	for($i=0;$i<count($hddukien);$i++)
+	{
+?>		
+		<tr  <?= $action->eda_type!='ajax'?' style="cursor:pointer;" onmouseover="this.style.backgroundColor=\'yellow\';" onmouseout="this.style.backgroundColor=\'\';"':''?> >
+                <?php
+                if($action->eda_code==md5('view_report')) {
+                    echo '<td align="center" height="25">'.($i+1).'</td>';
+                }
+                ?>                     
+                <td><?= $hddukien[$i]['stock_name']?></td>
+                <td><?= $hddukien[$i]['khhd']?></td>
+                <td><?= $hddukien[$i]['batdau']?></td>
+                <td><?= $hddukien[$i]['ketthuc']?></td>
+                <td><?= $hddukien[$i]['hientai']?></td>
+                <?php
+                if($action->eda_code!=md5('view_report')) {
+                ?>                    
+		<td align="center" height="25"><a href="?eda_act=<?=md5('general')?>&eda_code=<?= md5('edit_hddukien')?>&eda_id=<?= $hddukien[$i]['ch_id']?>" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" width="16" border="0"></a></td>
+		<td align="center" height="25"><a href="javascript:void()" onclick="if(confirm('Bạn có chắc chắn muốn xoá thông tin cài đặt số hóa đơn này không?'))window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('del_hddukien')?>&eda_id=<?= $hddukien[$i]['ch_id']?>';" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="16" border="0"></a></td>
+                <?php
+                }
+                ?>                
+	    </tr>
+<?php
+	}
+?>	    
+	</table>
+<?php
+if($action->eda_code!=md5('view_report')) {
+?>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0"  style="border-collapse:collapse">
+	    <tr><td height="25" align="center">	
+<?php	
+			if($hddukien_count>0)
+			{
+					echo '<b>Trang: </b>';
+					$page=ceil($hddukien_count/14);
+					$start_page=$action->eda_page-10;
+					echo ' <a class="cart_payment" href="javascript:load_page(1);">';
+					if($action->eda_page==1)
+						echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+					echo "1";
+					if($action->eda_page==1)
+					echo "</b></font>";
+					echo '</a> ';							
+					if($start_page<2)
+						$start_page=1;
+					else
+						echo " ... ";
+					$end_page=$action->eda_page+10;
+					if($end_page>$page)
+						$end_page=$page-1;						
+					for($i=$start_page;$i<$end_page;$i++)
+					{
+						echo ' <a class="cart_payment" href="javascript:load_page('.($i+1).');">';
+						if($action->eda_page==$i+1)
+							echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+						echo ($i+1);
+						if($action->eda_page==$i+1)
+						echo "</b></font>";
+						echo '</a> ';
+					}
+					if($action->eda_page+11<$page)
+						echo " ... ";
+					if($page>1)
+					{
+						echo ' <a class="cart_payment" href="javascript:load_page('.$page.');">';
+						if($action->eda_page==$page)
+							echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+						echo ($page);
+						if($action->eda_page==$page)
+						echo "</b></font>";
+						echo '</a> ';							
+					}
+			}
+			else
+				echo '<table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td>Không có cài đặt số hóa đơn nào được tìm thấy</td></tr></table>';	
+?>	
+	</td></tr>
+	</table>				
+<?php
+}
+?>	

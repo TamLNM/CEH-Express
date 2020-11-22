@@ -1,0 +1,146 @@
+<?php $stock_type_list 		= get_data("select * from stock_type order by stock_type_code, stock_type_name"); ?>
+<?php $warehouse_list 		= get_data("select * from warehouse order by warehouse_code, warehouse_name"); ?>
+<?php $tariff_list          = get_data("select * from ord_tariff order by warehouse_id_des, ord_trf_code"); ?>
+<?php $tariff_details_list  = get_data("select * from ord_tariff_details order by ord_trf_code"); ?>
+<?php $user_info     		= get_data("select * from users where user_id = '".$sessions->get_session('user_id')."'"); ?>
+<?php $trs_internal_warehouse_code_list = get_data("select distinct(trs_internal_warehouse_code) from ord_tariff order by trs_internal_warehouse_code"); ?>
+
+<style>
+	.checkbox .input-span, .radio .input-span, table.dataTable td .checkbox span {
+		height: 12px!important;
+		width: 12px!important;
+	}
+	.checkbox .input-span::after, .radio .input-span::after, table.dataTable td .checkbox span:after {
+	    left: 3px!important;
+	    top: -1px!important;
+	}
+	#contenttable_wrapper .datatable-header #contenttable_filter label{
+		font-size: 12px;
+		padding-left: 5px;
+	}
+	#contenttable_wrapper .datatable-header #contenttable_filter .input-xs{
+		width: 150px!important;
+		height: 25px;
+	}
+</style>
+
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/check_import_stock.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Kiểm tra nhập hàng (hiện trường)</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+
+<div style="margin: 10px;" id="div_contenttable">
+	<input hidden id="table_name" value="check_import_stock">
+	<div style="width: 978px; margin-top: 10px;">
+		<div style="width: 70%; float: left">
+			<table id="contenttable" style="width: 100%;margin-bottom: 10px;" class="table table-striped display nowrap" cellspacing="0">
+			   	<thead>
+				    <tr> 
+				        <th col-name="tick">
+				        	<label class="checkbox checkbox-success"><input type="checkbox" id="checkAll"><span class="input-span"></span></label>
+				        </th>
+				        <th col-name="order_id">Mã order</th>
+				        <th col-name="total_price">Tổng tiền</th>
+				        <th col-name="sender_name">Người gửi</th>
+				        <th col-name="sender_address">Địa chỉ người gửi</th>
+				        <th col-name="receiver_name">Người nhận</th>
+				        <th col-name="receiver_address">Địa chỉ nhận</th>
+				        <th col-name="receiver_tel">SĐT nhận hàng</th>
+				        <th col-name="total_stock_weight">Tổng trọng lượng</th>
+				        <th col-name="status">Trạng thái</th>
+				        <th col-name="remark">Ghi chú</th>
+				    </tr>
+				</thead>
+			    <tbody id="tbody_contenttable"></tbody>
+			</table>
+		</div>
+		<div style="width: 30%; float: left">
+			<table>
+				<tr style="height: 25px;">
+					<td style="padding-left: 10px; text-align: left; font-weight: bold" colspan="3">THÔNG TIN NHẬP HÀNG ORDER <span id="order_id"></span></td>
+				</tr>
+				<tr style="height: 25px;">
+					<td style="width: 175px; padding-left: 10px; text-align: left;">Loại hàng</td>
+					<td style="width: 50px;" colspan="2">
+						<input style="width: 100px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="" type="text" readonly />  
+					</td>
+					<td>(kg)</td>
+				</tr>
+				<tr style="height: 25px;">
+					<td style="width: 175px; padding-left: 10px; text-align: left;">Diễn giải</td>
+					<td style="width: 50px;" colspan="2">
+						<input style="width: 100px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="" type="text" readonly/>  
+					</td>
+					<td>(kg)</td>
+				</tr>
+				<tr style="height: 25px;">
+					<td style="width: 175px; padding-left: 10px; text-align: left;">Số lượng gửi</td>
+					<td style="width: 50px;" colspan="2">
+						<input style="width: 100px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="" type="number" readonly/>  
+					</td>
+					<td>(kg)</td>
+				</tr>
+				<tr style="height: 25px;">
+					<td style="width: 175px; padding-left: 10px; text-align: left; font-weight: bold">Số lượng nhận (*)</td>
+					<td style="width: 50px;" colspan="2">
+						<input style="width: 100px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="" type="number"/>  
+					</td>
+					<td>(kg)</td>					
+				</tr>
+				<tr style="height: 25px;">
+					<td style="width: 150px; padding-left: 10px; text-align: left;">Trọng lượng gửi</td>
+					<td style="width: 50px;" colspan="2">
+						<input style="width: 100px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="" type="number" readonly/>  
+					</td>
+					<td>(kg)</td>					
+				</tr>
+				<tr style="height: 25px;">
+					<td style="width: 150px; padding-left: 10px; text-align: left; font-weight: bold">Trọng lượng nhận (*)</td>
+					<td style="width: 50px;" colspan="2">
+						<input style="width: 100px; padding-left: 5px; border-radius: 5px; border: solid 1px #004c93; color: #004c93; font-size: 12px;" name="" id="" type="number"/>  
+					</td>
+					<td>(kg)</td>					
+				</tr>
+				<tr style="height: 25px;">
+					<td colspan="4" width="200px;" align="right">
+						<button class="confirm_details" style="font-family: Times New Roman; border-radius: 5px; height: 1.5rem; width: 7.5rem; background-color: #207b99; border: #207b99 solid 1px; color: white; margin-right: 10px; font-weight: bold;"><p style="margin-top: auto; margin-bottom: auto">Xác nhận</p></button>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		var tbl 				= $('#contenttable'),
+			tblORDDetails 		= $('#tbl_trf_ord_details'),
+            _columns 			= ['tick', 'order_id', 'total_price', 'sender_name', 'sender_address', 'receiver_name', 'receiver_address', 'receiver_tel', 'total_stock_weight', 'status', 'remark'];
+
+        tbl.newDataTable({
+            scrollY: '30vh',
+            columnDefs: [
+                { className: "text-center", targets: _columns.getIndexs(['tick', 'order_id', 'total_price', 'sender_name', 'receiver_name', 'total_stock_weight', 'status', 'remark', 'sender_address', 'receiver_tel', 'receiver_address'])},
+            ],
+            paging: false,
+            keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            paging: false,
+            info: false,
+            buttons: [],
+            arrayColumns: _columns,
+        });
+        tbl.initComplete({
+			QMCT: 'QMCT',
+		});
+    });
+</script>

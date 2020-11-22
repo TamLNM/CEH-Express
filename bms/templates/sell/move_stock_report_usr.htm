@@ -1,0 +1,44 @@
+	<table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="60%" align="center" bgcolor="#afd7ff" height="25"><b>Thống kê theo người bán hàng</b></td>
+		<td width="20%" align="center" bgcolor="#afd7ff"><b>Tổng số lượng</b></td>
+		<td width="20%" align="center" bgcolor="#afd7ff"><b>Tổng tiền</b></td>
+		</tr>
+<?php
+	$inv=get_data("select usr.full_name, mat.mat_name, msu.msu_name, sum(invd.mat_quantity) quantity, sum(invd.amount) total from invoices inv, invoice_details invd, stock_mat_msu smm, mat_msu mms, materials mat, categories cat, users usr, meansure msu  where inv.inv_type=2 and inv.user_id=usr.user_id and inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id ".(!empty($return_val['stock_id'])?"  and inv.stock_id=".$return_val['stock_id']:"")." and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and mat.cat_id=cat.cat_id ".(!empty($return_val['cat_id'])?"  and cat.cat_id=".$return_val['cat_id']:"").(!empty($return_val['user_id'])?" and inv.user_id='".$return_val['user_id']."' ":"")." and inv.created_date between ".$sdate." and ".$edate." and mms.msu_id=msu.msu_id group by usr.full_name, mat.mat_name, mms.mms_id order by usr.full_name, mat.mat_name");
+	$total=0;
+	$quantity=0;
+	$total_cat=0;
+	$quantity_cat=0;
+	$str='';
+	for($i=0;$i<count($inv);$i++)
+	{	
+	    $str.='<tr>
+		<td style="padding-left:5px;" height="25"> - '.$inv[$i]['mat_name'].'</td>
+		<td align="center">'.number_format($inv[$i]['quantity'],0,","," ").' '.$inv[$i]['msu_name'].'</td>
+		<td align="right" style="padding-right:5px;">'.number_format($inv[$i]['total'],0,","," ").'</td>
+		</tr>';
+		$total+=$inv[$i]['total'];
+		$quantity+=$inv[$i]['quantity'];
+		$total_cat+=$inv[$i]['total'];
+		$quantity_cat+=$inv[$i]['quantity'];			
+		if($inv[$i]['full_name']!=($i<count($inv)-1?$inv[$i+1]['full_name']:'')) {
+			echo '<tr style="background-Color:#eeeeee;">
+			<td style="padding-left:5px;" height="25"><b>'.$inv[$i]['full_name'].'</b></td>
+			<td align="center"><b>'.number_format($quantity_cat,0,","," ").'</b></td>
+			<td align="right" style="padding-right:5px;"><b>'.number_format($total_cat,0,","," ").'</b></td>
+			</tr>';
+			echo $str;
+			$str='';
+			$total_cat=0;
+			$quantity_cat=0;		
+		}	
+
+	}
+?>	
+	    <tr style="background-Color:#eeeeee;">
+		<td height="25" align="center"><b>Tổng cộng</b></td>
+		<td align="center"><b><?= number_format($quantity,0,","," ")?></b></td>
+		<td align="right" style="padding-right:5px;"><b><?= number_format($total,0,","," ")?></b></td>
+		</tr>
+	</table>

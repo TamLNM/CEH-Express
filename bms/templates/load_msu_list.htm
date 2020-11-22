@@ -1,0 +1,43 @@
+<?php
+		$msu_chk=get_data("select msu_parid, msu_multiple from meansure where msu_id in(select msu_id from mat_msu where mms_id in(select mms_id from stock_mat_msu where smm_id='".$action->eda_cid."'))");
+		if(count($msu_chk)>0)
+			$msu_table=get_data("select msu.* from meansure msu, mat_msu mms where mms.mat_id='".$action->eda_id."' and mms.msu_id=msu.msu_id and (msu.msu_parid='".$msu_chk[0]['msu_parid']."' or msu.msu_id='".$msu_chk[0]['msu_parid']."') and msu.msu_multiple<".$msu_chk[0]['msu_multiple']." order by msu.msu_name");
+		else 
+			$msu_table=array();
+		$i=0;
+		$st='';
+		$line=ceil(count($msu_table)/5);
+		if(count($msu_table)>0)
+		{
+			$st.= '<table width="750" border="0" cellspacing="0" cellpadding="0">';
+			for($j=0;$j<$line;$j++)
+			{
+				$st.= '<tr>';
+				for($k=0;$k<5;$k++)
+				{
+					$st.= '<td width="20%" height="25">';
+					if($i<count($msu_table))
+					{
+						$st.='<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr>';
+						$chk="";
+						if (isset($return_val['msu']))
+							for($t=0;$t<count($return_val['msu']);$t++)
+							{
+								if($msu_table[$i]["msu_id"]==$return_val['msu'][$t])
+									$chk="checked";
+							}
+						$st.= '<td width="20"><input value="'.$msu_table[$i]["msu_id"].'" '.$chk.' type="checkbox" name="msu[]" id="msu_'.$i.'"></td>';
+						$st.= '<td style="cursor:pointer;" onclick="document.getElementById(\'msu_'.$i.'\').checked=!document.getElementById(\'msu_'.$i.'\').checked;">';
+						$st.= $msu_table[$i]["msu_name"]."</td></tr></table>";
+					}
+					else
+						$st.="&nbsp;";
+					$st.= '</td>';
+					$i++;
+				}
+				$st.= '</tr>';
+			}			
+			$st.= '</table>';
+		}		
+		echo $st;
+?>

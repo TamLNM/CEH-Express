@@ -1,0 +1,209 @@
+<?php
+  global $head;
+?>
+<html>
+<head>
+<LINK REL="SHORTCUT ICON" HREF="<?=$head['logo']?>">
+<title><?= $action->title?></title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link rel="stylesheet" href="<?=ROOT_URL?>bms/skins/hideprint.css" type="text/css" media="print">
+<style>
+BODY, TD, TH{
+	color:#000000;
+	font-family: Arial;
+	font-size: 13px;
+	margin:0px;
+}
+p {
+    margin:0px;
+    margin-top:3px;
+}
+</style>
+</head>
+<body style="background:#333;">
+    <div style="height:5px;width:<?=@$_GET['type']=='mini'?'210px;':'800px;'?>margin:auto;background:#fff;">&nbsp;</div>
+<?php
+        $rep["sell/mat_adv_report"]["title"]="BÁO CÁO HÀNG KHUYẾN MÃI";
+        $rep["sell/output_adv_detail"]["title"]="THỐNG KÊ CHI TIẾT HÀNG BÁN KHUYẾN MÃI";
+        $rep["sell/input_adv_detail"]["title"]="THỐNG KÊ CHI TIẾT HÀNG NHẬP KHUYẾN MÃI";
+        
+	$rep["sell/output_report"]["title"]="BÁO CÁO BÁN HÀNG";
+	$rep["sell/view_input_mat"]["title"]="PHIẾU NHẬP HÀNG";
+	$rep["sell/view_input_mat"]["user"]="NGƯỜI NHẬN HÀNG";
+	$rep["sell/view_mat_split"]["title"]="PHIẾU TÁCH SẢN PHẨM BÁN LẺ";
+	$rep["sell/view_output"]["title"]="PHIẾU BÁN HÀNG";
+	$rep["sell/view_output"]["user"]="NGƯỜI NHẬN";
+	
+	$rep["sell/input_mat_report"]["title"]="BÁO CÁO NHẬP HÀNG";
+	$rep["sell/instock"]["title"]="BẢNG THỐNG KÊ HÀNG TỒN KHO";
+	$rep["sell/move_stock_report"]["title"]="THỐNG KÊ XUẤT KHO NHÂN VIÊN";
+	$rep["sell/view_move_stock"]["title"]="PHIẾU XUẤT KHO NHÂN VIÊN";
+	$rep["sell/mat_split_report"]["title"]="LỊCH SỬ TÁCH SẢN PHẨM BÁN LẺ";
+	$rep["sell/view_mat_modify"]["title"]="PHIẾU ĐIỀU CHỈNH HÀNG TỒN KHO";
+	$rep["sell/view_mat_modify"]["user"]="NGƯỜI DUYỆT";	
+	$rep["sell/mat_modify_report"]["title"]="LỊCH SỬ CHỈNH HÀNG TỒN KHO";
+	$rep["sell/search_serial"]["title"]="TRA CỨU SẢN PHẨM THEO SERIAL";
+	$rep["sell/view_mat_return"]["title"]="PHIẾU NHẬP HÀNG TRẢ LẠI";	
+	$rep["sell/view_mat_return"]["user"]="NGƯỜI TRẢ";			
+	$rep["sell/mat_return_report"]["title"]="THỐNG KÊ PHIẾU NHẬP HÀNG TRẢ LẠI";	
+        $rep["sell/input_mat_detail"]["title"]="THỐNG KÊ CHI TIẾT HÀNG NHẬP";
+        $rep["sell/output_detail"]["title"]="THỐNG KÊ CHI TIẾT HÀNG XUẤT BÁN";
+        $rep["sell/mat_return_detail"]["title"]="THỐNG KÊ CHI TIẾT HÀNG TRẢ LẠI";
+        $rep["sell/move_stock_detail"]["title"]="THỐNG KÊ CHI TIẾT HÀNG XUẤT KHO NHÂN VIÊN";
+        $rep["sell/mat_move_report"]["title"]="THỐNG KÊ XUẤT KHO NỘI BỘ";
+        $rep["sell/view_mat_move"]["title"]="PHIẾU XUẤT KHO NỘI BỘ";
+        $rep["sell/mat_move_detail"]["title"]="THỐNG KÊ CHI TIẾT HÀNG XUẤT KHO NỘI BỘ";
+	
+	$rep["finance/debt_cus_inv"]["title"]="BẢNG TỔNG HỢP CÔNG NỢ KHÁCH HÀNG";
+        $rep["finance/debt_cus_inv"]["user"]="KHÁCH HÀNG";
+	$rep["finance/debt_sup_inv"]["title"]="BẢNG TỔNG HỢP CÔNG NỢ NHÀ CUNG CẤP";
+
+    $rep["finance/debt_sup_all_inv"]["title"]="SỔ CHI TIẾT CÔNG NỢ LÊN CHO TẤT CẢ NHÀ CUNG CẤP";
+    $rep["finance/debt_sup_all_inv"]["user"]="Người lập biểu";
+    $rep["finance/debt_sup_all_inv"]["user2"]="Kế toán trưởng";
+    $rep["finance/debt_sup_all_inv"]["user3"]="Tổng giám đốc";
+
+	$rep["finance/view_budget_input"]["title"]="PHIẾU THU";
+	$rep["finance/view_budget_input"]["user"]="NGƯỜI NỘP";
+	$rep["finance/view_budget_input"]["user2"]="NGƯỜI THU";
+	$rep["finance/view_budget_output"]["title"]="PHIẾU CHI";
+	$rep["finance/view_budget_output"]["user"]="NGƯỜI NHẬN";
+	$rep["finance/view_budget_output"]["user2"]="NGƯỜI CHI";
+	$rep["finance/budget_report"]["title"]="BÁO CÁO TỔNG HỢP THU/CHI";
+	$rep["finance/debtsum_cus"]["title"]="BẢNG THỐNG KÊ TỔNG HỢP CÔNG NỢ KHÁCH HÀNG";
+	$rep["finance/debtsum_sup"]["title"]="BẢNG THỐNG KÊ TỔNG HỢP CÔNG NỢ NHÀ CUNG CẤP";
+	$rep["finance/debtsum_emp"]["title"]="BẢNG THỐNG KÊ TỔNG HỢP CÔNG NỢ NHÂN VIÊN";	
+	$rep["finance/debt_emp_inv"]["title"]="BẢNG THỐNG KÊ CÔNG NỢ NHÂN VIÊN";
+	$rep["finance/interest_sum"]["title"]="BÁO CÁO LÃI/LỖ BÁN HÀNG";
+	
+	$rep["waranty/view_waranty_in"]["title"]="PHIẾU NHẬN BẢO HÀNH - DỊCH VỤ";
+	$rep["waranty/view_waranty_in"]["user"]="NGƯỜI GIAO";
+	$rep["waranty/view_waranty_in"]["user2"]="NGƯỜI NHẬN";
+	$rep["waranty/waranty_out"]["title"]="PHIẾU TRẢ BẢO HÀNH - DỊCH VỤ";
+	$rep["waranty/waranty_out"]["user"]="NGƯỜI GIAO";
+	$rep["waranty/waranty_out"]["user2"]="NGƯỜI NHẬN";
+        $rep["waranty/view_waranty_process"]["title"]="PHIẾU XỬ LÝ BẢO HÀNH - DỊCH VỤ";
+	$rep["waranty/view_waranty_process"]["user"]="NGƯỜI GIAO";
+	$rep["waranty/view_waranty_process"]["user2"]="NGƯỜI NHẬN";        
+	
+	$rep["waranty/waranty_man_inv"]["title"]="THỐNG KÊ PHIẾU NHẬN BẢO HÀNH";
+	$rep["general/smm_instock"]["title"]="THỐNG KÊ HÀNG TỒN KHO ĐẦU KỲ";
+        $rep["general/search_cus_man"]["title"]="DANH SÁCH KHÁCH HÀNG";
+        $rep["general/search_sup_man"]["title"]="DANH SÁCH NHÀ CUNG CẤP";
+        $rep["general/search_emp_man"]["title"]="DANH SÁCH NHÂN VIÊN";
+    $rep["finance/fund_invoices"]["title"]="THỐNG KÊ GIAO DỊCH CHUYỂN QUỸ/TÀI KHOẢN";
+	$rep["finance/move_fund_view"]["title"]="PHIẾU CHUYỂN QUỸ/TÀI KHOẢN";
+
+
+    $rep["sell/rp_nxt"]["title"]="BÁO CÁO NHẬP XUẤT TỒN THEO THÁNG";
+    $rep["sell/rp_dskh"]["title"]="BÁO CÁO DOANH SỐ THEO KHÁCH HÀNG";
+    $rep["sell/rp_doanhso"]["title"]="BÁO CÁO DOANH SỐ";
+
+?>
+  <table align="center" width="<?=@$_GET['type']=='mini'?'210':'800'?>" border="0" cellpadding="0" cellspacing="0" style="background:#fff;">
+    <tr>
+    <td style="padding-left:10px;<?=@$_GET['type']=='mini'?'font-size:10px;':''?>">
+                <?php
+                if(!empty($head['logo'])&&@empty($head['nologo'])) {
+                    if(@$_GET['type']!='mini') {
+                        echo '<img style="float:left;padding-right:5px;width: 77px;position: absolute;" src="'.$head['logo'].'"  '.(@empty($head['nologoresize'])?'height="64"':'width="250"').' align="middle">';
+                    } else {
+                        echo '<img style="float:left;padding-right:5px;" src="'.$head['logo'].'"  '.(@empty($head['nologoresize'])?'height="24"':'width="210"').' align="middle">';
+                    }
+                }
+                ?>
+		<?=empty($head['nologoresize'])?$head['head_title']:''?>
+    </td>
+    </tr>
+    <tr><td  align="center" style="<?=@$_GET['type']=='mini'?'font-size:12px;padding-top:10px;':'font-size:18px;padding-bottom:10px;padding-top: 24px;'?>"><b><?= $rep[$action->eda_module]["title"]?></b></td></tr>
+    <tr><td contenteditable="true" style="outline: none;" spellcheck=false>
+   <?php
+   	include("bms/templates/".$action->eda_module.".htm");
+   ?>
+<?php
+        if($action->eda_module=='sell/view_output'&&@$_GET['type']!='mini') {
+            if(isset($head['output_footer'])) {
+                if(strip_tags($head['output_footer'])!='') {
+                    echo '<style>.outputfooter p {margin:0px;padding:0px;margin-top:2px;}</style><div class="outputfooter" style="padding-left:10px;padding-top:5px;"'.$head['output_footer']."</div>";
+                }
+            }
+        }
+?>                  
+    </td></tr>
+    <tr><td  style="padding-top:10px;">
+    <table align="center" width="100%" border="0" cellpadding="0" cellspacing="0">
+<?php
+	if($action->eda_module=="sell/view_output"&&@$_GET['type']!='mini') {
+?>
+    <tr>
+    <td align="center" width="25%"><b>NHẬN HÀNG</b><br>(Ký ghi rõ họ tên)</td>    
+    <td align="center" width="25%"><b>LẬP PHIẾU</b><br>(Ký ghi rõ họ tên)</td>
+    <td align="center" width="25%"><b>GIAO HÀNG</b><br>(Ký ghi rõ họ tên)</td>
+    <td align="center" width="25%"><b>THỦ KHO</b><br>(Ký ghi rõ họ tên)</td>    
+    </tr>
+<?php	
+	} else if($action->eda_module=="sell/view_move_stock") {
+?>
+    <tr>
+    <td align="center" width="30%"><b>NGƯỜI NHẬN</b><br>(Ký ghi rõ họ tên)</td>
+    <td align="center" width="40%"><b>THỦ TRƯỞNG</b><br>(Ký ghi rõ họ tên)</td>
+    <td align="center" width="30%"><b>NGƯỜI LẬP PHIẾU</b><br>(Ký ghi rõ họ tên)</td>
+    </tr>
+<?php		
+	} else if($action->eda_module=="finance/view_budget_input"||$action->eda_module=="finance/view_budget_output") {
+?>
+    <tr>
+        <?php
+        if($action->eda_module=="finance/view_budget_input") {
+            echo '<td align="center" width="20%"><b>NGƯỜI NỘP</b><br>(Ký ghi rõ họ tên)</td>';
+        } else {
+            echo '<td align="center" width="20%"><b>NGƯỜI NHẬN</b><br>(Ký ghi rõ họ tên)</td>';
+        }
+        ?>
+   
+    <td align="center" width="20%"><b>NGƯỜI LẬP</b><br>(Ký ghi rõ họ tên)</td>
+    <td align="center" width="20%"><b>THỦ QUỸ</b><br>(Ký ghi rõ họ tên)</td>
+    <td align="center" width="20%"><b>KẾ TOÁN TRƯỞNG</b><br>(Ký ghi rõ họ tên)</td>
+    <td align="center" width="20%"><b>THỦ TRƯỞNG ĐƠN VỊ</b><br>(Ký tên đóng dấu)</td>    
+    </tr>
+<?php	
+	}
+else if($action->eda_module=="finance/debt_sup_all_inv") {
+?>
+    <tr>
+        <td colspan=3 style="padding:5px;padding-right:10px;padding-bottom:10px;text-align:right;">Ngày <?=date("d")?> tháng <?=date("m")?> năm <?=date("Y")?></td>
+    </tr>
+    <tr>   
+    <td align="center" width="20%"><b>Người lập biểu</b><br>(Ký ghi rõ họ tên)</td>
+    <td align="center" width="20%"><b>Kế toán trưởng</b><br>(Ký ghi rõ họ tên)</td>
+    <td align="center" width="20%"><b>Tổng giám đốc</b><br>(Ký ghi rõ họ tên, Đóng dấu)</td> 
+    </tr>
+<?php   
+    }
+
+
+
+    else if(@$_GET['type']!='mini'){
+?>    
+    <tr>
+    <td align="center" width="50%"><b><?= isset($rep[$action->eda_module]["user"])?$rep[$action->eda_module]["user"].'</b><br>(Ký ghi rõ họ tên)':''?></b></td>
+    <td align="center"><b><?= isset($rep[$action->eda_module]["user2"])?$rep[$action->eda_module]["user2"]:'NGƯỜI LẬP'?></b><br>(Ký ghi rõ họ tên)</td>
+    </tr>
+<?php
+	}    
+?>    
+</table>
+    <div class="hideprint" style="padding-top:30px;">      	
+    <table align="center"  border="0" cellpadding="0" cellspacing="0" style="cursor:pointer;">
+    <tr><td width="50" align="center"><img onclick="window.print();" src="<?=ROOT_URL?>/bms/images/icon/preview.gif" width="32"></td>
+    <td onclick="window.print();"><b>In ấn</b></td>
+    <td width="50" align="center" style="padding-left:20px;"><img onclick="window.close();" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="24"></td>
+    <td onclick="window.close();"><b>Đóng</b></td>
+    </tr>
+    </table>
+    </div>             
+    </td></tr>
+   </table>
+    <div style="height:5px;width:<?=@$_GET['type']=='mini'?'210px;':'800px;'?>margin:auto;background:#fff;">&nbsp;</div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<?php
+$parmenu = get_data("select * from function_menu where fmenu_parid is null and  fmenu_act!='other' ".($action->eda_act!='homepage'?" and fmenu_act='".$action->eda_act."'":'')." order by order_by");
+$mnu=get_data("select count(*) c from function_menu fmenu, user_group_permission ugp where fmenu.fmenu_id=ugp.fmenu_id  and ugp.user_id='" . $sessions->get_session('user_id') . "' order by order_by");
+for ($i = 0; $i < count($parmenu); $i++) {
+    if ($sessions->get_session('user_name') == 'admin') {
+        $menu = get_data("select fmenu.* from function_menu fmenu where fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' order by order_by");
+    } else {
+        $menu=get_data("select fmenu.* from function_menu fmenu, user_group_permission ugp where fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' and fmenu.fmenu_id=ugp.fmenu_id  and ugp.user_id='" . $sessions->get_session('user_id') . "' order by order_by");
+        if($mnu[0]['c']==0) {
+            $menu = get_data("select fmenu.* from function_menu fmenu, user_group_permission ugp where fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' and fmenu.fmenu_id=ugp.fmenu_id  and ugp.group_id='" . $sessions->get_session('group_id') . "' order by order_by");
+        }
+    }
+   if(count($menu)>0) {
+?>
+<table onmouseover="this.style.cursor='pointer';"  border="0" style="border-collapse:collapse" width="168"  cellpadding="0"cellspacing="0">
+  <tr onmouseover="this.style.backgroundColor='#FF9900';" onmouseout="this.style.backgroundColor='#6aa2c3';" onclick="extmenu('menu<?=$i?>');" style="background-Color:#6aa2c3">
+    <td id="menu<?=$i?>" height="25" align="left" valign="middle" width="140" style="padding-left:5px;"><span class="style1"><?=$parmenu[$i]['fmenu_name']?></span></td>
+    <td width="25" align="center"></td>
+  </tr>
+  <tr>
+    <td height="1" bgcolor="#ffffff" colspan="2"></td>
+  </tr>
+  <tr id="submenu<?=$i?>" class="<?=$action->eda_act==$parmenu[$i]['fmenu_act']||$action->eda_act=='homepage'||($action->eda_act=='' && $i==0)?'on':'off'?>">
+    <td colspan="2"><table width="100%" height="22"  style="border-collapse:collapse" border="0" cellpadding="0" cellspacing="0" >
+<?php
+			for($j=0;$j<count($menu);$j++) {
+?>    
+      <tr onclick="window.location='?eda_act=<?= md5($parmenu[$i]['fmenu_act'])?>&eda_code=<?= md5($menu[$j]['fmenu_act'])?>';" onmouseover="this.style.backgroundColor='#ededed';" onmouseout="this.style.backgroundColor='';">
+        <td align="center" width="30" height="22"><img src="<?=ROOT_URL?>bms/images/icon/<?=$menu[$j]['fmenu_img']?>" height="18" /></td>
+        <td  align="left" valign="middle" class="style1"><a style="<?= $action->eda_decode==$menu[$j]['fmenu_act']?'color:green;':''?>" class="tabcat" href="?eda_act=<?= md5($parmenu[$i]['fmenu_act'])?>&eda_code=<?= md5($menu[$j]['fmenu_act'])?>"><?=$menu[$j]['fmenu_name']?></a></td>
+      </tr>
+      <tr>
+        <td height="1" bgcolor="#ffffff" colspan="2"></td>
+      </tr>     
+<?php
+			}
+?>               
+    </table></td>
+  </tr>
+</table> 
+<?php
+		}
+	}
+?>
+
+<script language=javascript> 
+	var cur_mnu='';   
+	function extmenu(mn)
+	{
+		if(cur_mnu!='')
+		{
+			if(document.getElementById('sub'+cur_mnu))
+				document.getElementById('sub'+cur_mnu).className='off';			
+		}
+		else
+		{
+			if(document.getElementById('submenu0'))
+				document.getElementById('submenu0').className='off';
+			if(document.getElementById('submenu1'))
+				document.getElementById('submenu1').className='off';
+			if(document.getElementById('submenu2'))
+				document.getElementById('submenu2').className='off';
+			if(document.getElementById('submenu3'))
+				document.getElementById('submenu3').className='off';
+		}
+		if(document.getElementById('sub'+mn))
+			document.getElementById('sub'+mn).className='on';
+		cur_mnu=mn;
+	}    
+</script>	

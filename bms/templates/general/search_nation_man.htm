@@ -1,0 +1,35 @@
+<?php
+	$data=get_data("select * from nation"." order by nation_name");
+   	if($action->eda_code != md5('view_report')) {
+        $rowsNumeric = get_data("select count(*) from nation"." order by nation_name");
+        $rowsNumeric = $rowsNumeric[0][0];
+    }
+?>
+<table width="99%" id="" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="margin-left: 5px; margin-right: 5px; border-collapse:collapse;<?=$action->eda_code!=md5('view_report')?'':'margin-top:10px;'?>">
+	<tr>
+        <?php
+            if($action->eda_code==md5('view_report')) {
+                echo '<td width="8%" align="center" bgcolor="#afd7ff" height="25"><b>STT</b></td>';
+            }
+        ?>
+		<td width="90%" align="center" bgcolor="#afd7ff" height="25"><b>Tên quốc gia</b></td>
+		<td width="5%" align="center" bgcolor="#afd7ff"><b>Sửa</b></td>
+		<td width="5%" align="center" bgcolor="#afd7ff"><b>Xoá</b></td>		
+	</tr>
+
+<?php
+	if(count($data)>0){
+		for($i=0; $i < count($data); $i++){
+?>	
+	<tr>
+		<td class="nation_name" contenteditable="true" align="center"><?= $data[$i]['nation_name']?></td>
+		<td align="center" height="25"><a href="?eda_act=<?=md5('general')?>&eda_code=<?= md5('edit_nation')?>&eda_id=<?=$data[$i]['nation_id'];?>" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" width="16" border="0"></a></td>
+		<td align="center" height="25"><a href="javascript:void()" onclick="if(confirm('Bạn có chắc chắn muốn xoá thông tin Quốc gia này không?')) window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('del_nation')?>&eda_id=<?= $data[$i]['nation_id']?>';" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="16" border="0"></a></td>
+	</tr>
+
+<?php
+		}
+	}
+?>	
+</table>
+

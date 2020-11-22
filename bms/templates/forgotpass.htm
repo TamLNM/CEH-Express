@@ -1,0 +1,72 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+  <td height=2><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=2></td>
+</tr>
+</table>
+	<div class="ModuleFrame">
+	<div class="UpperModuleBorder">
+	<div class="HeaderBar">
+	<div class="RightCorner">&nbsp;</div>
+	<div class="LeftControlArea">
+	<table width="300" border="0" cellpadding="0" cellspacing="0">
+	<tr><td width="30" align="center">
+	<img src="<?=ROOT_URL?>/bms/images/forgot.png" border="0" height="16" width="16">
+	</td><td>
+	<b>Quên mật khẩu</b>
+	</td></tr>
+	</table>
+	</div>
+	</div>
+	</div>
+	<div class="ModuleContent"> 
+	<form id="forgotfrm" name="forgotfrm" method="post" action="?eda_act=<?= md5('homepage')?>&eda_code=<?= md5('forgot')?>" style="margin:0px">
+	<table  border="0" width="100%" cellspacing="0" cellpadding="0">
+	<tr>
+	<td width="350" valign="top" style="padding-left:5px;padding-right:5px;padding-top:5px;padding-bottom:5px;">
+	<table  border="0" width="100%" cellspacing="0" cellpadding="0" bgcolor="#f5f5f5">
+	<tr><td style="padding-left:10px;padding-right:10px;padding-top:10px;padding-bottom:10px;line-height:22px;color:#333333">
+    <b><u>Quên mật khẩu</u></b>
+    <br>* Bạn hãy nhập chính xác tên đăng nhập và địa chỉ email dùng để đăng ký tài khoản trên Thươngmạitrựctuyến. Nhập xác nhận mã bảo mật vầ bấm vào <b>Chấp nhận</b>.
+Mật khẩu mới sẽ được gửi vào email của bạn, hãy kiểm tra email để lấy mật khẩu mới và đăng nhập vào vào hệ thống.
+	</td></tr>
+	</table>
+	</td>
+	<td style="padding-left:10px;">	
+	  <table border="0" width="100%" cellspacing="1" cellpadding="1">
+        <tr>
+          <td height="31" colspan="3" align="center"><strong><?= EDA_FORGOT_TITLE?></strong><?= $msg==""?"":"<br><table><tr><td width=15>&nbsp;</td><td><font color=red>$msg</font></td></tr></table>"?></td>
+        </tr>
+        <tr>
+          <td width="150" height="25" style="color:#333333;font-weight:bold;">(*) <?= EDA_FORGOT_USER?></td>
+          <td width="190"><input name="user" type="text" class="catbg" style="width:180px" value="<?= $user?>" size="28" />
+          </td><td style="color:#666666;">Nhập tên đăng nhập cần lấy lại mật khẩu</td>
+        </tr>
+        <tr>
+          <td height="25"  style="color:#333333;font-weight:bold;">(*) <?= EDA_FORGOT_EMAIL?></td>
+          <td><input name="email" type="text" class="catbg" style="width:180px" value="<?= $email?>" size="28" />
+           </td><td style="color:#666666;">Nhập Email dùng để đăng ký tài khoản</td>
+        </tr>
+        <tr>
+          <td height="25"  style="color:#333333;font-weight:bold;"><?= EDA_FORGOT_CODE?></td>
+          <td><img src="gd.php?<?= rand()?>" /> </td>
+          <td style="color:#666666;">Mã xác nhận bảo mật</td>
+        </tr>
+        <tr>
+          <td height="25"  style="color:#333333;font-weight:bold;">(*) <?= EDA_FORGOT_CONFIRM_CODE?></td>
+          <td><input name="verifygd" type="text" class="catbg" style="width:180px" value="" size="28" />
+           <td style="color:#666666;">Nhập lại mã xác nhận bảo mật</td>
+        </tr>
+        
+        <tr>
+          <td>&nbsp;</td>
+          <td height="25"><input style="font-weight:bold;cursor:pointer;" class="button" type="submit" name="forgot" value="<?= EDA_FORGOT_ACCEPT?>" />
+          &nbsp;&nbsp;<input  style="font-weight:bold;cursor:pointer;" onclick="window.location='?';" class="button" type="button" name="cancel" value="Bỏ qua" />
+	</td>
+        </tr>
+      </table>
+      </td></tr>
+      </table>
+</form>
+	</div>
+	<div class="LowerModuleBorder"><div class="FooterBar"><div class="RightCorner">&nbsp;</div></div></div>
+	</div>

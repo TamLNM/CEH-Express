@@ -1,0 +1,256 @@
+<?php $data 	  		= get_data("select * from stock order by stock_code, stock_name"); ?>
+<?php $stock_type 		= get_data("select * from stock_type"); ?>
+<?php $warehouse_list 	= get_data("select * from warehouse"); ?>
+
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;" id="div_title_page">
+    <tr>
+        <td width="30" align="center">
+            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/stock.png" width="18" height="18" />
+        </td>
+        <td height="25"><b>Quản lý Hàng hóa</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>
+
+<div style="margin: 10px;" id="div_contenttable">
+	<input hidden id="table_name" value="stock">
+	<div style="width: 978px;">
+		<table id="contenttable" class="table table-striped display nowrap" cellspacing="0" style="width: 99.5%">
+			<thead>
+				<tr>
+					<th class="editor-cancel" col-name="STT" width="10%">STT</th>
+					<th col-name="stock_id"></th>
+					<th col-name="stock_type_name" style="min-width: 150px!important;">Loại hàng</th>
+					<th col-name="stock_code">Mã sản phẩm</th>
+					<th col-name="stock_name">Tên sản phẩm</th>
+					<th col-name="warehouse_name" style="min-width: 300px;">Thuộc kho</th>
+					<th col-name="price">Giá</th>
+					<th col-name="stock_type_id"></th>
+					<th col-name="stock_type_code"></th>
+					<th col-name="warehouse_id"></th>
+					<th col-name="warehouse_code"></th>
+					<th col-name="nation_id"></th>
+					<th col-name="nation_code"></th>
+					<th col-name="nation_name"></th>
+					<th col-name="city_id"></th>
+					<th col-name="city_code"></th>
+					<th col-name="city_name"></th>
+					<th col-name="district_id"></th>
+					<th col-name="district_code"></th>
+					<th col-name="district_name"></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php $index = 1; 
+					for($i=0; $i < count($data); $i++){?>	
+					<tr>
+						<td contenteditable="true" align="center"><?=$index++;?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['stock_id'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['stock_type_name'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['stock_code'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['stock_name'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['warehouse_name'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['price'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['stock_type_id'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['stock_type_code'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['warehouse_id'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['warehouse_code'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['nation_id'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['nation_code'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['nation_name'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['city_id'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['city_code'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['city_name'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['district_id'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['district_code'];?></td>
+						<td contenteditable="true" align="center"><?=$data[$i]['district_name'];?></td>
+					</tr>
+				<?php } ?>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div id="cell-context" class="btn-group" style="padding-top: 12px;">
+	<ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<div id="cell-context-2" class="btn-group" style="padding-top: 12px;">
+	<ul style="list-style-type: none;" class="dropdown-menu dropdown-menu-left"></ul>
+</div>
+
+<?php
+	include("bms/templates/add_row_popup.htm");
+?>
+
+<input id="editor-input" hidden="">
+
+<script type="text/javascript">
+	$(document).ready(function () {
+		var tbl 			= $('#contenttable'),
+			_columns 		= ['STT', 'stock_id', 'stock_type_name', 'stock_code', 'stock_name', 'warehouse_name', 'price', 'stock_type_id', 'stock_type_code', 'warehouse_id', 'warehouse_code', 'nation_id', 'nation_code', 'nation_name', 'city_id', 'city_code', 'city_name', 'district_id', 'district_code', 'district_name'];
+
+		var dataTbl = tbl.newDataTable({
+			scrollY: '55vh',
+			columnDefs: [
+				{ type: "num", className: "text-center", targets: _columns.indexOf('STT') },
+				{ className: "text-center", targets: _columns.getIndexs([ 'stock_type_name', 'stock_code', 'stock_name', 'warehouse_name', 'price'])},
+				{ className: "hiden-input", targets: _columns.getIndexs(['stock_id', 'stock_type_id', 'stock_type_code', 'warehouse_id', 'warehouse_code', 'nation_id', 'nation_code', 'nation_name', 'city_id', 'city_code', 'city_name', 'district_id', 'district_code', 'district_name'])},
+			],
+			order: [[ _columns.indexOf('STT'), 'asc' ]],
+			paging: false,
+			keys: true,
+            autoFill: {
+                focus: 'focus'
+            },
+            select: true,
+            rowReorder: false,
+            arrayColumns: _columns,
+		});
+		tbl.editableTableWidget();
+		tbl.initComplete({
+			ADD: 'ADD',
+			SAVE: 'SAVE',
+			DELETE: 'DELETE'
+		});
+
+		var stockTypeList = [];
+		<?php for($i = 0; $i < count($stock_type); $i++){ ?>
+			stockTypeList.push({
+				'stock_type_code'	: <?="'".$stock_type[$i]['stock_type_code']."'";?>,
+				'stock_type_name'	: <?="'".$stock_type[$i]['stock_type_name']."'";?>,
+				'stock_type_id'  	: <?="'".$stock_type[$i]['stock_type_id']."'";?>,
+				
+			});
+		<?php } ?>
+
+		tbl.setExtendDropdown({
+			target: "#cell-context",
+			source: stockTypeList,
+			colIndex: _columns.indexOf("stock_type_name"), 
+			onSelected: function(cell, value){ 
+				var stock_type_name = '', stock_type_id = '';
+				for (i = 0; i < stockTypeList.length; i++){
+					if (stockTypeList[i].stock_type_code == value){
+						stock_type_name = stockTypeList[i].stock_type_name;
+						stock_type_id   = stockTypeList[i].stock_type_id;
+						i 				= stockTypeList.length;
+					}
+				}
+
+				var tempCell = cell;
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("stock_type_name");
+				tbl.DataTable().cell(tempCell).data(stock_type_name).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("stock_type_code");
+				tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("stock_type_id");
+				tbl.DataTable().cell(tempCell).data(stock_type_id).draw(false);
+
+				var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+				if(!crRow.hasClass("addnew")){
+		        	tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+	        	}	
+			}
+		});	
+
+		var warehouseList = [];
+		<?php for($i = 0; $i < count($warehouse_list); $i++){ ?>
+			warehouseList.push({
+				'warehouse_code': <?="'".$warehouse_list[$i]['warehouse_code']."'";?>,
+				'warehouse_name': <?="'".$warehouse_list[$i]['warehouse_name']."'";?>,
+				'warehouse_id'  : <?="'".$warehouse_list[$i]['warehouse_id']."'";?>,
+				'nation_id'  	: <?="'".$warehouse_list[$i]['nation_id']."'";?>,
+				'nation_code'   : <?="'".$warehouse_list[$i]['nation_code']."'";?>,
+				'nation_name'  	: <?="'".$warehouse_list[$i]['nation_name']."'";?>,
+				'city_id'  		: <?="'".$warehouse_list[$i]['city_id']."'";?>,
+				'city_code'  	: <?="'".$warehouse_list[$i]['city_code']."'";?>,
+				'city_name'  	: <?="'".$warehouse_list[$i]['city_name']."'";?>,
+				'district_id'  	: <?="'".$warehouse_list[$i]['district_id']."'";?>,
+				'district_code' : <?="'".$warehouse_list[$i]['district_code']."'";?>,
+				'district_name' : <?="'".$warehouse_list[$i]['district_name']."'";?>,
+			});
+		<?php } ?>
+
+		tbl.setExtendDropdown({
+			target: "#cell-context-2",
+			source: warehouseList,
+			colIndex: _columns.indexOf("warehouse_name"), 
+			onSelected: function(cell, value){ 
+				var warehouse_name 	= '', 
+					warehouse_id 	= '',
+					nation_id		= '',
+					nation_code		= '',
+					nation_name		= '',
+					city_id			= '',
+					city_code		= '',
+					city_name		= '',
+					district_id		= '',
+					district_code	= '',
+					district_name	= '';
+				for (i = 0; i < warehouseList.length; i++){
+					if (warehouseList[i].warehouse_code == value){
+						warehouse_name 	= warehouseList[i].warehouse_name;
+						warehouse_id   	= warehouseList[i].warehouse_id;
+						nation_id   	= warehouseList[i].nation_id;
+						nation_code   	= warehouseList[i].nation_code;
+						nation_name   	= warehouseList[i].nation_name;
+						city_id   		= warehouseList[i].city_id;
+						city_code   	= warehouseList[i].city_code;
+						city_name   	= warehouseList[i].city_name;
+						district_id   	= warehouseList[i].district_id;
+						district_code   = warehouseList[i].district_code;
+						district_name   = warehouseList[i].district_name;
+						console.log(warehouseList[i]);
+						i 				= warehouseList.length;
+					}
+				}
+
+				var tempCell = cell;
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_name");
+				tbl.DataTable().cell(tempCell).data(warehouse_name).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_code");
+				tbl.DataTable().cell(tempCell).data(value).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("warehouse_id");
+				tbl.DataTable().cell(tempCell).data(warehouse_id).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("nation_id");
+				tbl.DataTable().cell(tempCell).data(nation_id).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("nation_code");
+				tbl.DataTable().cell(tempCell).data(nation_code).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("nation_name");
+				tbl.DataTable().cell(tempCell).data(nation_name).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_id");
+				tbl.DataTable().cell(tempCell).data(city_id).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_code");
+				tbl.DataTable().cell(tempCell).data(city_code).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("city_name");
+				tbl.DataTable().cell(tempCell).data(city_name).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_id");
+				tbl.DataTable().cell(tempCell).data(district_id).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_code");
+				tbl.DataTable().cell(tempCell).data(district_code).draw(false);
+
+				tempCell[0]['_DT_CellIndex'].column = _columns.indexOf("district_name");
+				tbl.DataTable().cell(tempCell).data(district_name).draw(false);
+
+				var crRow = tbl.find("tbody tr:eq("+ cell[0]['_DT_CellIndex'].row +")");
+
+				if(!crRow.hasClass("addnew")){
+		        	tbl.DataTable().row(crRow).nodes().to$().addClass("editing");
+	        	}	
+			}
+		});	
+	});
+</script>

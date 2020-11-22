@@ -1,0 +1,71 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td height="25" width="100" style="padding-left:10px;"><b>Chủng loại</b></td>
+	<td width="130">
+	<select class="catbg" style="width:120px;" name="cat_id" id="cat_id">
+<?php
+	echo '<option value="">Tất cả chủng loại</option>';
+	$cat=get_data("select * from categories   order by cat_name");
+	for($i=0;$i<count($cat);$i++)
+		echo '<option value="'.$cat[$i]['cat_id'].'">'.$cat[$i]['cat_name'].'</option>';
+?>	
+	</select>
+	</td>
+	<td height="25"  width="100"><b>Chọn kho hàng</b></td>
+	<td width="130">
+	<select onchange="load_page(1);" class="catbg" style="width:120px;" name="search_stock_id" id="search_stock_id">
+	<option value="">Tất cả kho hàng</option>
+	</select>	
+	</td>	        
+	<td></td>
+      </tr>
+	<tr>
+	<td style="padding-left:10px;"><b>Số phiếu</b></td>
+	<td>
+	<input  onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) load_mat_page(1);" onfocus="this.select();" style="width:120px;" value=""  class="catbg" name="search_inv_code" type="text" id="search_inv_code" size="25" />	
+	</td>	
+	<td><b>Tên sản phẩm</b></td>
+	<td><input  onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) load_mat_page(1);" onfocus="this.select();" style="width:120px;" value=""  class="catbg" name="mat_name" type="text" id="mat_name" size="25" />
+	</td>
+	<td><input  type="button" value="Tra cứu" onclick="load_mat_page(1);" name="search" class="button"></td>
+      </tr>      
+      <tr><td id="search_by_sup"  colspan="4" style="padding-left:10px;padding-bottom:5px;"></td></tr>    
+	</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center">	
+<div id="matid" style="width:530px;height:410px;overflow:auto;"></div>
+	</td></tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr><td align="center" height="30" bgcolor="#f3f3f3">
+      <input type="button" value="Đóng"  onclick="hidediv('searchmat');" class="button">&nbsp;&nbsp;<input type="button" value="Chọn"  onclick="selectmat();" class="button"></td>
+      </tr>
+	</table>
+	
+<script language="javascript">
+	var cur_mat_page=1;
+	var cur_mms_id='';
+	var cur_smm_id='';
+	var cur_msu_name='';
+	var cur_price=0;
+	var cur_price_dealer=0;
+	var cur_msu_id='';
+	function load_mat_page(p)
+	{
+		load('?eda_type=ajax&eda_code=<?=md5("search_mat_return")?>&mat_return_type='+document.getElementById('mat_return_type').value+'&emp_stock_id='+document.getElementById('stock_id').value+'&cus_id='+document.getElementById('cus_id').value+'&sup_id='+document.getElementById('sup_id').value+'&mat_name='+document.getElementById('mat_name').value+'&cat_id='+document.getElementById('cat_id').value+'&stock_id='+document.getElementById('search_stock_id').value+'&search_inv_code='+document.getElementById('search_inv_code').value+'&eda_page='+p,'matid','html','GET',null,'in');
+		cur_mat_page=p;
+	}
+	function selectmat()
+	{
+		if(cur_mms_id=='')
+		{
+			alert('Hãy chọn sản phẩm cần thêm');
+		}
+		else
+		{
+			hidediv('searchmat');
+			load_mat();
+		}
+	}
+</script>

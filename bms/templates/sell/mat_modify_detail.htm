@@ -1,0 +1,242 @@
+<?php
+if (isset($return_val["datefrom"])) {
+    $sdate = explode("/", $return_val["datefrom"]);
+    if ($sdate[0] > 0 && $sdate[0] <= 31 && $sdate[1] > 0 && $sdate[1] <= 12 && $sdate[2] <= date('Y')) {
+        $sdate = mktime(0, 0, 0, $sdate[1], $sdate[0], $sdate[2]);
+    }
+}
+if (!isset($sdate)) {
+    if (date('m') > 1)
+        $sdate = mktime(0, 0, 0, date('m') - 1, date('d'), date('Y'));
+    else
+        $sdate = mktime(0, 0, 0, 12, date('d'), date('Y') - 1);
+    $return_val["datefrom"] = date('d/m/Y', $sdate);
+}
+if (isset($return_val["dateto"])) {
+    $edate = explode("/", $return_val["dateto"]);
+    if ($edate[0] > 0 && $edate[0] <= 31 && $edate[1] > 0 && $edate[1] <= 12 && $edate[2] <= date('Y')) {
+        $edate = mktime(23, 59, 59, $edate[1], $edate[0], $edate[2]);
+    }
+}
+if (!isset($edate)) {
+    $edate = mktime(23, 59, 59, date('m'), date('d'), date('Y'));
+}
+$m = get_data("select mat.mat_name, msu.msu_name from materials mat, mat_msu mms, meansure msu where mms.mms_id='" . $return_val['mms_id'] . "' and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id");
+if ($action->eda_type != 'ajax') {
+    ?>
+    <Script type="text/javascript" src="<?=ROOT_URL?>bms/common/CalendarPopup.js"></Script>
+    <script language="javaScript" id="jscal1x">
+        var cal = new CalendarPopup("calendarpopup");
+        cal.setTodayText("Hôm nay");
+        cal.showNavigationDropdowns();
+        cal.setYearSelectStartOffset(20);
+        cal.setMonthNames("Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12");
+        cal.setDayHeaders("CN","T2","T3","T4","T5","T6","T7");
+    </script>
+    <SCRIPT LANGUAGE="JavaScript">document.write(getCalendarStyles());</SCRIPT>
+    <DIV ID="calendarpopup" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></DIV>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td width="30" align="center">
+                <img style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/documents.png" width="18" height="18"/>        
+            </td>
+            <td  height="25"><b>Báo cáo chi tiết hàng điều chỉnh</b></td>
+            <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>
+    <table align="center" width="98%" border="0" cellspacing="0" cellpadding="0" style="margin-top:5px;">
+        <tr>
+            <td width="60"><b>Từ ngày</b></td>
+            <td width="70">
+                <input readonly style="width:70px;" class="catbg"  onclick="cal.select(document.getElementById('datefrom'),'anchor1','dd/MM/yyyy');if(document.getElementById('datefrom').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;" class="textbox" value="<?= isset($return_val['datefrom']) ? $return_val['datefrom'] : '' ?>" onBlur="check_date(this);" name="datefrom" id="datefrom" type="text" />
+            </td><td width="20">
+                <A href="javascript:void()" onclick="cal.select(document.getElementById('datefrom'),'anchor1','dd/MM/yyyy'); if(document.getElementById('datefrom').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor1" ID="anchor1" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+            </td>
+            <td width="70" style="padding-right:15px;" align="right"><b>Đến ngày</b></td>
+            <td width="70">
+                <input readonly style="width:70px;" class="catbg"  onclick="cal.select(document.getElementById('dateto'),'anchor2','dd/MM/yyyy');if(document.getElementById('dateto').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;" class="textbox" value="<?= isset($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>" onBlur="check_date(this);" name="dateto" id="dateto" type="text" />
+            </td> <td width="25">
+                <A href="javascript:void()" onclick="cal.select(document.getElementById('dateto'),'anchor2','dd/MM/yyyy'); if(document.getElementById('dateto').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor2" ID="anchor2" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+            </td>  
+            <td width="130">
+                <select class="catbg" style="width:120px;" name="stock_id" id="stock_id">
+                    <option value="">Tất cả kho hàng</option>
+                    <?php
+                    $chk_mainstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+                    $chk_empstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+                    if (count($chk_mainstock) > 0 && count($chk_empstock) > 0) {
+                        $stock = get_data("select stock_id, stock_name, user_id from stocks order by stock_name");
+                    } else if (count($chk_mainstock) > 0) {
+                        $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id is null or user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+                    } else {
+                        $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+                    }
+                    for ($i = 0; $i < count($stock); $i++)
+                        echo '<option ' . (isset($return_val['stock_id']) ? ($return_val['stock_id'] == $stock[$i]['stock_id'] ? 'selected' : '') : '') . ' value="' . $stock[$i]['stock_id'] . '">' . $stock[$i]['stock_name'] . '</option>';
+                    ?>	
+                </select>       
+            </td>  
+            <td width="130">
+                <select class="catbg" style="width:120px;" name="cat_id" id="cat_id">
+                    <option value="">Tất cả chủng loại</option>
+                    <?php
+                    $cat = get_data("select * from categories order by cat_name");
+                    for ($i = 0; $i < count($cat); $i++)
+                        echo '<option ' . (isset($return_val['cat_id']) ? ($return_val['cat_id'] == $cat[$i]['cat_id'] ? 'selected' : '') : '') . ' value="' . $cat[$i]['cat_id'] . '">' . $cat[$i]['cat_name'] . '</option>';
+                    ?>	
+                </select>       
+            </td>
+            <td width="210">
+                <select style="width:200px;" class="catbg" name="user_id" id="user_id">
+                    <option value="">Tất cả người điều chỉnh</option>
+                    <?php
+                    $usr = get_data("select full_name, user_name, user_id from users order by full_name");
+                    for ($i = 0; $i < count($usr); $i++)
+                        echo '<option ' . (isset($return_val['user_id']) ? ($return_val['user_id'] == $usr[$i]['user_id'] ? 'selected' : '') : '') . ' value="' . $usr[$i]['user_id'] . '">' . $usr[$i]['full_name'] . ' (' . $usr[$i]['user_name'] . ')</option>';
+                    ?>                       
+                </select>        
+            </td>
+            <td style="padding-left:10px;"><input onclick="window.location='?eda_act=<?= md5('sell') ?>&eda_code=<?= md5('mat_modify_report') ?>&datefrom='+document.getElementById('datefrom').value+'&dateto='+document.getElementById('dateto').value+'&user_id='+document.getElementById('user_id').value+'&cat_id='+document.getElementById('cat_id').value+'&stock_id='+document.getElementById('stock_id').value+'&report_type='+get_radio();" type="button" value="Xem" class="button"></td>
+        </tr>
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>    
+    <?php
+} else {
+    ?>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+
+    <table align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td width="60"><b>Từ ngày</b></td>
+            <td width="70">
+                <?= !empty($return_val['datefrom']) ? $return_val['datefrom'] : 'Tất cả' ?>
+            </td>
+            <td width="70" style="padding-right:15px;" align="right"><b>Đến ngày</b></td>
+            <td width="70">
+                <?= !empty($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>
+            </td> 
+            <td width="60"><b>Chủng loại:</b></td>
+            <td width="100">
+                <?php
+                $cat = get_data("select cat_name from categories where  cat_id='" . $return_val['cat_id'] . "'");
+                if (count($cat) > 0)
+                    echo $cat[0]['cat_name'];
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>
+            <td width="50"><b>Kho hàng:</b></td>
+            <td width="100">
+                <?php
+                $stock = get_data("select stock_name from stocks where  stock_id='" . $return_val['stock_id'] . "'");
+                if (count($stock) > 0)
+                    echo $stock[0]['stock_name'];
+                else
+                    echo "Tất cả";
+                ?> 
+            </td> 
+            <td width="120" style="padding-left:20px;"><b>Người thực hiện</b></td>
+            <td>
+                <?php
+                $usr = get_data("select full_name from users where  user_id='" . $return_val['user_id'] . "'");
+                if (count($usr) > 0)
+                    echo $usr[0]['full_name'];
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>
+        </tr>
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>	
+    <?php
+}
+?>	
+<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td height=30 style="padding-left:10px;"><b>Sản phẩm thống kê:</b> <?= $m[0]['mat_name'] ?> (<?= $m[0]['msu_name'] ?>)</td>
+    </tr>
+</table>    
+<?php
+$where = '';
+$where.=(!empty($return_val['cat_id']) ? "  and cat.cat_id=" . $return_val['cat_id'] : "");
+$where.=(!empty($return_val['stock_id']) ? "  and smm.stock_id=" . $return_val['stock_id'] : "");
+$where.=(!empty($return_val['user_id']) ? " and inv.user_id='" . $return_val['user_id'] . "' " : "");
+$where .= " and mms.mms_id='" . $return_val['mms_id'] . "'";
+$imo = get_data("select imo.*, imod.quantity, imod.back_quantity, usr.full_name from instock_modify imo, imo_details imod, users usr, stock_mat_msu smm, mat_msu mms where imo.imo_id=imod.imo_id and imo.created_date between " . $sdate . " and " . $edate . $where." and imo.user_id=usr.user_id and imod.smm_id=smm.smm_id and smm.mms_id=mms.mms_id order by imo.created_date desc");
+if (count($imo) == 0) {
+    echo 'Không tìm thấy sản phẩm nào';
+} else {
+    $quantity = 0;
+    ?>
+<table width="98%" align="center"  border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <tr>
+        <td width="12%" align="center" bgcolor="#afd7ff"><b>Mã phiếu</b></td>
+        <td  align="center" bgcolor="#afd7ff"><b>Người thực hiện</b></td>
+        <td width="15%" align="center" bgcolor="#afd7ff"><b>Thời gian thực hiện</b></td>
+        <td width="15%" align="center" bgcolor="#afd7ff" height="25"><b>SL trước điều chỉnh</b></td>
+        <td width="15%" align="center" bgcolor="#afd7ff" height="25"><b>SL sau điều chỉnh</b></td>
+        <td width="15%" align="center" bgcolor="#afd7ff" height="25"><b>SL điều chỉnh</b></td>
+    </tr>
+<?php
+if (count($imo) > 0) {
+    for ($i = 0; $i < count($imo); $i++) {
+        ?>		
+            <tr  <?= $action->eda_type != 'ajax' ? ' style="cursor:pointer;" onmouseover="this.style.backgroundColor=\'yellow\';" onmouseout="this.style.backgroundColor=\'\';" onclick="window.location=\'?eda_act=' . md5('sell') . '&eda_code=' . md5('view_mat_modify') . '&eda_id=' . $imo[$i]['imo_id'] . '\';"' : '' ?>>
+                <td height="22" align="center"><?= $imo[$i]['imo_code'] ?></td>
+                <td align="center"><?= $imo[$i]['full_name'] ?></td>
+                <td align="center"><?= date('d/m/Y H:i', $imo[$i]['created_date']) ?></td>
+                <td align="right" style="padding-right:5px;"><?= number_format($imo[$i]['back_quantity'], 0, ",", " ") ?></td>
+                <td align="right" style="padding-right:5px;"><?= number_format($imo[$i]['quantity'], 0, ",", " ") ?></td>
+                <td align="right" style="padding-right:5px;"><?= number_format($imo[$i]['quantity']-$imo[$i]['back_quantity'], 0, ",", " ") ?></td>
+            </tr>
+            <?php
+            $quantity+=$imo[$i]['quantity']-$imo[$i]['back_quantity'];
+        }
+}
+        ?>		
+        <tr>
+            <td colspan="5" height="25" align="center"><b>Tổng cộng</b></td>		
+            <td align="right" style="padding-right:5px;"><b><?= number_format($quantity, 0, ",", " ") ?></b></td>			
+        </tr>
+    </table>
+
+    <?php
+    if ($action->eda_type != 'ajax') {
+        ?>	
+        <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+            </tr>
+        </table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+            <tr>
+                <td  height="30" style="padding-left:5px;" width="30">
+                    <img src="<?=ROOT_URL?>bms/images/icon/preview.gif" height="24">
+                </td>
+                <td   style="padding-left:5px;">
+                    <a class="cart_payment" href="javascript:void()" onclick="window.open('?eda_code=<?= md5('view_report') ?>&eda_type=ajax&eda_module=sell/input_mat_detail&datefrom='+document.getElementById('datefrom').value+'&dateto='+document.getElementById('dateto').value+'&stock_id='+document.getElementById('stock_id').value+'&sup_id='+document.getElementById('sup_id').value+'&mms_id=<?= $return_val['mms_id'] ?>');"><b>Xem dạng in ấn</b></a>
+                </td>          
+                <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+            </tr>
+        </table>       
+        <?php
+    }
+}
+?>
+<script language="javascript">
+    function reloadreport() {
+        window.location='?eda_act=<?= md5('sell') ?>&eda_code=<?= md5('input_mat_detail') ?>&datefrom='+document.getElementById('datefrom').value+'&dateto='+document.getElementById('dateto').value+'&sup_id='+document.getElementById('sup_id').value+'&keyword='+document.getElementById('keyword').value+'&stock_id='+document.getElementById('stock_id').value+'&mms_id=<?= $return_val['mms_id'] ?>';
+    }
+</script>   

@@ -1,0 +1,130 @@
+/*author: Manes;
+createdate: 18/04/2018;
+*/
+
+@mixin spinIcon($size){
+	content: "";
+	position: absolute;
+	top: 0;
+	right: 0;
+	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;	
+	width: $size;
+	height: $size;	
+	cursor: pointer;
+}
+
+.m-corner-setting{
+	position: absolute;
+	right: 0;
+	top: 0;		
+	display: inline-block;		
+	z-index: 10;
+	.m-corner-content{
+		position: absolute;
+		top: 3.7vw;
+		right: 0;
+		background-color: rgba(0,0,0,0.7);
+		width: 15vw;
+		height: auto;
+		text-align: center;
+		display: none;
+		button, label{
+			width: 100%;
+			margin-bottom: 0;
+		}
+	}
+	&:before{
+		background: url('../images/icons/settings-l.png');
+		animation: spin 4s linear infinite;	
+		@include spinIcon(40px);		
+	}
+}
+
+#m-corner-close{
+	width: 100%;
+	border-bottom: 1px solid $uncheck-color;
+	font-size: $fontsize*1.5;
+	color: $uncheck-color;
+	background: transparent;
+	transition: all 0.3s;
+	height: 4vw;
+	z-index: 20;
+	&:hover{
+		color: darken($primary-color, 20%);
+		background: $primary-background;
+		transition: all 0.3s;
+	}
+}
+
+.m-corner-setting-l{
+	position: absolute;
+	top: 0;
+	left: 7%;
+	display: inline-block;
+	z-index: 10;	
+	&:before{
+		background: url('../images/icons/settings-l.png');
+		animation: spin 4s linear infinite;
+		@include spinIcon(3.5vw);
+	}
+	.m-corner-content{
+		position: absolute;
+		top: 3.7vw;
+		left: -5vw;
+		background-color: rgba(0,0,0,0.7);
+		width: 10vw;
+		height: auto;
+		text-align: center;
+		display: none;
+		label{		
+			border: none;
+			background-color: transparent;
+			color: $color-l;
+			padding: 5px 8px;
+			float: left;
+			width: 100%;
+			&:after{
+				content: "";
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 0%;
+				background-color: transparent;
+				border-radius: 0px;
+				border-bottom: 3px inset lighten($active-color, 40%);
+				transform: center;
+				z-index: 1;
+				transition: width 0.3s;
+			}
+
+			&:hover{
+				&:after{
+					width: 100%;
+				}
+			}
+		}
+	}
+}
+
+.m-process{
+	position: relative;
+	&:before{
+		@include spinIcon(25px);
+		top: 10%;
+		right: 2%;		
+		background-image: url('../images/icons/loading.png');
+		animation: 4s spin linear infinite;
+	}
+}
+
+// animation
+@keyframes spin{
+	0%{
+		transform: rotate(0deg);
+	}
+	100%{
+		transform: rotate(360deg);
+	}
+}

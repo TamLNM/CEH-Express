@@ -1,0 +1,64 @@
+<style type="text/css">
+    #importing_div{
+        position: absolute;
+        left: 0px;
+        top: 20px;
+        width: 550px;
+        height: 90px;
+        z-index: 21;
+    }
+    #importing_iframe {
+        position: absolute;
+        left: 0px;
+        top: 20px;
+        width: 546px;
+        height: 446px;
+        z-index: 21;
+    }
+</style>
+<iframe id="importing_iframe" style="display:none;"></iframe>
+<div id="importing_div" style="display:none;">
+    <table  style="border-color: #004c93" bgcolor="#ffffff" width="650" border="0" height="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height="25" valign=top align=center width="100%">
+                <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+                    <tr>
+                        <td height="25" valign=top align=center width="100%">
+                            <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+                                <tr>
+                                    <td width="91%" height="25" id="searchuserhead" background="<?=ROOT_URL?>bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('importing_',event);" style="color:white;"><b>&nbsp;&nbsp;Import Excel</b></td>
+                                    <td width="5%" height="25" align="right" background="<?=ROOT_URL?>bms/images/head_bg.gif" style="padding-right:2px;">
+                                        <img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>bms/images/close.gif" width="21" height="21" onclick="removeBlurUIBelow();">
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+                <div id="importing_id">
+                    <table height="5" width="100%" border="0" cellspacing="0" cellpadding="0" style="padding: 5px;">
+                        <tr style="padding-left: auto; padding-right: auto;">
+                            <td align="center" width="120" height="30"><b>File dữ liệu excel</b></td>
+                            <td width="260">
+                                <form id="excelfrm" action="?eda_act=958153f1b8b96ec4c4eb2147429105d9&eda_code=ec2f7a7a72707997acddad74271f4e45" enctype="multipart/form-data" method="post"><input onclick="resetStep();" type="file" id="excelfile" name="excelfile" style="width:250px;"></form>
+                            </td>
+                            <td  height="30"><a id="template_file"><i>(Tải file dữ liệu mẫu)</i></a></td>
+                        </tr>                        
+                    </table>    
+                    <table height="5" width="100%" border="0" cellspacing="0" cellpadding="0" style="padding: 5px; background-color: #eee; height: 25px;">
+                        <tr>
+                            <td align="center" colspan="3">
+                                <input type="button" value="Đóng"  onclick="hidediv('excel'); resetStep();" class="button" style="margin-left: auto!important;">
+                                <input type="button" value="Import"  onclick="nextstep();" class="button" style="margin-right: auto;">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>   

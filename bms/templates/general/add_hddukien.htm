@@ -1,0 +1,91 @@
+<form onkeypress="return tabOnEnter(document.activeElement, event);" onsubmit="return false;" name="frmadmin" method="post" action="?eda_act=<?= md5('general') ?>&eda_code=<?= md5('add_hddukien_sm') ?>" style="margin:0px">
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td width="30" align="center">
+                <img style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/about.gif" width="18" height="18"/>        
+            </td>
+            <td  height="25"><b>Thêm nhà cung cấp mới</b></td>
+            <td align="right" style="padding-right:5px;"><img onclick="window.location='?eda_act=<?= md5('general') ?>&eda_code=<?= md5('hddukien_manager') ?>';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>
+
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+            <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td height="25" width="160" align="left"><b>(*) Kho</b></td>
+                        <td width="180">
+                            <?php
+                                $chk_mainstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+                                $chk_empstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+                                if ($action->eda_module == 'emp') {
+                                    if (count($chk_mainstock) > 0 && count($chk_empstock) > 0) {
+                                        $stocks = get_data("select stock_id, stock_name, user_id from stocks order by stock_name");
+                                    } else if (count($chk_mainstock) > 0) {
+                                        $stocks = get_data("select stock_id, stock_name, user_id from stocks where user_id is null or user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+                                    } else {
+                                        $dt = get_data("select stock_id from stocks  where concat(',',user_list,',') like concat('%,'," . $sessions->get_session('user_id') . ",',%')");
+                                        $stocklist = "0";
+                                        for ($i = 0; $i < count($dt); $i++) {
+                                            $stocklist.=',' . $dt[$i]['stock_id'];
+                                        }
+                                        $stocks = get_data("select stock_id, stock_name, user_id from stocks where (user_id='" . $sessions->get_session('user_id') . "' or stock_id in(" . $stocklist . "))  order by stock_name");
+                                    }
+                                } else {
+                                    if (count($chk_mainstock) > 0) {
+                                        $stocks = get_data("select stock_id, stock_name, user_id from stocks where user_id is null order by stock_name");
+                                    } else {
+                                        $stocks = array();
+                                    }
+                                }
+                            ?>
+                            <select name=stock_id id=stock_id>
+                                <?php
+                                    /*$stocks = get_data("select * from stocks order by stock_name");*/
+                                    foreach ($stocks as $key => $stock) {
+                                       echo "<option value='".$stock['stock_id']."'>".$stock['stock_name']."</option>";
+                                    }
+                                ?>
+                                </select>
+
+                        </td>
+                        
+                    </tr>
+                    <tr>
+                        <td height="25" align="left"><b>Bắt đầu</b></td>
+                        <td>
+                            <input style="width:180px;" class="catbg" name="batdau" id="batdau" type="text" value="<?= isset($return_val['batdau']) ? $return_val['batdau'] : '' ?>" />                          
+                        </td>    
+                        <td width="120" height="25" align="left" style="padding-left:20px;"><b>Kết thúc</b></td>
+                        <td>
+                            <input style="width:180px;" class="catbg" name="ketthuc" id="ketthuc" type="text" value="<?= isset($return_val['ketthuc']) ? $return_val['ketthuc'] : '' ?>" />                          
+                        </td>      
+                    </tr>
+                    <tr>
+                        <td height="25" align="left"><b>Ký hiệu hóa đơn</b></td>
+                        <td>
+                            <input style="width:180px;" class="catbg" name="khhd" id="khhd" type="text" value="<?= isset($return_val['khhd']) ? $return_val['khhd'] : '' ?>" />
+                        </td>
+                        <td height="25" align="left" style="padding-left:20px;"><b>Số hiện tại</b></td>
+                        <td>
+                            <input style="width:180px;" class="catbg" class="textbox" value="<?= isset($return_val['hientai']) ? $return_val['hientai'] : '' ?>" name="hientai" id="hientai" type="text" />
+                        </td>             
+                    </tr>  
+                </table>
+            </td></tr></table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=5></td>
+        </tr>
+    </table>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td  height="30" style="padding-left:5px;">
+                <input style="font-weight:bold;cursor:pointer;"  onclick="document.forms[0].submit();" class="button" type="button" name="button" value="Lưu nhà cung cấp" />
+            </td>
+            <td align="right" style="padding-right:5px;"><img  onclick="window.location='?eda_act=<?= md5('general') ?>&eda_code=<?= md5('hddukien_manager') ?>';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>          
+</form>
+

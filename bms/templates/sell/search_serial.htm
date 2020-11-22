@@ -1,0 +1,297 @@
+<?php
+$serialno=isset($_GET['serialno'])?$_GET['serialno']:'';
+if($action->eda_type!='ajax')
+{
+?>	
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/search.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Tra cứu sản phẩm theo Serial</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>      
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center" height="30" width="160"><b>Số Serial cần tra cứu</b></td>
+	<td width="160"><input onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) window.location='?eda_act=<?=md5('sell')?>&eda_code=<?=md5('search_serial')?>&serialno='+document.getElementById('serialno').value.toUpperCase();" onfocus="this.select();" style="width:150px;" value="<?=empty($serialno)?'':$serialno?>"  class="catbg" name="serialno" type="text" id="serialno" size="25" />
+	</td>
+	<td><input type="button" value="Tra cứu" onclick="window.location='?eda_act=<?=md5('sell')?>&eda_code=<?=md5('search_serial')?>&serialno='+document.getElementById('serialno').value.toUpperCase();" name="search" class="button"></td>
+      </tr>
+	</table>         
+<?php
+	} else {
+		echo '<table width="100%" border="0" cellspacing="0" cellpadding="0"><tr><td style="padding-left:20px;" height="25"><b>Số serial tra cứu: '.$serialno.'</b></td></tr></table>';
+	}
+	if(!empty($serialno)) {
+		$inv=get_data("select inv.inv_code, invd.oinvd_id, inv.created_date,  usr.full_name, cus.cus_name from waranty_invoices inv, waranty_invoice_details invd, users usr, customers cus where invd.serial = '".$serialno."'  and invd.inv_id=inv.inv_id and inv.user_id=usr.user_id and inv.cus_id=cus.cus_id");
+		if(count($inv)>0) {
+			echo '<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr><td style="padding-left:20px;" height="25"><b><u>Phiếu bảo hành:</u></b></td></tr>
+				<tr><td style="padding-left:20px;padding-right:20px;padding-bottom:10px;">';
+			for($i=0;$i<count($inv);$i++)
+			{
+				$return_val=$inv[$i];	
+?>
+     <table  border="0" cellspacing="0" cellpadding="0"><tr><td><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height="5"></td></tr></table>
+     <table  bgcolor="#eeeeee" width="780" border="0" cellspacing="0" cellpadding="0">     
+            <tr>
+              <td height="25" width="150" align="left" style="padding-left:10px;"><b>Người nhận</b></td>
+              <td width="200"><?= $return_val['full_name']?></td>
+              <td height="25" width="110" align="left" style="padding-left:20px;"><b>Thời gian nhận</b></td>
+              <td><?= date('d/m/Y H:i',$return_val['created_date'])?></td>
+            </tr>
+            <tr>
+              <td height="25" align="left" style="padding-left:10px;"><b>Tên khách hàng</b></td>
+              <td><?= $return_val['cus_name']?></td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Số phiếu BH</b></td>
+              <td> 
+<?php
+				if($action->eda_type!='ajax') {                       
+				      echo '<a class="cart_payment" href="?eda_code='.md5('view_report').'&eda_type=ajax&eda_module=waranty/waranty_out&inv_code='.$return_val['inv_code'].'" target="_blank">';
+				}
+				echo $return_val['inv_code'];
+				if($action->eda_type!='ajax') { 
+					echo ' <b>(Xem phiếu)</b></a>';
+				}
+?>	    
+              </td>             
+            </tr>    
+            <tr>
+              <td height="25" align="left" style="padding-left:10px;"><b>Tên sản phẩm</b></td>
+              <td width="200" colspan="3">
+<?php
+				$mat=get_data("select mat.mat_name from materials mat, stock_mat_msu smm, mat_msu mms, out_invoice_details oinvd where oinvd.invd_id='".$return_val['oinvd_id']."' and oinvd.smm_id=smm.smm_id and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id");
+				if(count($mat)>0) {
+					echo $mat[0][0];
+				}
+?>              
+              </td>
+            </tr>                                      
+          </table>
+
+<?php
+			}
+			echo '</td><tr></table>';
+		}
+		$inv=get_data("select inv.inv_code, inv.inv_id, mat.mat_name, invd.invd_id, inv.created_date, usr.full_name, cus.cus_name from out_invoices inv, out_invoice_details invd, users usr, customers cus, out_serials seri, stock_mat_msu smm, mat_msu mms, materials mat where inv.inv_type=0 and invd.invd_id=seri.invd_id 
+		and (LENGTH('".$serialno."')<=LENGTH(seri.serial_start ) and  ( LPAD('".$serialno."',LENGTH(seri.serial_start ),'Z') = seri.serial_start or LPAD('".$serialno."',LENGTH(seri.serial_start ),'Z') between seri.serial_start and seri.serial_end)) 
+		and invd.inv_id=inv.inv_id and invd.smm_id=smm.smm_id and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and inv.user_id=usr.user_id and inv.cus_id=cus.cus_id");
+		if(count($inv)>0) {
+			echo '<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr><td style="padding-left:20px;" height="25"><b><u>Phiếu xuất kho bán hàng:</u></b></td></tr>
+				<tr><td style="padding-left:20px;padding-right:20px;padding-bottom:10px;">';
+			for($i=0;$i<count($inv);$i++)
+			{
+				$return_val=$inv[$i];	
+?>
+     <table  border="0" cellspacing="0" cellpadding="0"><tr><td><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height="5"></td></tr></table>
+     <table  bgcolor="#eeeeee" width="780" border="0" cellspacing="0" cellpadding="0">     
+            <tr>
+              <td height="25" width="150" align="left" style="padding-left:10px;"><b>Người xuất</b></td>
+              <td width="200"><?= $return_val['full_name']?></td>
+              <td height="25" width="110" align="left" style="padding-left:20px;"><b>Thời gian xuất</b></td>
+              <td><?= date('d/m/Y H:i',$return_val['created_date'])?></td>
+            </tr>
+            <tr>
+              <td height="25" align="left" style="padding-left:10px;"><b>Tên khách hàng</b></td>
+              <td><?= $return_val['cus_name']?></td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Số phiếu xuất</b></td>
+              <td> 
+<?php
+				if($action->eda_type!='ajax') {                       
+				      echo '<a class="cart_payment" href="?eda_code='.md5('view_report').'&eda_type=ajax&eda_module=sell/view_output&eda_id='.$return_val['inv_id'].'" target="_blank">';
+				}
+				echo $return_val['inv_code'];
+				if($action->eda_type!='ajax') { 
+					echo ' <b>(Xem phiếu)</b></a>';
+				}
+?>	    
+              </td>             
+            </tr>    
+            <tr>
+              <td height="25" align="left" style="padding-left:10px;"><b>Tên sản phẩm</b></td>
+              <td width="200" colspan="3"><?= $return_val['mat_name']?></td>
+            </tr>                                      
+          </table>
+
+<?php
+			}
+			echo '</td><tr></table>';
+		}	
+		$inv=get_data("select inv.inv_code, inv.inv_id, mat.mat_name, invd.invd_id, inv.created_date, usr.full_name, stock.stock_name from invoices inv, invoice_details invd, users usr, stocks stock, serials seri, stock_mat_msu smm, mat_msu mms, materials mat where inv.inv_type=2 and invd.inv_id=inv.inv_id  and invd.invd_id=seri.invd_id and seri.mms_id is null
+		and (LENGTH('".$serialno."')<=LENGTH(seri.serial_start ) and  ( LPAD('".$serialno."',LENGTH(seri.serial_start ),'Z') = seri.serial_start or LPAD('".$serialno."',LENGTH(seri.serial_start ),'Z') between seri.serial_start and seri.serial_end)) 
+		and invd.smm_id=smm.smm_id and smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and inv.user_id=usr.user_id and inv.stock_id=stock.stock_id");
+		if(count($inv)>0) {
+			echo '<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr><td style="padding-left:20px;" height="25"><b><u>Phiếu xuất kho nhân viên:</u></b></td></tr>
+				<tr><td style="padding-left:20px;padding-right:20px;padding-bottom:10px;">';
+			for($i=0;$i<count($inv);$i++)
+			{
+				$return_val=$inv[$i];	
+?>
+     <table  border="0" cellspacing="0" cellpadding="0"><tr><td><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height="5"></td></tr></table>
+     <table  bgcolor="#eeeeee" width="780" border="0" cellspacing="0" cellpadding="0">     
+            <tr>
+              <td height="25" width="150" align="left" style="padding-left:10px;"><b>Người xuất</b></td>
+              <td width="200"><?= $return_val['full_name']?></td>
+              <td height="25" width="110" align="left" style="padding-left:20px;"><b>Thời gian xuất</b></td>
+              <td><?= date('d/m/Y H:i',$return_val['created_date'])?></td>
+            </tr>
+            <tr>
+              <td height="25" align="left" style="padding-left:10px;"><b>Tên kho nhận</b></td>
+              <td><?= $return_val['stock_name']?></td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Số phiếu xuất</b></td>
+              <td> 
+<?php
+				if($action->eda_type!='ajax') {                       
+				      echo '<a class="cart_payment" href="?eda_code='.md5('view_report').'&eda_type=ajax&eda_module=sell/view_move_stock&eda_id='.$return_val['inv_id'].'" target="_blank">';
+				}
+				echo $return_val['inv_code'];
+				if($action->eda_type!='ajax') { 
+					echo ' <b>(Xem phiếu)</b></a>';
+				}
+?>	    
+              </td>             
+            </tr>    
+            <tr>
+              <td height="25" align="left" style="padding-left:10px;"><b>Tên sản phẩm</b></td>
+              <td width="200" colspan="3"><?= $return_val['mat_name']?></td>
+            </tr>                                      
+          </table>
+
+<?php
+			}
+			echo '</td><tr></table>';
+		}							
+		$inv=get_data("select inv.inv_code, inv.inv_id, mat.mat_name, invd.invd_id, inv.created_date, usr.full_name, sup.sup_name from invoices inv, invoice_details invd, users usr, supliers sup, serials seri, mat_msu mms, materials mat where inv.inv_type=1 and invd.inv_id=inv.inv_id  and invd.invd_id=seri.invd_id and seri.smm_id is null
+		and (LENGTH('".$serialno."')<=LENGTH(seri.serial_start ) and  ( LPAD('".$serialno."',LENGTH(seri.serial_start ),'Z') = seri.serial_start or LPAD('".$serialno."',LENGTH(seri.serial_start ),'Z') between seri.serial_start and seri.serial_end)) 
+		and invd.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and inv.user_id=usr.user_id and inv.sup_id=sup.sup_id");
+		if(count($inv)>0) {
+			echo '<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr><td style="padding-left:20px;" height="25"><b><u>Phiếu nhập kho:</u></b></td></tr>
+				<tr><td style="padding-left:20px;padding-right:20px;padding-bottom:10px;">';
+			for($i=0;$i<count($inv);$i++)
+			{
+				$return_val=$inv[$i];	
+?>
+     <table  border="0" cellspacing="0" cellpadding="0"><tr><td><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height="5"></td></tr></table>
+     <table  bgcolor="#eeeeee" width="780" border="0" cellspacing="0" cellpadding="0">     
+            <tr>
+              <td height="25" width="150" align="left" style="padding-left:10px;"><b>Người nhập</b></td>
+              <td width="200"><?= $return_val['full_name']?></td>
+              <td height="25" width="110" align="left" style="padding-left:20px;"><b>Thời gian nhập</b></td>
+              <td><?= date('d/m/Y H:i',$return_val['created_date'])?></td>
+            </tr>
+            <tr>
+              <td height="25" align="left" style="padding-left:10px;"><b>Tên nhà cung cấp</b></td>
+              <td><?= $return_val['sup_name']?></td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Số phiếu nhập</b></td>
+              <td> 
+<?php
+				if($action->eda_type!='ajax') {                       
+				      echo '<a class="cart_payment" href="?eda_code='.md5('view_report').'&eda_type=ajax&eda_module=sell/view_input_mat&eda_id='.$return_val['inv_id'].'" target="_blank">';
+				}
+				echo $return_val['inv_code'];
+				if($action->eda_type!='ajax') { 
+					echo ' <b>(Xem phiếu)</b></a>';
+				}
+?>	    
+              </td>             
+            </tr>    
+            <tr>
+              <td height="25" align="left" style="padding-left:10px;"><b>Tên sản phẩm</b></td>
+              <td width="200" colspan="3"><?= $return_val['mat_name']?></td>
+            </tr>                                      
+          </table>
+
+<?php
+			}
+			echo '</td><tr></table>';
+}
+
+
+
+$inv=get_data("select msh.inv_code msh_code,msh.created_date,msh.id msh_id,stock.stock_name,mat.mat_name,usr.full_name from mat_split_history msh,stocks stock,materials mat,users usr where msh.serial={$serialno} and usr.user_id=msh.user_id and msh.mat_id=mat.mat_id and msh.stock_id=stock.stock_id");
+		if(count($inv)>0) {
+			echo '<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr><td style="padding-left:20px;" height="25"><b><u>Phiếu tách:</u></b></td></tr>
+				<tr><td style="padding-left:20px;padding-right:20px;padding-bottom:10px;">';
+			for($i=0;$i<count($inv);$i++)
+			{
+				$return_val=$inv[$i];	
+?>
+     <table  border="0" cellspacing="0" cellpadding="0"><tr><td><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height="5"></td></tr></table>
+     <table  bgcolor="#eeeeee" width="780" border="0" cellspacing="0" cellpadding="0">     
+            <tr>
+              <td height="25" width="150" align="left" style="padding-left:10px;"><b>Người tách</b></td>
+              <td width="200"><?= $return_val['full_name']?></td>
+              <td height="25" width="110" align="left" style="padding-left:20px;"><b>Thời gian tách</b></td>
+              <td><?= date('d/m/Y H:i',$return_val['created_date'])?></td>
+            </tr>
+            <tr>
+              <td height="25" align="left" style="padding-left:10px;"><b>Kho hàng lấy</b></td>
+              <td><?= $return_val['stock_name']?></td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Số phiếu tách</b></td>
+              <td> 
+<?php
+				if($action->eda_type!='ajax') {                       
+				      echo '<a class="cart_payment" href="?eda_act=8325324b47e1e62a1c2998a640cbdc72&eda_code=320f1291031c2f20f65f19d69408a7db&eda_id='.$inv[$i]['msh_id'].'" target="_blank">';
+				}
+				echo $return_val['msh_code'];
+				if($action->eda_type!='ajax') { 
+					echo ' <b>(Xem phiếu)</b></a>';
+				}
+?>	    
+              </td>             
+            </tr>    
+            <tr>
+              <td height="25" align="left" style="padding-left:10px;"><b>Tên sản phẩm</b></td>
+              <td width="200" colspan="3"><?= $return_val['mat_name']?></td>
+            </tr>                                      
+          </table>
+
+<?php
+			}
+			echo '</td><tr></table>';
+}
+				
+		
+	}
+?>	
+<?php
+if($action->eda_type!='ajax')
+{
+?>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5 ><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	     </table>
+
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+<?php        
+	if(!empty($serialno)) {        
+?>	
+          <td  height="30" style="padding-left:5px;" width="30">
+          <img src="<?=ROOT_URL?>/bms/images/icon/preview.gif" height="24">
+          </td>
+          <td   style="padding-left:5px;">
+          <a class="cart_payment" href="?eda_code=<?= md5('view_report')?>&eda_type=ajax&eda_module=sell/search_serial&serialno=<?=$serialno?>" target="_blank"><b>Xem dạng in ấn</b></a>
+          </td>
+<?php
+	}
+?>          
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>       
+<?php
+	}               
+?>

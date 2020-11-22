@@ -1,0 +1,155 @@
+<?php
+header("Access-Control-Allow-Origin: *");
+
+$headers = apache_request_headers();
+$param=array();
+parse_str( @explode("?", $_SERVER['REQUEST_URI'])[1],$param);
+$token=safe_str(@$_SERVER['HTTP_TOKEN']);
+if($token=="")$token=safe_str(@$param['token']);
+$signalKey=safe_str(@$param['signalKey']);
+
+$err="";
+
+
+$inputJSON = file_get_contents('php://input');
+
+
+
+
+$qc=safe_str(@$param['name']);
+$gai=safe_str(@$param['gai']);
+$trueSignalKey=sha1("name={$qc}&gai={$gai}&secretKey=".SECRET_KEY);
+
+//Test data
+// $inputJSON='{
+//   "price": 123000,
+//   "category_code": 2,
+//   "category_name": "Vỏ tay ga",
+//   "pr": "4",
+//   "description": "string",
+//   "is_intestine": 0,
+//   "is_coveralls": 0
+// }';
+
+
+$data = json_decode($inputJSON, TRUE);
+
+if($token!=TOKEN){
+	$reback['result']=false;
+	$reback['message']="Sai token !! [".$token."]";
+	echo json_encode($reback,true);die();
+}
+if($trueSignalKey!=$signalKey){
+	$reback['result']=false;
+	$reback['message']="Sai signalKey !! [".$trueSignalKey."]";
+	echo json_encode($reback,true);die();
+}
+
+	if(isset($data['price'])){
+		$price=floatval(@$data['price']);
+	}
+	$category_code=safe_str(@$data['category_code']);
+	$category_name=safe_str(@$data['category_name']);
+	$pr=safe_str(@$data['pr']);
+	$mat_desc=safe_str(@$data['description']);
+	$is_intestine=intval(@$data['is_intestine']);
+	$is_coveralls=intval(@$data['is_coveralls']);
+	if($is_coveralls==0 && $is_intestine==0){
+		$is_tyre=1;
+	}
+	else
+	{
+		$is_tyre=0;
+	}
+	if($category_name==""){
+		$err="Không có dữ liệu category_name";
+		goto error_out;
+	}
+	if($category_code==""){
+		$err="Không có dữ liệu category_code";
+		goto error_out;
+	}
+
+$mat_name=$qc."_".$gai;
+
+	$check_cat=get_data("select * from categories where cat_name like '{$category_name}'");
+	if(count($check_cat)>0){
+		$cat_id=$check_cat[0]['cat_id'];
+	}
+	else
+	{
+		$db->query("insert into categories(cat_name) values ('{$category_name}')");
+		$cat_id=$db->insert_id();
+	}
+
+$check_mat=get_data("select mat.*,mms.price from materials mat,mat_msu mms where mms.mat_id=mat.mat_id and mat.qc='".$qc."' and mat.gai='".$gai."'");
+if(count($check_mat)>0){
+	if(floatval($check_mat[0]['price'])!=floatval($price))
+	{
+		$db->query("update mat_msu set price='{$price}' where mms_id='{$check_mat[0]['mms_id']}'");
+		$reback['edit_list'][]="price";
+	}
+	if(intval($check_mat[0]['cat_id'])!=intval($cat_id))
+	{
+		$db->query("update materials set cat_id='{$cat_id}' where mat_id='{$check_mat[0]['mat_id']}'");
+		$reback['edit_list'][]="category";
+	}
+	if(intval($check_mat[0]['is_tyre'])!=intval($is_tyre))
+	{
+		$db->query("update materials set is_tyre='{$is_tyre}' where mat_id='{$check_mat[0]['mat_id']}'");
+		$reback['edit_list'][]="is_tyre";
+	}
+	if(intval($check_mat[0]['is_coveralls'])!=intval($is_coveralls))
+	{
+		$db->query("update materials set is_coveralls='{$is_coveralls}' where mat_id='{$check_mat[0]['mat_id']}'");
+		$reback['edit_list'][]="is_coveralls";
+	}
+	if(intval($check_mat[0]['is_intestine'])!=intval($is_intestine))
+	{
+		$db->query("update materials set is_intestine='{$is_intestine}' where mat_id='{$check_mat[0]['mat_id']}'");
+		$reback['edit_list'][]="is_intestine";
+	}
+	if(($check_mat[0]['pr'])!=($pr))
+	{
+		$db->query("update materials set pr='{$pr}' where mat_id='{$check_mat[0]['mat_id']}'");
+		$reback['edit_list'][]="pr";
+	}
+	if(($check_mat[0]['mat_desc'])!=($mat_desc))
+	{
+		$db->query("update materials set mat_desc='{$mat_desc}' where mat_id='{$check_mat[0]['mat_id']}'");
+		$reback['edit_list'][]="mat_desc";
+	}
+	$reback['result']=true;
+	$reback['message']="Cập nhật sản phẩm [{$mat_name}] thành công !";
+	$reback['do']="edit";
+	echo json_encode($reback,true);die();
+
+}
+else
+{
+	$vat=10;
+	$mat_name=$qc;
+	$mat_model=$qc."_".$gai;
+	$mat_waranty=0;
+	$barcode="";
+	$xuatxu="";
+	$db->query("insert into materials(vat,mat_name, mat_model, mat_desc, cat_id, mat_waranty,barcode,qc,xuatxu,pr,gai,alert_qty,is_tyre,is_coveralls,is_intestine) 
+		values 
+		('{$vat}','{$mat_name}','{$mat_model}','{$mat_desc}','{$cat_id}','{$mat_waranty}','{$barcode}','{$qc}','{$xuatxu}','{$pr}','{$gai}',0,$is_tyre,$is_coveralls,$is_intestine)");
+	$mat_id=$db->insert_id();
+	$db->query("insert into mat_msu(mat_id,msu_id,price,price_dealer,price_dealer2) 
+		values 
+		('{$mat_id}','3','{$price}','{$price}','{$price}')");
+	$mms_id=$db->insert_id();
+	$reback['result']=true;
+	$reback['message']="Thêm mới sản phẩm [{$mat_name}] thành công !";
+	$reback['do']="add";
+	echo json_encode($reback,true);die();
+}
+
+
+error_out:
+$reback['result']=false;
+$reback['message']=$err;
+echo json_encode($reback,true);die();
+?>

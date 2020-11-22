@@ -1,0 +1,65 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td height="25" style="padding-left:10px;"><b>Số serial</b></td>
+	<td colspan="2">
+	<input  onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) load_page(cur_mat_page);" onfomat="this.select();" style="width:120px;" value=""  class="catbg" name="search_serial" type="text" id="search_serial" size="25" />
+	</td>	
+	<td><b>Tên sản phẩm</b></td>
+	<td><input  onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) load_page(cur_mat_page);" onfomat="this.select();" style="width:120px;" value=""  class="catbg" name="search_mat_name" type="text" id="search_mat_name" size="25" />
+	</td>
+	<td><input  type="button" value="Tra cứu" onclick="load_mat_page(cur_mat_page);" name="search" class="button"></td>
+      </tr>     
+	<tr>
+	<td height="25" width="80" style="padding-left:10px;"><b>Ngày xuất</b></td>
+      <td width="100">
+        <input style="width:100px;" class="catbg"  onclick="cal.select(document.getElementById('search_date'),'anchor2','dd/MM/yyyy');if(document.getElementById('search_date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;" class="textbox" value="<?= isset($return_val['search_date'])?$return_val['search_date']:''?>" onBlur="check_date(this);" name="search_date" id="search_date" type="text" />
+        </td>
+       <td width="30">
+        <A href="javascript:void()" onclick="cal.select(document.getElementById('search_date'),'anchor2','dd/MM/yyyy'); if(document.getElementById('search_date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor2" ID="anchor2" src="<?=ROOT_URL?>/bms/images/icon/calendar.gif" height="18" border="0"></A>
+       </td>
+	<td width="100"><b>Phiếu xuất</b></td>
+	<td width="130">
+	<input  onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) load_page(cur_mat_page);" onfomat="this.select();" style="width:120px;" value=""  class="catbg" name="search_inv_no" type="text" id="search_inv_no" size="25" />	
+	</td>
+	<td></td>
+      </tr>
+      <tr><td colspan="6" style="padding-top:5px;"></td></tr> 
+	</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center">	
+<div id="matid" style="width:530px;height:410px;overflow:auto;"></div>
+	</td></tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr><td align="center" height="30" bgcolor="#f3f3f3">
+      <input type="button" value="Đóng"  onclick="hidediv('searchmat');" class="button">&nbsp;&nbsp;<input type="button" value="Chọn"  onclick="selectmat();" class="button"></td>
+      </tr>
+	</table>
+	
+<script language="javascript">
+	var cur_mat_page=1;
+	var cur_invd_id='';
+	var cur_msu_name='';
+	var cur_mat_name='';
+	var cur_serial='';
+	var cur_inv_date='';
+	var cur_inv_code='';
+	function load_mat_page(p)
+	{
+		load('?eda_type=ajax&eda_act=<?=md5("waranty")?>&eda_code=<?=md5("search_mat_waranty")?>&cus_id='+document.getElementById('cus_id').value+'&mat_name='+document.getElementById('search_mat_name').value+'&serial='+document.getElementById('search_serial').value+'&created_date='+document.getElementById('search_date').value+'&inv_code='+document.getElementById('search_inv_no').value+'&eda_page='+p,'matid','html','GET',null,'in');
+		cur_mat_page=p;
+	}
+	function selectmat()
+	{
+		if(cur_invd_id=='')
+		{
+			alert('Hãy chọn sản phẩm cần bảo hành');
+		}
+		else
+		{
+			hidediv('searchmat');
+			load_mat();
+		}
+	}
+</script>

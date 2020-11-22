@@ -1,0 +1,159 @@
+<form onkeypress="return tabOnEnter(document.activeElement, event);" onsubmit="return false;" name="frmadmin" method="post" action="?eda_act=<?=md5('general')?>&eda_code=<?= md5('add_warehouse_sm')?>" style="margin:0px">
+	<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+	    <tr>
+	        <td width="30" align="center">
+	            <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/warehouse.png" width="18" height="18" />
+	        </td>
+	        <td height="25"><b>Thêm Kho mới</b></td>
+	        <td align="right" style="padding-right:5px;"><img onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('district')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+	    </tr>
+		<table width="100%" border="0" cellspacing="0" cellpadding="0">
+			<tr>
+				<td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+            			<tr>
+			              	<td height="25" width="10%" align="left" style="padding-left:20px;"><b>Mã kho (*)</b></td>
+			              	<td width="20%">
+				              	<input style="width: 70%;" class="catbg" name="warehouse_code" id="warehouse_code" type="text" value="<?=isset($return_val['warehouse_id'])?$return_val['warehouse_id']:''?>" />
+							</td>
+			              	<td height="25" width="10%" align="left"><b>Tên kho (*)</b></td>
+			              	<td width="20%">
+				              	<input style="width: 70%;" class="catbg" name="warehouse_name" id="warehouse_name" type="text" value="<?=isset($return_val['warehouse_name'])?$return_val['warehouse_name']:''?>" />
+              				</td>
+              				
+				        <tr>
+				        	<td height="25" width="10%" align="left" style="padding-left:20px;"><b>Loại kho (*)</b></td>
+			              	<td>
+              					<select style="width: 70%" class="catbg" name="warehouse_type_id" id="warehouse_type_id"  data-placeholder="Chọn Loại kho">	
+								    <?php $warehouse_type_list = get_data('select * from warehouse_type order by warehouse_type_id, warehouse_type_name'); 
+								        for ($i = 0; $i < count($warehouse_type_list); $i++){
+								            echo ('<option value="'.$warehouse_type_list[$i]['warehouse_type_id'].'">'.$warehouse_type_list[$i]['warehouse_type_name'].'</option>');
+								        }
+								    ?>
+								</select>
+              				</td>
+              				<td height="25" width="10%" align="left"><b>Quốc gia (*)</b></td>
+				        	<td>
+				        		<select style="width: 70%" class="catbg" name="nation_id" id="nation_id"  data-placeholder="Chọn Quốc gia">	
+				        			<option value="0" selected>Chọn Quốc gia</option>
+								    <?php $nation_list = get_data('select * from nation order by nation_id, nation_name'); 
+								        for ($i = 0; $i < count($nation_list); $i++){
+								            echo ('<option value="'.$nation_list[$i]['nation_id'].'">'.$nation_list[$i]['nation_name'].'</option>');
+								        }
+								    ?>
+								</select>
+				        	</td>
+				        </tr>
+
+				        <tr>				        	
+				        	<td height="25" width="10%" align="left" style="padding-left:20px;"><b>Tỉnh/ Thành phố (*)</b></td>
+			              	<td width="20%">
+				              	<select style="width: 70%" class="catbg" name="city_id" id="city_id"  data-placeholder="Chọn Tỉnh/ Thành">	
+				        			<option value="0" selected>Chọn Tỉnh/ Thành phố</option>
+								</select>
+              				</td>
+              				<td height="25" width="10%" align="left"><b>Quận/ Huyện (*)</b></td>
+				        	<td>
+				        		<select style="width: 70%" class="catbg" name="district_id" id="district_id"  data-placeholder="Chọn Quận/ Huyện">	
+				        			<option value="0" selected>Chọn Quận/ Huyện</option>								   
+								</select>
+				        	</td>
+				        </tr>
+				        <tr>				        	
+				        	<td height="25" width="10%" align="left" style="padding-left:20px;"><b>Địa chỉ</b></td>
+			              	<td>
+              					<input style="width: 70%;" class="catbg" name="address" id="address" type="text" value="<?=isset($return_val['address'])?$return_val['address']:''?>" />
+              				</td>
+				        </tr>
+				    </table>
+				</td>
+			</tr>
+		</table>
+		<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+	        <tr>
+	          	<td  height="30" style="padding-left:5px;">
+	          		<input style="font-weight:bold;cursor:pointer;" onclick="document.forms[0].submit();" class="button" type="button" name="button" value="Lưu thông tin" />&nbsp;
+	          	</td>
+	        	<td align="right" style="padding-right:5px;"><img  onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('district')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+	        </tr>
+	    </table> 
+	</table>
+</form>
+<?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+
+
+<script type="text/javascript">
+	$(document).ready(function () {	
+		$(document).on('change', '#nation_id', function(){
+			var nation_id = $('#nation_id').val();
+
+			if(nation_id + "" != "0"){
+				$('#city_id').html('');                         
+                $('#city_id').append('<option selected value="0">Chọn Tỉnh/ Thành phố</option>');
+				
+                $('#district_id').html('');                         
+                $('#district_id').append('<option selected value="0">Chọn Quận/ Huyện</option>');
+
+               	$.ajax({
+                    url: "<?php echo "?eda_act=".md5('general') . '&eda_code=' . md5('load_city_list');?>",
+                    dataType: 'json',
+                    data: {"nation_id": nation_id},
+                    type: 'POST',
+                    success: function (data) {
+                        if(typeof data[0] != "undefined"){
+
+                            for (i = 0; i < data.length; i++){
+                            	$('#city_id').append('<option value="' + data[i]['city_id'] + '">' + data[i]['city_name'] + '</option>');
+                            }                            
+                        }
+                    },
+                    error: function(err){
+                    	console.log(err);
+
+                    }
+                });
+			}
+		});	
+
+		$(document).on('change', '#city_id', function(){
+			if ($('#city_id').val() != 0){
+				var nation_id = $('#nation_id').val(),
+					city_id = $('#city_id').val();
+
+	            $('#district_id').html('');                         
+                $('#district_id').append('<option selected value="0">Chọn Quận/ Huyện</option>');
+
+				if(city_id + "" != "0"){
+					$.ajax({
+	                    url: "<?php echo "?eda_act=".md5('general') . '&eda_code=' . md5('load_district_list');?>",
+	                    dataType: 'json',
+	                    data: {"nation_id": nation_id, "city_id": city_id},
+	                    type: 'POST',
+	                    success: function (data) {
+	                        if(typeof data[0] != "undefined"){
+	                            for (i = 0; i < data.length; i++){
+	                            	$('#district_id').append('<option value="' + data[i]['district_id'] + '">' + data[i]['district_name'] + '</option>');
+	                            }
+	                        }
+	                    },
+	                    error: function(err){
+	                    	console.log(err);
+
+	                    }
+	                });
+	            }
+			}
+		});	
+
+		$(document).on('change', '#nation_id, #city_id, #district_id', function(){
+			if ($('#nation_id').val() != 0 && $('#city_id').val() != 0 && $('#district_id').val() != 0){
+				var nation_name   = $( "#nation_id option:selected" ).text(),
+					city_name 	  = $( "#city_id option:selected" ).text(),
+					district_name = $( "#district_id option:selected" ).text(),
+					address 	  = district_name + ', ' + city_name + ', ' + nation_name;
+
+				$('#address').val(address);
+			}
+		});
+	});
+</script>

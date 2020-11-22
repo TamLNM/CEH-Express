@@ -1,0 +1,62 @@
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+    <tr>
+	    <td width="30" align="center">
+	      <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/transpot-company.png" width="18" height="18"/>        
+	      </td>
+	      <td  height="25"><b>Quản lý công ty vận chuyển</b></td>
+	    <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+    </tr>
+</table>
+<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+    <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+    </tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+        <td>
+            <input type="button" value="Thêm công ty mới" onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('add_transpot_company')?>';" name="add" class="button" style="margin-left: 5px;">
+        </td>
+		<td width="150" align="center" height="30"><b>Tên công ty vận chuyển</b></td>
+		<td width="120">
+			<input onfocus="this.select();" onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) load_page(cur_page);" onfosup="this.select();" style="width:110px;" value=""  class="catbg" name="search_trscomp_name" type="text" id="search_trscomp_name" size="25" />
+		</td>
+		<td width="80">
+			<input type="button" value="Tra cứu" id="search" name="search" class="button">
+		</td>
+		
+		<td>
+			<input hidden type="button" value="Nhập công ty từ file excel" onclick="excel();" name="add" class="button">
+		</td>
+        <td width="500"></td>
+    </tr>
+</table> 
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center">
+            <div id="supid" style="height:410px;overflow:auto;">
+                <?php
+					include("bms/templates/general/search_transpot_company.htm");
+				?>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+    </tr>
+</table>
+<table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+    <tr>
+        <td height="30" style="padding-left:5px;" width="30">
+            <img src="<?=ROOT_URL?>/bms/images/icon/preview.gif" height="24">
+        </td>
+        <td style="padding-left:5px;">
+            <a class="cart_payment" href="javascript:void()" onclick="window.open('?eda_code=<?= md5('view_report')?>&eda_type=ajax&eda_module=general/search_sup_man&sup_name='+document.getElementById('sup_search_name').value);"><b>Xem dạng in ấn</b></a>
+        </td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18" /></td>
+    </tr>
+</table>

@@ -1,0 +1,474 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="center" width="120" height="30"><b>File dữ liệu excel</b></td>
+        <td width="260">
+            <form id="excelfrm" action="#" enctype="multipart/form-data" method="post"><input onclick="resetStep();" type="file" id="excelfile" name="excelfile" style="width:250px;"></form>
+        </td>
+        <td  height="30"><a id="templatefile" href="bms/tmp/input.xls"><i>(Tải file dữ liệu mẫu)</i></a></td>
+    </tr>
+</table>
+<style type="text/css">
+    #progress { display:none;position:relative; width:400px; border: 1px solid #ddd; padding: 1px; border-radius: 3px;text-align: left; }
+    #bar { background-color: #B4F5B4; width:0%; height:20px; border-radius: 3px; text-align: left;}
+    #percent { position:absolute; display:inline-block; top:3px; left:48%;  text-align: left;}
+</style>
+<div id="progress">
+    <div id="bar"></div>
+    <div id="percent">0%</div >
+</div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td align="left">	
+            <div id="dataid" style="padding:5px;max-height:450px;width:650px;overflow:auto;"></div>
+        </td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr><td align="center" height="30" bgcolor="#f3f3f3">
+            <input type="button" value="Đóng"  onclick="hidediv('excel');" class="button">&nbsp;&nbsp;<input type="button" value="Tiếp theo"  onclick="nextstep();" class="button"></td>
+    </tr>
+</table>
+<script language="javascript">
+    var step=1;
+    function resetStep() {
+        step=1;
+    }
+    function nextstep() {
+        if(step===1) {
+            loadexcel();
+        } else if(step===2) {
+            loadexcel_data();
+        } else if(step===3) {
+            import_data();
+        } else if(step===4) {
+            closediv('excel');
+        }
+    }
+    function loadexcel() {
+        $("#bar").width('0%');
+        $("#percent").html('0%');
+        $('#progress').show();
+        $.ajax({
+            xhr: function()
+            {
+                var xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener("progress", function(evt) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = Math.round(evt.loaded / evt.total * 100);
+                        $("#bar").width(percentComplete + '%');
+                        $("#percent").html(percentComplete + '%');
+                    }
+                }, false);
+                return xhr;
+            },
+            url: '?eda_type=ajax&eda_code=<?= md5("excelload") ?>',
+            data: serializefiles('#excelfrm'),
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'POST',
+            success: function(data) {
+                $('#progress').hide();
+                $("#bar").width('0%');
+                $("#percent").html('0%');
+                if(data===null) {
+                    step=1;
+                    alert("File dữ liệu không hợp lệ");
+                } else if(typeof data==="string") {
+                    step=1;
+                    alert(data);
+                } else {
+                    step=2;
+                    str='<div style="height:25px;"><div style="width:200px;float:left;">Chọn vùng làm việc (Worksheet):</div><select  class="textbox" id="worksheet">';
+                    for(i=0;i<data.length;i++) {
+                        str+='<option value="'+i+'">'+data[i]+'</option>';
+                    }
+                    str+='</select></div>';
+                    $('#dataid').html(str);
+                }
+            }
+        });
+    }
+    var excel_data='';
+    function loadexcel_data() {
+        $('#dataid').html($('#dataid').html()+'<br><img src="bms/images/loading.gif" height="16" align="left"> Đang xử lý dữ liệu ...');
+        $.get('?eda_type=ajax&eda_code=<?= md5("excelload_data") ?>&worksheet='+$('#worksheet').val(),function(data){
+                if(data===null) {
+                    step=2;
+                    alert("File dữ liệu không hợp lệ");
+                } else if(typeof data==="string") {
+                    step=2;
+                    alert(data);
+                    //$('#dataid').html(data);
+                } else {
+                    step=3;
+                    str='<div style="height:25px;width:380px;float:left;"><div style="width:160px;float:left;">Vùng làm việc (Worksheet):</div>'+$('#worksheet>option:selected').text()+'</div>';
+                    excel_data=data;
+                    str+=previewData(excel_data);
+                    $('#dataid').html(str);
+                }            
+        });
+    }
+    function previewData(data) {      
+        var str='';
+        var row=0;
+        for(var i in data) {
+            if(row===0) {
+                str+='<div style="height:25px;width:220px;float:left;"><div style="float:left;width:160px;">Dòng bắt đầu chứa dữ liệu</div><input id="columndata" type="text" style="width:60px;" value="2" class="textbox"></div>';
+                str+='<table border="1" bordercolor="#ddd" style="border-collapse:collapse;margin-top:10px;border-color:#ddd;">';
+                str+='<tr><td></td>';
+                c=0;
+                for(var j in data[i]) {
+                    if(excel_type==="output"||excel_type==="input") {
+                        str+='<td align="center"><select onchange="checkselect(this);" colname="'+j+'" name="cols[]" class="textbox">';
+                        str+='<option value="">Chọn trường dữ liệu</option>';
+                        str+='<option '+(c===0?'selected':'')+' value="mat_model">Mã sản phẩm</option>';
+                        str+='<option '+(c===1?'selected':'')+' value="mat_name">Tên sản phẩm</option>';
+                        str+='<option '+(c===2?'selected':'')+' value="serials">Serials</option>';
+                        str+='<option '+(c===3?'selected':'')+' value="quantity">Số lượng</option>';
+                        str+='<option '+(c===4?'selected':'')+' value="msu_name">Đơn vị tính</option>';
+                        str+='<option '+(c===5?'selected':'')+' value="price">Đơn giá</option>';
+                        str+='<option '+(c===6?'selected':'')+' value="vat">VAT</option>';
+                        str+='</select></td>';
+                    }
+                    if(excel_type==="add_mat") {
+                        str+='<td align="center"><select onchange="checkselect(this);" colname="'+j+'" name="cols[]" class="textbox">';
+                        str+='<option value="">Chọn trường dữ liệu</option>';
+                        str+='<option '+(c===0?'selected':'')+' value="mat_model">Mã sản phẩm</option>';
+                        str+='<option '+(c===1?'selected':'')+' value="mat_name">Tên sản phẩm</option>';
+                        str+='<option '+(c===2?'selected':'')+' value="mat_desc">Chi tiết</option>';
+                        str+='<option '+(c===3?'selected':'')+' value="cat_name">Chủng loại</option>';
+                        str+='<option '+(c===4?'selected':'')+' value="mat_waranty">Bảo hành</option>';
+                        str+='<option '+(c===5?'selected':'')+' value="barcode">Mã vạch</option>';
+                        str+='<option '+(c===6?'selected':'')+' value="msu_name">Đơn vị tính</option>';
+                        str+='<option '+(c===7?'selected':'')+' value="price_input">Giá nhập</option>';
+                        str+='<option '+(c===8?'selected':'')+' value="discount_input">Chiết khấu nhập</option>';
+                        str+='<option '+(c===9?'selected':'')+' value="price">Giá bán</option>';
+                        str+='<option '+(c===10?'selected':'')+' value="price_dealer">Giá đại lý cấp 1</option>';
+                        str+='<option '+(c===11?'selected':'')+' value="price_dealer2">Giá đại lý cấp 2</option>';
+                        str+='<option '+(c===12?'selected':'')+' value="vat">VAT</option>';
+                        str+='<option '+(c===13?'selected':'')+' value="qc">Quy cách</option>';
+                        str+='<option '+(c===14?'selected':'')+' value="pr">Bố</option>';
+                        str+='<option '+(c===15?'selected':'')+' value="gai">Gai</option>';
+                        str+='<option '+(c===16?'selected':'')+' value="xuatxu">Xuất xứ</option>';
+                        str+='</select></td>';
+                    }
+
+                    if(excel_type==="add_cus") {
+                        str+='<td align="center"><select onchange="checkselect(this);" colname="'+j+'" name="cols[]" class="textbox">';
+                        str+='<option value="">Chọn trường dữ liệu</option>';
+                        str+='<option '+(c===0?'selected':'')+' value="cus_name">Tên khách hàng</option>';
+                        str+='<option '+(c===1?'selected':'')+' value="cus_code">Mã khách hàng</option>';
+                        str+='<option '+(c===2?'selected':'')+' value="plist_name">Nhóm khách hàng</option>';
+                        str+='<option '+(c===3?'selected':'')+' value="area_name">Khu vực</option>';
+                        str+='<option '+(c===4?'selected':'')+' value="tel">Số điện thoại</option>';
+                        str+='<option '+(c===5?'selected':'')+' value="fax">Số fax</option>';
+                        str+='<option '+(c===6?'selected':'')+' value="email">Email</option>';
+                        str+='<option '+(c===7?'selected':'')+' value="website">Website</option>';
+                        str+='<option '+(c===8?'selected':'')+' value="tax_no">Mã số thuế</option>';
+                        str+='<option '+(c===9?'selected':'')+' value="reg_no">Số đăng ký kinh doanh</option>';
+                        str+='<option '+(c===10?'selected':'')+' value="bank_acc">Số tài khoản</option>';
+                        str+='<option '+(c===11?'selected':'')+' value="bank_name">Tên ngân hàng</option>';
+                        str+='<option '+(c===12?'selected':'')+' value="address">Địa chỉ</option>';
+                        str+='<option '+(c===13?'selected':'')+' value="debt">Dư nợ đầu kỳ</option>';
+                        str+='<option '+(c===14?'selected':'')+' value="max_debt">Hạn mức nợ cho phép</option>';
+                        str+='<option '+(c===15?'selected':'')+' value="daidien">Tên người đại diện</option>';
+                        str+='<option '+(c===16?'selected':'')+' value="tel_dd">Số điện thoại người đại diện</option>';
+                        str+='<option '+(c===17?'selected':'')+' value="chucvu">Chức vụ người đại diện</option>';
+                        str+='<option '+(c===18?'selected':'')+' value="comment">Ghi chú thông tin khách hàng</option>';
+                        str+='</select></td>';
+                    }
+                    c++;
+                }
+                str+='</tr>';
+                str+='<tr><td style="background:#eee;"></td>';
+                for(var j in data[i]) {
+                    str+='<td style="background:#eee;" align="center">'+j+'</td>';
+                }
+                str+='</tr>';
+            }
+            row++;            
+            str+='<tr><td style="background:#eee;" align="center">'+row+'</td>';
+            colspan=1;
+            col='';
+            for(var j in data[i]) {
+                str+='<td>';
+                str+=(data[i][j]===null?'':data[i][j]);
+                str+='</td>';                    
+            }
+            str+='</tr>';
+        }
+        str+='</table>';
+        return str;
+    }
+    function checkselect(obj) {
+        var objs=$("select[name='cols[]']");
+        for(var i=0;i<objs.length;i++) {
+            if(objs[i]!==obj&&$(objs[i]).val()==$(obj).val()) {
+                $(objs[i]).val('');
+                return;
+            }
+        }
+    }
+    function import_data() {
+        var chk='';
+        if(excel_type==="output"||excel_type==="input") {
+            chk=import_data_inout();
+            if(chk==='') {
+                if($('#exceldiv').attr('max')==="max") {
+                    maxdiv('excel');
+                }
+                step=4;
+                closediv('excel');
+            } else {
+                alert(chk);
+            }            
+        }     
+        if(excel_type==="add_mat") {
+            chk=import_data_mat();
+        } 
+        if(excel_type==="add_sub") {
+            chk=import_data_sub();
+        } 
+
+    }
+    function import_data_inout() {
+        var row=0;
+        var cols={};
+        var obj=$("select[name='cols[]']");
+        for(var i=0;i<obj.length;i++) {
+            cols[$(obj[i]).val()]=$(obj[i]).attr('colname');
+        }
+        if(typeof cols['mat_name']==='undefined'||typeof cols['mat_model']==='undefined'||typeof cols['quantity']==='undefined'||typeof cols['price']==='undefined') {
+            return "Vui lòng gán ít nhất các trường dữ liệu tên sản phẩm, số lượng, đơn giá";
+        }
+        for(i in excel_data) {           
+            row++;
+            if(row>=$('#columndata').val()) {
+                if(excel_data[i][cols['mat_model']]!==null&&excel_data[i][cols['mat_model']]!=='') {
+                    getMatfrom('model',excel_data[i],cols);
+                } else {
+                    getMatfrom('matname',excel_data[i],cols);
+                }
+            }
+        }   
+        return "";
+    }
+    function import_data_sub() {
+        var row=0;
+        var cols={};
+        var obj=$("select[name='cols[]']");
+        console.log(excel_data);
+        for(var i=0;i<obj.length;i++) {
+            cols[$(obj[i]).val()]=$(obj[i]).attr('colname');
+        }
+    
+        $('#dataid').prepend('<div id="importmat" style="margin-bottom:5px;"><img src="bms/images/loading.gif" height="16" align="left"> <b>Đang nhập dữ liệu vào hệ thống ...</b></div>');
+        var data={};
+        var c=0;
+        for(i in excel_data) {           
+            row++;
+            data[c]={};
+            if(row>=$('#columndata').val()) {
+                data[c]['sup_name']=excel_data[i]['B']||"";
+                data[c]['address']=excel_data[i]['I']||"";              
+                data[c]['tel']=excel_data[i]['J']||"";
+                data[c]['email']=excel_data[i]['C']||"";
+                data[c]['website']=excel_data[i]['D']||"";
+                data[c]['tax_no']=excel_data[i]['E']||"";
+                data[c]['description']=excel_data[i]['L']||"";
+                data[c]['reg_no']=excel_data[i]['F']||"";
+                data[c]['bank_acc']=excel_data[i]['G']||"";
+                data[c]['bank_name']=excel_data[i]['H']||"";
+                data[c]['debt']=excel_data[i]['K']||"";
+                data[c]['sup_code']=excel_data[i]['A']||"";
+                c++;
+            }
+        }   
+        $.post('?eda_type=ajax&eda_code=<?= md5("excelimport_sup") ?>',data,function(v){
+            $('#importmat').html(v);
+            step=4;
+        })
+    }
+    function import_data_mat() {
+        var row=0;
+        var cols={};
+        var obj=$("select[name='cols[]']");
+        for(var i=0;i<obj.length;i++) {
+            cols[$(obj[i]).val()]=$(obj[i]).attr('colname');
+        }
+        if(typeof cols['mat_name']==='undefined'||typeof cols['cat_name']==='undefined'||typeof cols['msu_name']==='undefined') {
+            alert("Vui lòng gán ít nhất các trường dữ liệu tên sản phẩm, chủng loại và đơn vị tính");
+            return;
+        }
+        $('#dataid').prepend('<div id="importmat" style="margin-bottom:5px;"><img src="bms/images/loading.gif" height="16" align="left"> <b>Đang nhập dữ liệu vào hệ thống ...</b></div>');
+        var data={};
+        var c=0;
+        for(i in excel_data) {           
+            row++;
+            data[c]={};
+            if(row>=$('#columndata').val()) {
+                data[c]['mat_model']=(typeof cols['mat_name']==='undefined'?'':excel_data[i][cols['mat_model']]);
+                data[c]['mat_name']=excel_data[i][cols['mat_name']];
+                data[c]['mat_desc']=(typeof cols['mat_desc']==='undefined'?'':excel_data[i][cols['mat_desc']]);               
+                data[c]['cat_name']=excel_data[i][cols['cat_name']];
+                data[c]['mat_waranty']=(typeof cols['mat_waranty']==='undefined'?'':excel_data[i][cols['mat_waranty']]);
+                data[c]['barcode']=(typeof cols['barcode']==='undefined'?'':excel_data[i][cols['barcode']]);
+                data[c]['msu_name']=excel_data[i][cols['msu_name']];
+                data[c]['price_input']=(typeof cols['price_input']==='undefined'?'':excel_data[i][cols['price_input']]);
+                data[c]['discount_input']=(typeof cols['discount_input']==='undefined'?'':excel_data[i][cols['discount_input']]);
+                data[c]['price']=(typeof cols['price']==='undefined'?'':excel_data[i][cols['price']]);
+                data[c]['price_dealer']=(typeof cols['price_dealer']==='undefined'?'':excel_data[i][cols['price_dealer']]);
+                data[c]['price_dealer2']=(typeof cols['price_dealer2']==='undefined'?'':excel_data[i][cols['price_dealer2']]);
+                data[c]['vat']=(typeof cols['vat']==='undefined'?'':excel_data[i][cols['vat']]);
+                data[c]['qc']=(typeof cols['qc']==='undefined'?'':excel_data[i][cols['qc']]);
+                data[c]['pr']=(typeof cols['pr']==='undefined'?'':excel_data[i][cols['pr']]);
+                data[c]['gai']=(typeof cols['gai']==='undefined'?'':excel_data[i][cols['gai']]);
+                data[c]['xuatxu']=(typeof cols['xuatxu']==='undefined'?'':excel_data[i][cols['xuatxu']]);
+                c++;
+            }
+        }   
+        $.post('?eda_type=ajax&eda_code=<?= md5("excelimport_mat") ?>',data,function(v){
+            $('#importmat').html(v);
+            step=4;
+        })
+    }
+    function selectMSU(id,v) {
+        $('#mms_id_'+id+' option').filter(function () {
+            return $(this).text().toLowerCase() === v.toLowerCase();
+        }).attr('selected', 'selected');
+    }
+    function getMatfrom(t,exdata,cols) {
+            if(t==='matname') {
+                var v=exdata[cols['mat_name']];
+                if(v===''||v===null) {
+                    return false;
+                }
+                if(excel_type==="output") {
+                    url="?eda_code=<?= md5('getmatfrom') ?>&eda_type=ajax&t=mat_name&eda_id="+document.getElementById('search_stock_id').value+"&eda_module="+encodeURI(v);
+                } else {
+                    url="?eda_code=<?= md5('getmatfrom') ?>&eda_type=ajax&t=mat_name&input=1&eda_module="+encodeURI(v);
+                }
+            } else {
+                var v=exdata[cols['mat_model']];
+                if(v===''||v===null) {
+                    return false;
+                }          
+                if(excel_type==="output") {
+                    url="?eda_code=<?= md5('getmatfrom') ?>&eda_type=ajax&t=mat_model&eda_id="+document.getElementById('search_stock_id').value+"&eda_module="+encodeURI(v);
+                } else {
+                    url="?eda_code=<?= md5('getmatfrom') ?>&eda_type=ajax&t=mat_model&input=1&eda_module="+encodeURI(v);
+                }
+            }
+            $.get(url,function(data){
+                if(data=='none') {
+                    alert('Không tìm thấy sản phẩm "'+v+'"'+(excel_type==="output"?' trong kho hàng':'')+' đã chọn');
+                } else {
+                    v=data.split(":");
+                    if(excel_type==="output") {
+                        $input=$('input[name=\'smm_id[]\']');
+                    } else {
+                        $input=$('input[name=\'mat_id[]\']');
+                    }
+                    f=-1;
+                    /*for(i=0;i<$input.length;i++) {
+                        if(v[0]==$input[i].value) {
+                            f=i;
+                            id=$input[i].id.substr(7);
+                            break;
+                        }
+                        
+                    }*/
+                    if(f==-1) {
+                        for(i=0;i<$input.length;i++) {
+                            if($input[i].value=='') {
+                                f=i;
+                                id=$input[i].id.substr(7);
+                                break;
+                            }
+
+                        }                        
+                    }
+                    if(f==-1) {
+                        addrow();
+                        id=cur_index;
+                    }
+                                       
+                    if(excel_type==="output") {
+                        $("#smm_id_"+id).val(v[0]);
+                        if(typeof cols['msu_name']!=='undefined' &&exdata[cols['msu_name']]!==null&&exdata[cols['msu_name']]!=='') {
+                            load_msu(id,  v[6],v[1],function(ix){selectMSU(ix,exdata[cols['msu_name']])});
+                        } else {
+                            load_msu(id,  v[6],v[1]);
+                        }                        
+                        if(exdata[cols['vat']]!==null&&exdata[cols['vat']]!=='') {
+                            $("#vat_"+id).val(exdata[cols['vat']]);
+                        } else {                    
+                            $("#vat_"+id).val(v[7]);
+                        }  
+                        if(document.getElementById('price_type_1').checked) {
+                            if(exdata[cols['price']]!==null&&exdata[cols['price']]!=='') {
+                                $("#price_"+id).val(exdata[cols['price']]);
+                            } else {                    
+                                document.getElementById("price_"+id).value=v[5];
+                            }
+                            document.getElementById("mat_price_"+id).value=v[5];                     
+                        } else if(document.getElementById('price_type_2').checked) {
+                            if(exdata[cols['price']]!==null&&exdata[cols['price']]!=='') {
+                                $("#price_"+id).val(exdata[cols['price']]);
+                            } else {                          
+                                document.getElementById("price_"+id).value=v[8];
+                            }
+                            document.getElementById("mat_price_"+id).value=v[8];                     
+                        } else {
+                            if(exdata[cols['price']]!==null&&exdata[cols['price']]!=='') {
+                                $("#price_"+id).val(exdata[cols['price']]);
+                            } else {                          
+                                document.getElementById("price_"+id).value=v[4];
+                            }
+                            document.getElementById("mat_price_"+id).value=v[4];
+                        }                      
+                    } else {
+                        $("#mat_id_"+id).val(v[0]);
+                        $("#msu_id_"+id).val(v[1]);
+                        if(typeof cols['msu_name']!=='undefined' &&exdata[cols['msu_name']]!==null&&exdata[cols['msu_name']]!=='') {
+                            load_msu(id,  v[0],function(ix){selectMSU(ix,exdata[cols['msu_name']])});
+                        } else {
+                            load_msu(id,  v[0],function(ix){});
+                        }      
+                        if(exdata[cols['vat']]!==null&&exdata[cols['vat']]!=='') {
+                            $("#vat_"+id).val(exdata[cols['vat']]);
+                        } else {                    
+                            $("#vat_"+id).val(v[4]);
+                        }     
+                        if(exdata[cols['price']]!==null&&exdata[cols['price']]!=='') {
+                            $("#price_"+id).val(exdata[cols['price']]);
+                        }
+                    }
+                    if($("#mat_price_"+id).val()-$("#price_"+id).val()>0) {
+                        $("#discount_"+id).val($("#mat_price_"+id).val()-$("#price_"+id).val());
+                    } else {
+                        $("#discount_"+id).val(0);
+                    }  
+                    if(typeof cols['serials']!=='undefined' &&exdata[cols['serials']]!==null&&exdata[cols['serials']]!=='') {
+                        $("#serials_"+id).val(exdata[cols['serials']]);
+                    }
+                    $("#mat_name_"+id).val(v[2]);
+                    $("#mat_model_"+id).val(v[3]);
+
+                    if(exdata[cols['quantity']]!==null&&exdata[cols['quantity']]!=='') {
+                        $("#quantity_"+id).val(exdata[cols['quantity']]);
+                    } else {
+                        if($("#quantity_"+id).val()<1) {
+                            $("#quantity_"+id).val(1);
+                        } else {
+                            $("#quantity_"+id).val(strtoint($("#quantity_"+id).val())+1);
+                        }
+                    }
+
+                    format(document.getElementById("price_"+id));
+                    sum_mat(id);
+                }          
+            });
+    }
+</script>

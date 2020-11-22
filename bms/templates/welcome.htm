@@ -1,0 +1,58 @@
+<?php
+
+if(isset($_POST['user_name'])){
+    echo '<script>window.history.pushState({page: "another"}, document.title, window.location.origin);</script>';
+}
+
+
+$parmenu = get_data("select * from function_menu where is_visible = 1 and fmenu_parid is null and fmenu_act not in('other','update') ".($action->eda_act=="homepage"?"":"and fmenu_act='".$action->eda_act."'")." order by order_by");
+$mnu=get_data("select count(*) c from function_menu fmenu, user_group_permission ugp where is_visible = 1 and fmenu.fmenu_id=ugp.fmenu_id  and ugp.user_id='" . $sessions->get_session('user_id') . "' order by order_by");
+for ($i = 0; $i < count($parmenu); $i++) {
+    if ($sessions->get_session('user_name') == 'admin') {
+        $menu = get_data("select fmenu.* from function_menu fmenu where is_visible = 1 and fmenu.fmenu_act!='logout' and fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' order by order_by");
+    } else {
+        $menu=get_data("select fmenu.* from function_menu fmenu, user_group_permission ugp where fmenu.is_visible = 1 and fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' and fmenu.fmenu_id=ugp.fmenu_id  and ugp.user_id='" . $sessions->get_session('user_id') . "' order by order_by");
+        if($mnu[0]['c']==0) {
+            $menu = get_data("select fmenu.* from function_menu fmenu, user_group_permission ugp where is_visible = 1 and fmenu.fmenu_parid='" . $parmenu[$i]['fmenu_id'] . "' and fmenu.fmenu_id=ugp.fmenu_id  and ugp.group_id='" . $sessions->get_session('group_id') . "' order by order_by");
+        }
+    }
+    if (count($menu) > 0) {
+        echo '<table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td  class="catbg" height="25" style="padding-left:10px;border-bottom:0px;border-left:0px;border-right:0px;"><b>' . mb_strtoupper($parmenu[$i]['fmenu_name'], 'UTF-8') . '</b></td>
+        </tr>
+        <tr>
+          <td height="10">
+          <img src="'.ROOT_URL.'bms/images/spacer.gif" height="10"/>
+          </td>        
+        </tr>
+        <tr><td>';
+        $rows = ceil(count($menu) / 6);
+        echo '<table width="100%" border="0" cellpadding="0" cellspacing="0">';
+        $k = 0;
+        for ($j = 0; $j < $rows; $j++) {
+            echo '<tr>';
+            for ($t = 0; $t < 6; $t++) {
+                if (isset($menu[$k])) {
+                    echo '<td   height="80" width="'.(100/6).'%" align="center">';
+                    echo '<img onclick="window.location=\'?eda_act=' . md5($parmenu[$i]['fmenu_act']) . '&eda_code=' . md5($menu[$k]['fmenu_act']) . '\';" style="cursor:pointer;" src="'.ROOT_URL.'bms/images/icon/' . $menu[$k]['fmenu_img'] . '" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" vspace="5" height="48"/>';
+                    echo '<br><a class="cart_payment" href="?eda_act=' . md5($parmenu[$i]['fmenu_act']) . '&eda_code=' . md5($menu[$k]['fmenu_act']) . '">' . $menu[$k]['fmenu_name'] . '</a>';
+                    echo '</td>';
+                    $k++;
+                } else {
+                    echo '<td   height="80" width="'.(100/6).'%" align="center"></td>';
+                }
+            }
+            echo '</tr>
+		    <tr>
+		      <td height="10">
+		      <img src="'.ROOT_URL.'bms/images/spacer.gif" height="10"/>
+		      </td>        
+		    </tr>';
+        }
+        echo '</table></td></tr>
+		</table>';
+    }
+}
+?>
+  

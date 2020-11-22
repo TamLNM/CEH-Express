@@ -1,0 +1,267 @@
+<?php
+
+$stuan=intval(date("W",$edate))-intval(date("W",$sdate))+1;
+$maxtuan=intval(date("W",$edate));
+$mintuan=intval(date("W",$sdate));
+$thang=intval(date("m",$edate));
+$tuan=array();
+$lastdate=0;
+$lasttuan=0;
+$begin=0;
+$end=0;
+for ($i=$sdate; $i <= $edate; $i=$i+86400){
+$dd=strtotime(date("Y-m-d",$i));
+    if($lasttuan < intval(date("W",$dd)) ){
+        if(isset($tuan[intval(date("W",$dd))-1]["t"])){
+            $tuan[intval(date("W",$dd))-1]["t"]=$lastdate+86399;
+            $tuan[intval(date("W",$dd))]=array("f"=>$dd,"t"=>0,"dv"=>0,"tt"=>0);
+        }
+        else
+        {
+            $tuan[intval(date("W",$dd))]=array("f"=>$dd,"t"=>0,"dv"=>0,"tt"=>0);
+        }
+    }
+    $lasttuan=intval(date("W",$dd));
+    $lastdate=$dd;    
+}
+$tuan[$lasttuan]["t"]=$lastdate+86399;
+
+$cus_query="";
+if(intval(@$_GET['cus_id'])>0){
+    $cus_query=" and inv.cus_id=".intval(@$_GET['cus_id'])." ";
+}
+
+$cat_query="";
+if(@$_GET['cat_id']!=""){
+    $arr=explode(",", $_GET['cat_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $cat_arr[]=intval($value);
+    }
+    if(count($cat_arr)>0){
+        $cat_query= " and cat.cat_id in (".join(",",$cat_arr).") ";
+        $cates=get_data("select * from categories where cat_id in (".join(",",$cat_arr).")");
+    }
+
+}
+
+$stocks=array();
+$stock_query="";
+$stock_arr=array();
+if(@$_GET['stock_id']!=""){
+    
+    $arr=explode(",", $_GET['stock_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $stock_arr[]=intval($value);
+    }
+    if(count($stock_arr)>0){
+        $stock_query= " and smm.stock_id in (".join(",",$stock_arr).") ";
+    }
+
+}
+$user_query="";
+$user_arr=array();
+if(@$_GET['user_id']!=""){
+    
+    $arr=explode(",", $_GET['user_id']);
+    foreach ($arr as $key => $value) {
+        if(intval($value)>0)
+            $user_arr[]=intval($value);
+    }
+    if(count($user_arr)>0)
+        $user_query= " and inv.user_id in (".join(",",$user_arr).") ";
+}
+
+if (@$return_val['eda_module']=="sell/rp_dskh"){
+$stock_name=array();
+$user_name=array();
+$cat_name=array();
+$row=get_data("select * from stocks stock where 1=1 ".$stock_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $stock_name[]=$value['stock_name'];
+    }
+}
+
+$row=get_data("select * from users user where 1=1 ".$user_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $user_name[]=$value['user_name'];
+    }
+}
+
+$row=get_data("select * from categories cat where 1=1 ".$cat_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $cat_name[]=$value['cat_name'];
+    }
+}
+
+    
+?>
+<table align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td colspan=2 align="center">
+            <div><b>Từ ngày:</b> <?= !empty($return_val['datefrom']) ? $return_val['datefrom'] : 'Tất cả' ?> -- <b>Đến ngày:</b> <?= !empty($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>
+            </div>
+        </td>
+        </tr>
+        <tr>
+            <td colspan=2 align="center"><b>Chủng loại:</b>
+                <?php
+                if (count($cat_name) > 0 && @$_GET['cat_id']!="")
+                    echo join(" , ",$cat_name);
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>
+        </tr>
+        <tr>
+            <td colspan=2 align="center"><b>Kho hàng:</b>
+                <?php
+                if (count($stock_name) > 0 && @$_GET['stock_id']!="")
+                    echo join(" , ",$stock_name);
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>  
+        </tr>
+        <tr>      
+            <td colspan=2 align="center"><b>Người bán:</b>
+                <?php
+                if (count($user_name) > 0 && @$_GET['user_id']!="")
+                    echo join(" , ",$user_name);
+                else
+                    echo "Tất cả";
+                ?>                 
+            </td>
+        </tr>
+    </table>
+
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+<?php
+}
+?>
+<div class=tbl_box_ov>
+<div class=tbl_box2 >
+<table class="auto_excel_tbl" align="center" width="98%" border="1" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <tr>
+        <td width="2%" align="center" bgcolor="#afd7ff" rowspan="2" height="25"><b>Quy Cách</b></td>
+<?php
+    $ii=0;
+    foreach ($tuan as $key => $value) {
+        $ii++;
+        echo '<td width="5%" align="center" bgcolor="#afd7ff" colspan=2><b>Tuần '.$ii." (".date("d/m/Y",$value['f']).' - '.date("d/m/Y",$value['t']).' )</b></td>';
+    }
+
+
+?>
+        <td width="5%" align="center" bgcolor="#e3f7cc" colspan=2><b>Tháng <?=$thang?></b></td>
+    </tr>
+        <?php
+        foreach ($tuan as $key => $value) {
+            echo '<td width="5%" align="center" bgcolor="#afd7ff"><b>Đơn vị</b></td>
+            <td width="5%" align="center" bgcolor="#afd7ff"><b>Thành tiền</b></td>';
+        }
+        ?>
+        <td width="5%" align="center" bgcolor="#e3f7cc"><b>Đơn vị</b></td>
+        <td width="5%" align="center" bgcolor="#e3f7cc"><b>Thành tiền</b></td>
+    <tr>
+
+<?php
+$tongdv=0;
+$tongtt=0;
+$tmp=$tuan;
+$cat_list=get_data("select cat.cat_id, cat.cat_name from categories cat,out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, meansure msu, stock_mat_msu smm where inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id and mat.cat_id=cat.cat_id and inv.created_date >=".$sdate." and inv.created_date<=".$edate." ".$cat_query.$stock_query.$user_query.$cus_query." group by cat.cat_id");
+foreach ($cat_list as $kc => $cat) {
+    $cat_list[$kc]['tuan']=$tmp;
+    $getmat=get_data("select mat.mat_id,mat.mat_name from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, meansure msu, stock_mat_msu smm where inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id and inv.created_date >=".$sdate." and inv.created_date<=".$edate." and mat.cat_id=".$cat["cat_id"]." ".$stock_query.$user_query.$cus_query." group by mat.mat_id");
+    $cat_list[$kc]['matlist']=array();
+    if(is_array($getmat) && count($getmat)>0){
+        foreach ($getmat as $mkey => $mrow) {
+            $cat_list[$kc]['matlist'][$mrow['mat_id']]=$mrow;
+            $cat_list[$kc]['matlist'][$mrow['mat_id']]['tuan']=$tmp;
+            foreach ($cat_list[$kc]['matlist'][$mrow['mat_id']]['tuan'] as $kt => $tu) {
+                $cat_list[$kc]['matlist'][$mrow['mat_id']]['tuan'][$kt]['list']=array();
+                $getrow=get_data("select mat.mat_id,mat.mat_name,sum(invd.mat_quantity) dv,sum(invd.amount) tt from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, meansure msu, stock_mat_msu smm where inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id and inv.created_date >=".$tu["f"]." and inv.created_date<=".$tu["t"]." and mat.cat_id=".$cat["cat_id"]." and mat.mat_id=".$mrow["mat_id"]." ".$stock_query.$user_query.$cus_query." group by mat.mat_id");
+                if(is_array($getrow) && count($getrow)>0){
+                    foreach ($getrow as $mkey => $rowm) {
+                        $cat_list[$kc]['matlist'][$mrow['mat_id']]['tuan'][$kt]['list'][$rowm['mat_id']]=$rowm;
+                        $cat_list[$kc]['matlist'][$mrow['mat_id']]['tuan'][$kt]['dv']+=$rowm['dv'];
+                        $cat_list[$kc]['matlist'][$mrow['mat_id']]['tuan'][$kt]['tt']+=$rowm['tt'];
+                        $cat_list[$kc]['tuan'][$kt]['dv']+=$rowm['dv'];
+                        $cat_list[$kc]['tuan'][$kt]['tt']+=$rowm['tt'];
+                        $tuan[$kt]['dv']+=$rowm['dv'];
+                        $tuan[$kt]['tt']+=$rowm['tt'];
+                        $tongdv+=$rowm['dv'];
+                        $tongtt+=$rowm['tt'];
+                    }
+                }
+            }
+        }
+    }
+    
+    
+}
+
+
+echo '<tr class="total_tr">
+            <td align=center bgcolor="#e3f7cc">Tổng</td>';
+$gdv=0;
+$gtt=0;
+foreach ($tuan as $keyct => $ctuan) {
+            $gdv+=$ctuan['dv'];
+            $gtt+=$ctuan['tt'];
+            echo '<td align=right bgcolor="#e3f7cc">'.numN($ctuan['dv']).'</td>';
+            echo '<td align=right bgcolor="#e3f7cc">'.numN($ctuan['tt']).'</td>';
+        }
+echo '<td align=right bgcolor="#e3f7cc">'.numN($gdv).'</td>';
+echo '<td align=right bgcolor="#e3f7cc">'.numN($gtt).'</td>';
+echo '</tr>';
+
+
+
+
+foreach ($cat_list as $ckey => $cat) {
+    echo '<tr class="cat_name_tr">
+            <td>'.$cat['cat_name'].'</td>';
+            $gdv=0;
+            $gtt=0;
+        foreach ($cat['tuan'] as $keyct => $ctuan) {
+            $gdv+=$ctuan['dv'];
+            $gtt+=$ctuan['tt'];
+            echo '<td align=right>'.numN($ctuan['dv']).'</td>';
+            echo '<td align=right>'.numN($ctuan['tt']).'</td>';
+        }
+        echo '<td align=right bgcolor="#e3f7cc">'.numN($gdv).'</td>';
+        echo '<td align=right bgcolor="#e3f7cc">'.numN($gtt).'</td>';
+    echo '</tr>';
+    foreach ($cat['matlist'] as $keycm => $matc) {
+        echo '<tr>
+            <td>'.$matc['mat_name'].'</td>';
+            $gdv=0;
+            $gtt=0;
+            foreach ($matc['tuan'] as $keyct => $ctuan) {
+                $gdv+=$ctuan['dv'];
+                $gtt+=$ctuan['tt'];
+                echo '<td align=right>'.numN($ctuan['dv']).'</td>';
+                echo '<td align=right>'.numN($ctuan['tt']).'</td>';
+            }
+        echo '<td align=right bgcolor="#e3f7cc">'.numN($gdv).'</td>';
+        echo '<td align=right bgcolor="#e3f7cc">'.numN($gtt).'</td>';
+        echo '</tr>';
+    }
+}
+
+
+?>
+
+
+</table>
+</div>
+</div>

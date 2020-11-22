@@ -1,0 +1,85 @@
+<?php
+	$sup=get_data("select * from supliers where 1=1 ".(!empty($_GET['sup_name'])?" and sup_name like '%".$_GET['sup_name']."%'":"").(!empty($_GET['sup_code'])?" and sup_code like '%".$_GET['sup_code']."%'":"").(!empty($_GET['sup_tel'])?" and tel like '%".$_GET['sup_tel']."%'":"")." order by sup_name  limit ".(14*($action->eda_page-1)).",14");
+	$sup_count=get_data("select count(*) from supliers  where 1=1 ".(!empty($_GET['sup_name'])?" and sup_name like '%".$_GET['sup_name']."%'":""));
+	$sup_count=$sup_count[0][0];
+?>
+	<table width="100%" id="sup_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+	    <td width="8%" align="center" bgcolor="#afd7ff"><b>Chọn</b></td>
+            <td width="20%" align="center" bgcolor="#afd7ff" height="25"><b>Mã nhà CC</b></td>
+		<td width="25%" align="center" bgcolor="#afd7ff" height="25"><b>Tên nhà cung cấp</b></td>
+		<td width="30%" align="center" bgcolor="#afd7ff"><b>Địa chỉ</b></td>
+		<td  align="center" bgcolor="#afd7ff"><b>Điện thoại</b></td>
+		</tr>
+<?php
+	if(count($sup)>0)
+	for($i=0;$i<count($sup);$i++)
+	{
+?>		
+		<tr ondblclick="cur_taikhoan='<?= $sup[$i]['taikhoan']?>';cur_sup_id='<?= $sup[$i]['sup_id']?>';cur_sup_name='<?= $sup[$i]['sup_name']?>';selectsup();" style="cursor:pointer;" onclick="document.getElementById('select_sup_<?= $i?>').checked=true;cur_taikhoan='<?= $sup[$i]['taikhoan']?>';cur_sup_id='<?= $sup[$i]['sup_id']?>';cur_sup_name='<?= $sup[$i]['sup_name']?>';" onmouseover="this.style.backgroundColor='yellow';" onmouseout="this.style.backgroundColor='';">
+		<td align="center" height="25"><input name="select_sup" id="select_sup_<?= $i?>" type="radio" value="<?= $sup[$i]['sup_id']?>"/></td>
+                <td style="padding-left:5px;"><?= $sup[$i]['sup_code']?></td>
+		<td style="padding-left:5px;"><?= $sup[$i]['sup_name']?></td>
+		<td style="padding-left:5px;"><?= $sup[$i]['address']?></td>
+		<td style="padding-left:5px;"><?= $sup[$i]['tel']?></td>
+	    </tr>
+<?php
+	}
+?>	    
+	</table>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0"  style="border-collapse:collapse">
+	    <tr><td height="25" align="center">	
+<?php	
+			if($sup_count>0)
+			{
+				if(!isset($page_dis))
+					$page_dis=false;			
+			 	if($page_dis==false)
+			 	{
+					echo '<b>Trang: </b>';
+					$page=ceil($sup_count/14);
+					$start_page=$action->eda_page-10;
+					echo ' <a class="cart_payment" href="javascript:load_sup_page(1);">';
+					if($action->eda_page==1)
+						echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+					echo "1";
+					if($action->eda_page==1)
+					echo "</b></font>";
+					echo '</a> ';							
+					if($start_page<2)
+						$start_page=1;
+					else
+						echo " ... ";
+					$end_page=$action->eda_page+9;
+					if($end_page>$page)
+						$end_page=$page-1;						
+					for($i=$start_page;$i<$end_page;$i++)
+					{
+						echo ' <a class="cart_payment" href="javascript:load_sup_page('.($i+1).');">';
+						if($action->eda_page==$i+1)
+							echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+						echo ($i+1);
+						if($action->eda_page==$i+1)
+						echo "</b></font>";
+						echo '</a> ';
+					}
+					if($action->eda_page+10<$page)
+						echo " ... ";
+					if($page>1)
+					{
+						echo ' <a class="cart_payment" href="javascript:load_sup_page('.$page.');">';
+						if($action->eda_page==$page)
+							echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+						echo ($page);
+						if($action->eda_page==$page)
+						echo "</b></font>";
+						echo '</a> ';							
+					}
+				}
+			}
+			else
+				echo '<table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td>Không có nhà cung cấp nào được tìm thấy</td></tr></table>';	
+?>	
+	</td></tr>
+	</table>				
+		

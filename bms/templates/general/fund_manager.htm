@@ -1,0 +1,105 @@
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/wallet_icon.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Khai báo Quỹ/Tài khoản</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>        
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td height="40" style="padding-left:20px;"><input type="button" value="Thêm tài khoản mới" onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('fund_add')?>';" name="add_emp" class="button"></td>
+      </tr>
+	</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center">	
+<div id="cusid">
+<?php
+	$fund=get_data("select fd.*,ft.fund_type_name,ft.fund_type_code from fund fd left join fund_type ft on ft.fund_type_id=fd.fund_type order by fd.fund_name");
+?>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center">	
+<div id="empid">
+	<table width="100%" id="user_tbl" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td align="center" bgcolor="#afd7ff"><b>Tên tài khoản</b></td>
+		<td width="25%" align="center" bgcolor="#afd7ff" height="25"><b>Loại tài khoản</b></td>
+		<td width="20%" align="center" bgcolor="#afd7ff"><b>Số tài khoản ngân hàng</b></td>
+		<td width="15%" align="center" bgcolor="#afd7ff"><b>Mở tại ngân hàng</b></td>	
+		<td width="5%" align="center" bgcolor="#afd7ff"><b>Sửa</b></td>
+		<td width="5%" align="center" bgcolor="#afd7ff"><b>Xoá</b></td>		
+		</tr>
+<?php
+	if(count($fund)>0)
+	for($i=0;$i<count($fund);$i++)
+	{
+?>		
+		<tr>
+		<td height="25" style="padding-left:5px;"><?= $fund[$i]['fund_name']?></td>
+		<td style="padding-left:5px;"><?php
+                    echo "<b>[".$fund[$i]['fund_type_code']."]</b> ".$fund[$i]['fund_type_name'];
+                    if(empty($fund[$i]['user_id'])) {
+                        echo ' <i>[Tài khoản chung]</i>';
+                    } else {
+                        $usr=get_data("select full_name from users where user_id='".$fund[$i]['user_id']."'");
+                        if(count($usr)>0) {
+                            echo ' <i>['.$usr[0]['full_name'].']</i>';
+                        }
+                    }
+                ?></td>
+		<td style="padding-left:5px;"><?= $fund[$i]['acc_no']?></td>
+		<td style="padding-left:5px;"><?= $fund[$i]['bank_name']?></td>	
+		<td align="center">
+		<a href="?eda_act=<?=md5('general')?>&eda_code=<?= md5('fund_edit')?>&eda_id=<?= $fund[$i]['fund_id']?>" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" width="16" border="0"></a>
+		</td>
+		<td align="center" height="25">
+<?php 
+	if($fund[$i]['fund_id']!=1)	{
+?>			
+		<a href="javascript:void()" onclick="if(confirm('Bạn có chắc chắn muốn xoá tài khoản này không?'))window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('fund_del')?>&eda_id=<?= $fund[$i]['fund_id']?>';" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="16" border="0"></a>
+<?php
+	}
+?>
+		</td>
+	    </tr>
+<?php
+	}
+?>	    
+	</table>
+</div>
+	</td></tr>
+</table>		
+
+</div>
+	</td></tr>
+</table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>   	
+<script language="javascript">
+	var cur_page=1;
+	var cur_cus_id='';
+	var cur_cus_name='';
+	function load_page(p)
+	{
+		load('?eda_type=ajax&eda_act=<?=md5("general")?>&eda_code=<?= md5("search_emp_man")?>&dept_id='+document.getElementById('dept_id').value+'&full_name='+document.getElementById('full_name').value+'&eda_page='+p,'cusid','html','GET',null,'in');
+		cur_page=p;
+	}
+</script>

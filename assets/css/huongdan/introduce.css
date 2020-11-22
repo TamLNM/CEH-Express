@@ -1,0 +1,237 @@
+.m-parallax-bg{
+	background: url('../images/custom/bluesquare.png');
+	position: fixed;
+	right: -100px;
+	bottom: -100px;
+	min-width: 100vw;
+	min-height: 100vh;
+	background-repeat: no-repeat;
+	background-size: 40%;
+	background-position: bottom right;
+	opacity: 0.5;
+}
+
+.m-container{	
+	width: 100%;
+	height: calc(100vh - 70px);
+	position: relative;
+}
+
+.m-mix-container{
+	margin-top: 15%;
+}
+
+.m-mix-container div{
+	float: right;
+	display: block;
+	width: 70%;
+	cursor: pointer;
+	margin: 3px 5px;
+	transform: skew(-45deg);
+	transition: transform 0.3s ease-in-out;
+}
+
+.m-mix-container div h5{
+	transform: skew(45deg);
+	padding-top: 4px;
+	font-size: 16px;
+	text-align: center;
+	transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;	
+}
+
+.m-type-1,.m-type-2,.m-type-3,.m-type-4,.m-type-5,.m-type-6{
+
+}
+
+.m-type-1{
+	border:1px solid rgba(63,87,101,0.8);
+	width: 100%;	
+	background-color: rgba(63,87,101,0.5);
+}
+
+.m-type-2{
+	border:1px solid rgba(204,61,115,0.8);
+	width: 100%;	
+	background-color: rgba(204,61,115,0.5);
+}
+
+.m-type-3{
+	width: 100%;	
+	background-color: rgba(231,126,35,0.5);
+	border:1px solid rgba(231,126,35,0.8);
+}
+
+.m-type-4{
+	width: 100%;	
+	background-color: rgba(241,196,15,0.5);
+	border:1px solid rgba(241,196,15,0.8);
+}
+.m-type-5{
+	width: 100%;
+	background-color: rgba(45,204,112,0.5);
+	border:1px solid rgba(45,204,112,0.8);
+}
+.m-type-6{
+	width: 100%;
+	background-color: rgba(53,152,219,0.5);
+	border:1px solid rgba(53,152,219,0.8);
+}
+
+#m-block1,#m-block2{
+	width: 100%;	
+}
+
+.m-block1{
+	margin-left: -20px;
+	margin-top: -20px;
+	padding: 20px;
+	background: url('../images/custom/sidebarbackground-fix.png');
+	background-repeat: no-repeat;
+	background-position: left top;
+	height: 90vh;
+	text-align: left;
+}
+.m-block1 h4{
+	margin-top: 4.5%;
+	padding-left: 10%;
+}
+
+.m-slider ul li{	
+	min-height: 30%;
+	width: 30%;
+}
+.m-rotate{
+	margin-left: 70px;
+	margin-left: calc((130% - 200px) / 2);
+	position: relative;
+	width: 200px;
+	height: 200px;
+	transform: rotate(0deg);
+	background-image: url('../images/custom/infografic.png');
+	background-repeat: no-repeat;
+	background-size: contain;
+}
+
+.m-frag-1,.m-frag-2,.m-frag-3,.m-frag-4,.m-frag-5,.m-frag-6{
+	position: absolute;
+	background-repeat: no-repeat;
+	background-size: contain;
+	cursor: pointer;	
+	z-index: 11;
+	width: 95px;
+	height: 0px;
+	border-left: 40px solid transparent;
+	border-bottom: 46px solid transparent;
+	border-right: 25px solid transparent;	
+}
+.m-frag-1{	
+	transform: rotateZ(58deg);
+	top: 8%;
+	right: 7%;	
+	border-top-left-radius: 100%;		
+}
+.m-frag-2{
+	top: 38%;
+	right: -8%;	
+	border-top-left-radius: 100%;	
+	transform: rotateZ(118deg);
+}
+.m-frag-3{	
+	bottom: 11%;
+	right: 11%;	
+	border-top-left-radius: 100%;	
+	transform: rotateZ(179deg);
+}
+.m-frag-4{
+	transform: rotateZ(239deg);
+	bottom: 14%;
+	left: 7%;	
+	border-top-left-radius: 100%;	
+}
+.m-frag-5{
+	top: 33%;
+	left: -8%;	
+	border-top-left-radius: 100%;	
+	transform: rotateZ(300deg);
+}
+.m-frag-6{
+	top: 5%;
+	left: 11%;	
+	border-top-left-radius: 100%;	
+	transform: rotateZ(0deg);
+}
+.m-slide-title{
+	opacity: 0;
+	transition: opacity 0.3s ease-in-out;
+}
+
+.m-slide-active{
+	opacity: 1!important;
+	transition: opacity 0.3s ease-in-out;
+}
+
+.m-btn-active{
+	background-color: white!important;
+	box-shadow: 2px 2px 3px rgba(0,0,0,0.8);
+	transition: background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+.m-slider-content{
+	padding-left: 15%;	
+	margin-bottom: 1%;	
+	height: 65%;	
+}
+.m-slider-content img{
+	cursor: zoom-in;
+	max-width: 80%;
+}
+.m-slider{	
+	height: 30%;	
+	max-width: calc(67vw + 10px);
+	overflow-y: hidden!important;
+}
+.m-rotate-center{
+	top: 48%;
+	left: 50%;
+	width: 40px;
+	height: 40px;	
+	position: absolute;	
+	border-radius: 50%;
+	text-align: center;
+	padding-top: 10px;
+	overflow: hidden;
+}
+.m-rotate-center h5{
+	color: white;
+}
+
+#m-rotate-title{	
+	text-align: left;
+	color: white;
+	text-shadow: 1px 1px 1px #111;
+}
+
+/*zoom*/
+.m-zoom-bg,.m-zoom-content{
+	display: none;
+	position: fixed;	
+	left: 0;
+}
+
+.m-zoom-bg{	
+	top: 0;
+	width: 100vw;
+	height: 100vh;	
+	z-index: 998;
+	background-color: rgba(0,0,0,0.7);
+}
+.m-zoom-content{
+	top: 15vh;
+	margin-left: 5vw;
+	width: auto;
+	height: auto;
+	z-index: 999;
+	cursor: zoom-out;
+}
+.m-zoom-content img{
+	width: 90vw;
+}

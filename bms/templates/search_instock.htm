@@ -1,0 +1,67 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td width="80" align="center" height="30"><b>Chủng loại</b></td>
+	<td width="160">
+	<select class="catbg" style="width:120px;" name="cat_id" id="cat_id">
+	<option value="">Tất cả chủng loại</option>
+<?php
+	$cat=get_data("select * from categories order by cat_name");
+	for($i=0;$i<count($cat);$i++)
+		echo '<option value="'.$cat[$i]['cat_id'].'">'.$cat[$i]['cat_name'].'</option>';
+?>	
+	</select>
+	</td>
+	<td width="100" align="center" height="30"><b>Tên sản phẩm</b></td>
+	<td width="120"><input  onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) load_mat_page(1);" onfomat="this.select();" style="width:110px;" value=""  class="catbg" name="mat_name" type="text" id="mat_name" size="25" />
+	</td>
+	<td ><input type="button" value="Tra cứu" onclick="load_mat_page(1);" name="search" class="button"></td>
+      </tr>
+	</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center" style="padding-left:5px;padding-right:5px;">	
+<div id="matid">
+<?php
+	//include("bms/templates/chose_mat_instock.htm");
+?>	
+</div>
+	</td></tr>
+</table>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr><td align="center" height="30" bgcolor="#f3f3f3">
+      <input type="button" value="Đóng"  onclick="hidediv('searchmat');" class="button">&nbsp;&nbsp;<input type="button" value="Chọn"  onclick="selectmat();" class="button"></td>
+      </tr>
+	</table>
+<script language="javascript">
+	var cur_mat_page=1;
+	var cur_smm_id='';
+	var cur_mat_name='';
+	var cur_msp_id='';
+	var cur_quantity='';
+	var cur_msu_name='';
+	function selectmat()
+	{
+		if(cur_smm_id==''&&cur_msp_id=='')
+		{
+			alert('Hãy chọn sản phẩm cần thêm');
+		}
+		else
+		{
+			hidediv('searchmat');
+			load_mat();
+		}
+	}
+	function load_mat_page(p)
+	{
+		load('?eda_type=ajax&eda_code=<?= md5("chose_mat_instock")?>'+'&stock_id='+document.getElementById('stock_id').value+'&mat_name='+document.getElementById('mat_name').value+'&cat_id='+document.getElementById('cat_id').value+'&eda_page='+p,'matid','html','GET',null,'in');
+		cur_mat_page=p;
+	}
+	function load_instock_mat_page(p)
+	{
+		load('?eda_type=ajax&eda_code=<?= md5("chose_mat_instock")?>'+'&stock_id='+document.getElementById('stock_id').value+'&mat_name='+document.getElementById('mat_name').value+'&cat_id='+document.getElementById('cat_id').value+'&eda_page='+p,'matid','html','GET',null,'in');
+		cur_mat_page=p;
+	}
+	load_mat_page(cur_mat_page);
+</script>	        
+             

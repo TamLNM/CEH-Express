@@ -1,0 +1,357 @@
+/*author: Manes;
+createdate: 18/04/2018;
+*/
+$tally-primary: #3366ff;
+$tally-label: 1.2vw;
+$tally-guide: red;
+
+// .m-input-search{
+// 	position: relative;
+// 	display: inline-block;
+// 	width: 100%;
+// 	&:focus-within{
+// 		&:after{
+// 			width: 77%;
+// 		}
+// 		input{			
+// 			display: inline-block;
+// 			&:nth-child(1){
+// 				width: 77%;
+// 				color: #000;
+// 			}
+// 			&:nth-child(2){
+// 				width: 20%;
+// 			}
+// 		}
+// 	}		
+// 	input{
+// 		background-color: transparent;
+// 		width: 100%;
+// 		border:none;
+// 		color: #fff;
+// 		&:focus{
+// 			outline: none;
+// 		}
+// 		&:nth-child(1){
+// 			width: 77%;
+// 		}
+// 		&:nth-child(2){
+// 			width: 20%;
+// 			color: #fff;
+// 		}
+// 	}
+// 	&:before{
+// 		content: '';
+// 		position: absolute;		
+// 		width: 15%;
+// 		height: 100%;
+// 		top: 0;			
+// 		right: 0;
+// 		background-image: url('../images/icons/search.png');
+// 		background-repeat: no-repeat;
+// 		background-position: center;
+// 		background-size: contain;		
+// 	}
+
+// 	&:after{
+// 		content: "";
+// 		position: absolute;
+// 		width: 0;
+// 		height: 100%;
+// 		border: none;
+// 		background-color: $color-l;		
+// 		border-bottom: 2px solid $focus-color;
+// 		z-index: -1;
+// 		top: 0;
+// 		left: 1%;
+// 		transition: width 0.3s;
+// 	}
+// }
+
+#change{
+	display: inline-block;	
+}
+
+#filter{
+	input{
+		&:nth-child(1){
+			flex-flow: 2;
+		}
+	}
+}
+
+.m-pull-right{
+	float: right;
+	button{		
+		margin-left: 0.1vw;
+	}
+}
+
+.m-header-skew-top{
+	position: relative;
+	border-top: 1px solid $tally-primary;
+	background-color: lighten($tally-primary, 20%);
+	&:before{
+		position: absolute;
+		content: "";
+		top: -1px;
+		right: -3vw;
+		width: 0;
+		height: 0;
+		border-bottom: 3vw solid lighten($tally-primary, 20%);
+		border-right: 3vw solid transparent;
+	}
+}
+
+#memo{
+	display: inline-block;
+	width: 77%;
+	height: 3vw;
+	margin-top: 2px;
+}
+
+#jobctrl{
+	height: 100%;
+	overflow: hidden;
+}
+
+.m-input-btn{
+	background-color: $primary-background;
+	cursor: pointer;
+}
+
+.m-center-80{
+	width: 80%;
+	margin-left: 10%;
+	text-align: center;
+	border-style: ridge;	
+	padding: 10px;
+}
+
+#disp-deli{
+	display: inline-block;
+	vertical-align: middle;
+	font-size: $fontsize*1.5;
+	height: 100%;
+	padding-top: 4px;
+}
+
+.m-tech-block{
+	position: relative;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+.m-shape-title{
+	$height: 3vw;
+	width: 80%;
+	position: relative;
+	background-color: $tally-primary;
+	padding-left: 2vw;
+	span{		
+		color: $background-color;
+		display: inline-block;		
+		font-size: $height - 1;
+	}
+	.m-close-tab{
+		background-image: url('../images/icons/xmark.png');
+		background-repeat: no-repeat;
+		background-size: contain;
+		width: 2vw;
+		height: 2vw;
+		display: block;
+		position: absolute;
+		top: 15%;
+		right: -3%;
+	}
+	&:before{
+		position: absolute;
+		content: "";
+		top: 0;
+		right: -$height;
+		width: 0;
+		height: 0;
+		border-left: $height solid $tally-primary;
+		border-bottom: $height solid transparent;
+	}
+}
+
+.m-title-linebreak{
+	border-left: none;
+	border-right: none;
+	border-bottom: none;
+	border-style: ridge;
+	border-color: $color-d;
+	border-width: 3px;
+	text-align: center;
+	span{
+		font-size: $fontsize;
+		font-weight: bold;
+		color: $color-d;
+	}
+}
+
+#bayview{
+	display: none;
+}
+
+#bayview-control{
+	display: none;
+}
+
+#bayview-above{
+	height: 100%;
+	position: relative;
+}
+#bayview-content{
+	height: 100%;
+}
+
+#bayview-above-content, #bayview-below-content{
+	height: 100%;
+}
+
+#bayview-change{
+	text-align: left;
+	background-color: $tally-primary;
+	border: 2px groove lighten($tally-primary, 15%);
+	cursor: pointer;
+	position: relative;
+	span{
+		color: $color-l;
+		font-size: $fontsize*2;
+		font-weight: bold
+	}
+	i{
+		background-image: url('../images/icons/xmark.png');
+		background-repeat: no-repeat;
+		background-size: contain;
+		width: 2vw;
+		height: 2vw;
+		display: block;
+		position: absolute;
+		top: 15%;
+		right: 3%;
+	}
+}
+
+#bayview-list{
+	max-height: 85vh;
+	overflow-y: auto;
+	label{
+		padding: .5em 1.5em;
+		color: #fff;
+		border-radius: 5px;
+		margin-bottom: 0.5em;
+		font-size: 1.5em;
+		font-weight: bold;
+	}
+}
+
+#basement{
+	td{
+		border-spacing: 3px;
+		color: #fff;
+		background-color: $tally-primary;
+		border: 2px outset #fff!important;
+		// height: 2vw;
+		font-weight: bold;
+		margin: 3px 0px;
+	}
+}
+
+.m-cell-selected{
+	background-color: lighten($tally-primary, 50%);
+}
+
+.bayview-guidein, .bayview-guideout{
+	animation: m-flash 1.5s infinite;
+	cursor: pointer;	
+}
+
+.bayview-guidein{
+	animation-delay: 1.5s;
+}
+
+#jobctrl-cntrNo, #shifting-cntrNo{
+	padding: 5px 10px;
+	border-bottom: 2px solid $tally-primary;
+	width: 40%;
+	display: inline-block;
+	position: relative;
+	&:before{
+		position: absolute;
+		content: "";
+		top: 0;
+		left: 0;
+		width: 0;
+		height: 100%;
+		background-color: $color-l;
+		transition: width 0.3s;
+	}
+	span{
+		color: $color-d;
+		font-size: $fontsize *1.5;
+
+	}
+}
+
+#jobctrl-memo,#shifting-memo{
+	width: 50%;
+	display: inline-block;
+	font-size: $fontsize * 1.2;
+	color: red;
+	font-weight: bold;
+}
+
+.m-title-loading{
+	&:before{
+		width: 100%!important;
+	}
+}
+
+.m-btn-disable{
+	opacity: 0.5;
+	cursor: not-allowed!important;
+}
+
+#jobctrl-status, #jobctrl-method{
+	vertical-align: middle;
+}
+
+#disp-deli{
+	font-size: $fontsize+0.4;
+}
+#remark{
+	width: 100%;
+}
+
+#begin-export{
+	display: none;
+}
+
+#nofication{
+	height: 100%;
+	 
+}
+
+#shifting-remark{
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	width: 100%;
+	height: 26vh;
+}
+
+// .m-box-title{
+// 	span{
+
+// 	}
+// }
+
+@keyframes m-flash{
+	0%{background: $tally-guide;}
+	100%{background: $background-color;}
+}

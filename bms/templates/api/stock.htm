@@ -1,0 +1,51 @@
+<?php
+header("Access-Control-Allow-Origin: *");
+
+$param=array();
+parse_str( @explode("?", $_SERVER['REQUEST_URI'])[1],$param);
+$token=safe_str(@$param['token']);
+$signalKey=safe_str(@$param['signalKey']);
+
+$stock_code=safe_str(@$param['stock_code']);
+$qc=safe_str(@$param['name']);
+$gai=safe_str(@$param['gai']);
+
+$trueSignalKey=sha1("name={$qc}&gai={$gai}&secretKey=".SECRET_KEY);
+
+
+$where="";
+if($stock_code!=""){
+	$where .= " and stock.stock_code like '".$stock_code."'";
+}
+if($qc!=""){
+	$where .= " and mat.qc like '".$qc."'";
+}
+if($gai!=""){
+	$where .= " and mat.gai like '".$gai."'";
+}
+
+$reback=array();
+if($qc==""){
+	$reback['result']=false;
+	$reback['message']="Thiếu trường Gai (gai) hoặc Quy cách (name)";
+	echo json_encode($reback,true);die();
+}
+
+$dtback=get_data("select sum(smm.quantity) tong,stock.stock_code from stock_mat_msu smm,mat_msu mms,materials mat,stocks stock where smm.mms_id=mms.mms_id and mms.mat_id=mat.mat_id and smm.stock_id = stock.stock_id ".$where." group by stock.stock_code");
+
+if(count($dtback)>0){
+	$reback['result']=true;
+	$reback['message']="";
+	$reback['data']=array();
+	foreach ($dtback as $key => $value) {
+		$reback['data'][$value['stock_code']]=intval($value['tong']);
+	}
+}
+else
+{
+	$reback['result']=false;
+	$reback['message']="Không tìm thấy dữ liệu sản phẩm";
+	echo json_encode($reback,true);die();
+}
+echo json_encode($reback,true);die();
+?>

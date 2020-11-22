@@ -1,0 +1,99 @@
+<?php
+	$mat=get_data("select mat.*,  cat.cat_name from materials mat, categories cat where ".($action->eda_module=='XD'?"IFNULL(cat.cat_type,'')='XD' and ":"IFNULL(cat.cat_type,'')!='XD' and ")."cat.cat_id=mat.cat_id ".(!empty($_GET['mat_name'])?" and mat.mat_name like '%".$_GET['mat_name']."%'":"")." ".(!empty($_GET['cat_id'])?" and mat.cat_id = '".$_GET['cat_id']."'":"").(!empty($_GET['sup_id'])?" and mat.mat_id in(select mat_id from sup_mat where sup_id= '".$_GET['sup_id']."')":"")." order by mat.mat_name  limit ".(30*($action->eda_page-1)).",30");
+	$mat_count=get_data("select count(*) from materials mat, categories cat where ".($action->eda_module=='XD'?"IFNULL(cat.cat_type,'')='XD' and ":"IFNULL(cat.cat_type,'')!='XD' and ")." cat.cat_id=mat.cat_id ".(!empty($_GET['mat_name'])?" and mat.mat_name like '%".$_GET['mat_name']."%'":"")." ".(!empty($_GET['cat_id'])?" and mat.cat_id = '".$_GET['cat_id']."'":"").(!empty($_GET['sup_id'])?" and mat.mat_id in(select mat_id from sup_mat where sup_id= '".$_GET['sup_id']."')":""));
+	$mat_count=$mat_count[0][0];
+?>
+	<table width="100%"  border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="6%" align="center" bgcolor="#afd7ff"><b>Chọn</b></td>
+		<td align="center" bgcolor="#afd7ff" height="25"><b>Tên sản phẩm</b></td>
+		<td width="15%" align="center" bgcolor="#afd7ff"><b>Model</b></td>
+                <td width="15%" align="center" bgcolor="#afd7ff"><b>Mã vạch</b></td>
+		<td width="15%" align="center" bgcolor="#afd7ff"><b>Đơn vị tính</b></td>
+                <td width="15%" align="center" bgcolor="#afd7ff"><b>Đơn giá nhập</b></td>
+		</tr>
+<?php
+	if(count($mat)>0)
+	for($i=0;$i<count($mat);$i++)
+	{
+                $mat_more=get_data("select mms.mms_id,msu.msu_id,mms.price_input, msu.msu_name from mat_msu mms, meansure msu where mms.mat_id=".$mat[$i]['mat_id']." and mms.msu_id=msu.msu_id and msu.msu_multiple=1");            
+                if(count($mat_more)==0) {
+                    $mat_more=get_data("select mms.mms_id,msu.msu_id,mms.price_input, msu.msu_name from mat_msu mms, meansure msu where mms.mat_id=".$mat[$i]['mat_id']." and mms.msu_id=msu.msu_id limit 1");            
+                }
+                $mat[$i]['msu_name']='';
+                $mat[$i]['price_input']=0;
+                if(count($mat_more)>0) {
+                	$mat[$i]['mms_id']=$mat_more[0]['mms_id'];
+                	$mat[$i]['msu_id']=$mat_more[0]['msu_id'];
+                    $mat[$i]['msu_name']=$mat_more[0]['msu_name'];
+                    $mat[$i]['price_input']=$mat_more[0]['price_input'];
+                }            
+?>				
+		<tr ondblclick="cur_tkvt='<?= @$mat[$i]['tkvt']?>';cur_edit_tkvt=<?= intval(@$mat[$i]['edit_tkvt'])?>;cur_mms_id='<?= @$mat[$i]['mms_id']?>';cur_mat_model='<?= $mat[$i]['mat_model']?>';cur_vat='<?= $mat[$i]['vat']?>';cur_mat_name='<?= $mat[$i]['mat_name']?>';cur_mat_id='<?= $mat[$i]['mat_id']?>';cur_price='<?= $mat[$i]['mat_price']?>';cur_msu_id='<?= @$mat[$i]['msu_id']?>';selectmat();" style="cursor:pointer;" onclick="document.getElementById('select_mat_<?= $i?>').checked=true;cur_tkvt='<?= @$mat[$i]['tkvt']?>';cur_edit_tkvt=<?= intval(@$mat[$i]['edit_tkvt'])?>;cur_mms_id='<?= @$mat[$i]['mms_id']?>';cur_price='<?= $mat[$i]['mat_price']?>';cur_vat='<?= $mat[$i]['vat']?>';cur_mat_name='<?= $mat[$i]['mat_name']?>';cur_mat_id='<?= $mat[$i]['mat_id']?>';cur_msu_id='<?= @$mat[$i]['msu_id']?>';cur_mat_model='<?= $mat[$i]['mat_model']?>';" onmouseover="this.style.backgroundColor='yellow';" onmouseout="this.style.backgroundColor='';">
+		<td align="center" height="25"><input name="select_mat" id="select_mat_<?= $i?>" type="radio" value="<?= $mat[$i]['mat_id']?>"/></td>
+		<td style="padding-left:5px;"><?= $mat[$i]['mat_name']?></td>
+		<td style="padding-left:5px;"><?= $mat[$i]['mat_model']?></td>
+                <td style="padding-left:5px;"><?= $mat[$i]['barcode']?></td>
+		<td  align="center"><?= $mat[$i]['msu_name']?></td>
+                <td align="right" style="padding-right:5px;"><?= $mat[$i]['price_input']?></td>
+	    </tr>
+<?php
+	}
+?>	    
+	</table>
+	<table width="100%" border="0" cellpadding="0" cellspacing="0"  style="border-collapse:collapse">
+	    <tr><td height="25" align="center">	
+<?php	
+			if($mat_count>0)
+			{
+				if(!isset($page_dis))
+					$page_dis=false;
+			 	if($page_dis==false)
+			 	{
+					echo '<b>Trang: </b>';
+					$page=ceil($mat_count/30);
+					$start_page=$action->eda_page-10;
+					echo ' <a class="cart_payment" href="javascript:load_mat_page(1);">';
+					if($action->eda_page==1)
+						echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+					echo "1";
+					if($action->eda_page==1)
+					echo "</b></font>";
+					echo '</a> ';							
+					if($start_page<2)
+						$start_page=1;
+					else
+						echo " ... ";
+					$end_page=$action->eda_page+9;
+					if($end_page>$page)
+						$end_page=$page-1;						
+					for($i=$start_page;$i<$end_page;$i++)
+					{
+						echo ' <a class="cart_payment" href="javascript:load_mat_page('.($i+1).');">';
+						if($action->eda_page==$i+1)
+							echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+						echo ($i+1);
+						if($action->eda_page==$i+1)
+						echo "</b></font>";
+						echo '</a> ';
+					}
+					if($action->eda_page+10<$page)
+						echo " ... ";
+					if($page>1)
+					{
+						echo ' <a class="cart_payment" href="javascript:load_mat_page('.$page.');">';
+						if($action->eda_page==$page)
+							echo "<font color='blue' face='arial' style='font-size:12px;'><b>";
+						echo ($page);
+						if($action->eda_page==$page)
+						echo "</b></font>";
+						echo '</a> ';							
+					}
+				}
+			}
+			else
+				echo '<table width="100%" border="0" cellpadding="0" cellspacing="0"><tr><td>Không có sản phẩm nào được tìm thấy</td></tr></table>';	
+?>	
+	</td></tr>
+	</table>				
+		

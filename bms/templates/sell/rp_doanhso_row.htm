@@ -1,0 +1,285 @@
+<?php
+
+$thang=intval(@$return_val['thang']);
+$nam=intval(@$return_val['nam']);
+if($thang==0)$thang=intval(date("m"));
+if($nam==0)$nam=intval(date("Y"));
+
+$tuan1=array("f"=>strtotime($nam."-".$thang.'-1 00:00:00'),"t"=>strtotime($nam."-".$thang.'-7 23:59:59'));
+$tuan2=array("f"=>strtotime($nam."-".$thang.'-8 00:00:00'),"t"=>strtotime($nam."-".$thang.'-14 23:59:59'));
+$tuan3=array("f"=>strtotime($nam."-".$thang.'-15 00:00:00'),"t"=>strtotime($nam."-".$thang.'-22 23:59:59'));
+$tuan4=array("f"=>strtotime($nam."-".$thang.'-23 00:00:00'),"t"=>strtotime($nam."-".$thang.'-'.cal_days_in_month(CAL_GREGORIAN,$thang,$nam).' 23:59:59'));
+
+$cus_list=get_data("select cus.* from customers cus where cus.cus_id in (select inv.cus_id from out_invoices inv where created_date >=".$tuan1["f"]." and created_date<=".$tuan4["t"]." group by inv.cus_id)");
+$cus_arr=array();
+if(is_array($cus_list) && count($cus_list)>0)
+foreach ($cus_list as $key => $value) {
+   $cus_arr[$value['cus_id']]=$value;
+}
+
+
+$cat_list=get_data("select * from categories");
+$cat_arr=array();
+$cat_count=0;
+$cats=array();
+if(is_array($cat_list) && count($cat_list)>0){
+    $cat_count=count($cat_list);
+    foreach ($cat_list as $key => $value) {
+       $cat_arr[$value['cat_id']]=$value;
+       $cats[]=$value['cat_id'];
+    }
+}
+
+
+
+if ($return_val['report_type'] == 5 && @$return_val['eda_module']=="sell/output_report"){
+    $stock_name=array();
+$user_name=array();
+$cat_name=array();
+$row=get_data("select * from stocks stock where 1=1 ".$stock_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $stock_name[]=$value['stock_name'];
+    }
+}
+
+$row=get_data("select * from users user where 1=1 ".$user_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $user_name[]=$value['user_name'];
+    }
+}
+
+$row=get_data("select * from categories cat where 1=1 ".$cat_query);
+if(is_array($row) && count($row)>0){
+    foreach ($row as $key => $value) {
+        $cat_name[]=$value['cat_name'];
+    }
+}
+?>
+<table class="auto_excel_tbl" align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td colspan=2 align="center">
+            <div><b>Từ ngày:</b> <?= !empty($return_val['datefrom']) ? $return_val['datefrom'] : 'Tất cả' ?> -- <b>Đến ngày:</b> <?= !empty($return_val['dateto']) ? $return_val['dateto'] : date('d/m/Y') ?>
+            </div>
+        </td>
+        </tr>
+        <tr>
+            <td colspan=2 align="center"><b>Chủng loại:</b>
+                <?php
+                if (count($cat_name) > 0 && @$_GET['cat_id']!="")
+                    echo join(" , ",$cat_name);
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>
+        </tr>
+        <tr>
+            <td colspan=2 align="center"><b>Kho hàng:</b>
+                <?php
+                if (count($stock_name) > 0 && @$_GET['stock_id']!="")
+                    echo join(" , ",$stock_name);
+                else
+                    echo "Tất cả";
+                ?> 
+            </td>  
+        </tr>
+        <tr>      
+            <td colspan=2 align="center"><b>Người bán:</b>
+                <?php
+                if (count($user_name) > 0 && @$_GET['user_id']!="")
+                    echo join(" , ",$user_name);
+                else
+                    echo "Tất cả";
+                ?>                 
+            </td>
+        </tr>
+    </table>
+
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+<?php
+}
+?>
+<div class=tbl_box_ov>
+<div class=tbl_box >
+<table class="tbl_tablej" align="center" width="98%" border="1" cellpadding="5" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <thead>
+    <tr>
+        <td width="1%" align="center" bgcolor="#afd7ff" rowspan="2" height="25"><b>STT</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff" rowspan="2"><b>Mã khách hàng</b></td>
+        <td width="1%" align="center" bgcolor="#afd7ff" rowspan="2"><b>Tên khách hàng</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff" colspan=<?=($cat_count+1)?>><b>Tuần 1</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff" colspan=<?=($cat_count+1)?>><b>Tuần 2</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff" colspan=<?=($cat_count+1)?>><b>Tuần 3</b></td>
+        <td width="5%" align="center" bgcolor="#afd7ff" colspan=<?=($cat_count+1)?>><b>Tuần 4</b></td>
+        <td width="5%" align="center" bgcolor="#e3f7cc" colspan=<?=($cat_count+1)?>><b>Tháng <?=$thang?></b></td>
+    </tr>
+    <tr>
+        <?php
+        foreach ($cat_list as $key => $value) {
+            echo '<td bgcolor="#afd7ff">'.$value['cat_name'].'</td>';
+        }
+        echo '<td bgcolor="#afd7ff">Tổng</td>';
+        ?>
+
+        <?php
+        foreach ($cat_list as $key => $value) {
+            echo '<td bgcolor="#afd7ff">'.$value['cat_name'].'</td>';
+        }
+        echo '<td bgcolor="#afd7ff">Tổng</td>';
+        ?>
+
+        <?php
+        foreach ($cat_list as $key => $value) {
+            echo '<td bgcolor="#afd7ff">'.$value['cat_name'].'</td>';
+        }
+        echo '<td bgcolor="#afd7ff">Tổng</td>';
+        ?>
+
+        <?php
+        foreach ($cat_list as $key => $value) {
+            echo '<td bgcolor="#afd7ff">'.$value['cat_name'].'</td>';
+        }
+        echo '<td bgcolor="#afd7ff">Tổng</td>';
+        ?>
+
+        <?php
+        foreach ($cat_list as $key => $value) {
+            echo '<td bgcolor="#e3f7cc">'.$value['cat_name'].'</td>';
+        }
+        echo '<td bgcolor="#e3f7cc">Tổng</td>';
+        ?>
+    </tr>
+</thead>
+<tbody>
+    <?php
+    $sttt=0;
+    foreach ($cus_list as $key => $value) {
+        $sttt++;
+
+
+        
+
+
+        echo '<tr>
+            <td>'.$sttt.'</td>
+            <td>'.$value['cus_code'].'</td>
+            <td>'.$value['cus_name'].'</td>';
+            $tongr=0;
+            $getrow=get_data("select cat_id, sum(invd.mat_quantity) tong from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, meansure msu, stock_mat_msu smm  where 
+inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id
+           and inv.cus_id=".$value['cus_id']." and mat.cat_id in (".join(",",$cats).") and inv.created_date >=".$tuan1["f"]." and inv.created_date<=".$tuan1["t"]." group by cat_id");
+        $newrows=array();
+        foreach ($getrow as $key => $row) {
+            $newrows["cat".$row['cat_id']]=$row;
+        }
+            foreach ($cat_list as $key => $cat) {
+                $tongr+=intval(@$newrows["cat".$cat['cat_id']]['tong']);
+                echo '<td>'.numN(intval(@$newrows["cat".$cat['cat_id']]['tong'])).'</td>';
+            }
+            echo '<td>'.numN($tongr).'</td>';
+
+
+
+
+
+
+
+
+
+
+
+
+$tongr=0;
+            $getrow=get_data("select cat_id, sum(invd.mat_quantity) tong from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, meansure msu, stock_mat_msu smm  where 
+inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id
+           and inv.cus_id=".$value['cus_id']." and mat.cat_id in (".join(",",$cats).") and inv.created_date >=".$tuan2["f"]." and inv.created_date<=".$tuan2["t"]." group by cat_id");
+        $newrows=array();
+        foreach ($getrow as $key => $row) {
+            $newrows["cat".$row['cat_id']]=$row;
+        }
+            foreach ($cat_list as $key => $cat) {
+                $tongr+=intval(@$newrows["cat".$cat['cat_id']]['tong']);
+                echo '<td>'.numN(intval(@$newrows["cat".$cat['cat_id']]['tong'])).'</td>';
+            }
+            echo '<td>'.numN($tongr).'</td>';
+
+
+
+
+
+
+            $tongr=0;
+            $getrow=get_data("select cat_id, sum(invd.mat_quantity) tong from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, meansure msu, stock_mat_msu smm  where 
+inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id
+           and inv.cus_id=".$value['cus_id']." and mat.cat_id in (".join(",",$cats).") and inv.created_date >=".$tuan3["f"]." and inv.created_date<=".$tuan3["t"]." group by cat_id");
+        $newrows=array();
+        foreach ($getrow as $key => $row) {
+            $newrows["cat".$row['cat_id']]=$row;
+        }
+            foreach ($cat_list as $key => $cat) {
+                $tongr+=intval(@$newrows["cat".$cat['cat_id']]['tong']);
+                echo '<td>'.numN(intval(@$newrows["cat".$cat['cat_id']]['tong'])).'</td>';
+            }
+            echo '<td>'.numN($tongr).'</td>';
+
+
+
+
+
+            $tongr=0;
+            $getrow=get_data("select cat_id, sum(invd.mat_quantity) tong from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, meansure msu, stock_mat_msu smm  where 
+inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id
+           and inv.cus_id=".$value['cus_id']." and mat.cat_id in (".join(",",$cats).") and inv.created_date >=".$tuan4["f"]." and inv.created_date<=".$tuan4["t"]." group by cat_id");
+        $newrows=array();
+        foreach ($getrow as $key => $row) {
+            $newrows["cat".$row['cat_id']]=$row;
+        }
+            foreach ($cat_list as $key => $cat) {
+                $tongr+=intval(@$newrows["cat".$cat['cat_id']]['tong']);
+                echo '<td>'.numN(intval(@$newrows["cat".$cat['cat_id']]['tong'])).'</td>';
+            }
+            echo '<td>'.numN($tongr).'</td>';
+
+
+
+
+            $tongr=0;
+            $getrow=get_data("select cat_id, sum(invd.mat_quantity) tong from out_invoices inv, out_invoice_details invd, mat_msu mms, materials mat, meansure msu, stock_mat_msu smm  where 
+inv.inv_id=invd.inv_id and invd.smm_id=smm.smm_id and mms.mat_id=mat.mat_id and mms.msu_id=msu.msu_id and smm.mms_id=mms.mms_id
+           and inv.cus_id=".$value['cus_id']." and mat.cat_id in (".join(",",$cats).") and inv.created_date >=".$tuan1["f"]." and inv.created_date<=".$tuan4["t"]." group by cat_id");
+        $newrows=array();
+        foreach ($getrow as $key => $row) {
+            $newrows["cat".$row['cat_id']]=$row;
+        }
+            foreach ($cat_list as $key => $cat) {
+                $tongr+=intval(@$newrows["cat".$cat['cat_id']]['tong']);
+                echo '<td>'.numN(intval(@$newrows["cat".$cat['cat_id']]['tong'])).'</td>';
+            }
+            echo '<td>'.numN($tongr).'</td>';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        echo '</tr>';
+    }
+    ?>
+</tbody>
+</table>
+</div>
+</div>

@@ -1,0 +1,415 @@
+<Script type="text/javascript" src="<?=ROOT_URL?>bms/common/CalendarPopup.js"></Script>
+<script language="javaScript" id="jscal1x">
+var cal = new CalendarPopup("calendarpopup");
+cal.setTodayText("Hôm nay");
+cal.showNavigationDropdowns();
+cal.setYearSelectStartOffset(20);
+cal.setMonthNames("Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12");
+cal.setDayHeaders("CN","T2","T3","T4","T5","T6","T7");
+</script>
+<SCRIPT LANGUAGE="JavaScript">document.write(getCalendarStyles());</SCRIPT>
+<DIV ID="calendarpopup" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></DIV>
+<form  name="frmadmin" method="post" action="?eda_act=<?=md5('finance')?>&eda_code=<?= md5('budget_output_edit_sm')?>&eda_id=<?=$action->eda_id?>" style="margin:0px">
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/moneycalculator.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Sửa thông tin phiếu chi</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?eda_act=<?= md5('finance')?>&eda_code=<?=md5('view_budget_output')?>&eda_id=<?=$action->eda_id?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td height="25" width="180" align="left"><b>(*) Người chi</b></td>
+              <td width="200">
+              <select style="width:200px;" class="catbg" name="user_id" id="user_id">
+<?php
+	$usr=get_data("select user_id, user_name, full_name from users");
+	for($i=0;$i<count($usr);$i++)
+		echo '<option '.(isset($return_val['user_id'])?($return_val['user_id']==$usr[$i]['user_id']?'selected':''):($sessions->get_session('user_id')==$usr[$i]['user_id']?'selected':'')).' value="'.$usr[$i]['user_id'].'">'.$usr[$i]['full_name'].' ('.$usr[$i]['user_name'].')</option>';
+?>              
+              </select>  
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Thời gian lập</b></td>
+              <td>
+              <table  border="0" cellspacing="0" cellpadding="0">
+              <tr><td>
+              <input readonly style="width:90px;" class="catbg"  onclick="cal.select(document.getElementById('date'),'anchor1','dd/MM/yyyy');if(document.getElementById('date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;" class="textbox" value="<?= isset($return_val['date'])?$return_val['date']:date('d/m/Y')?>" onBlur="check_date(this);" name="date" id="date" type="text" />
+              </td><td>
+              <A href="javascript:void()" onclick="cal.select(document.getElementById('date'),'anchor1','dd/MM/yyyy'); if(document.getElementById('date').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor1" ID="anchor1" src="<?=ROOT_URL?>/bms/images/icon/calendar.gif" height="18" border="0"></A>
+              </td><td>
+              <select style="width:40px;" class="catbg" name="hour" type="text">
+<?php
+	for($i=0;$i<24;$i++)
+		echo '<option  '.(isset($return_val['date'])?($return_val['hour']==$i?'selected':''):($i==date('H')?'selected':'')).' value="'.$i.'">'.str_pad($i,2,'0',STR_PAD_LEFT).'</option>';
+?>              
+			</select>
+			</td><td><b>&nbsp;:&nbsp;</b></td>
+			<td><select style="width:40px;" class="catbg" name="minute" type="text">
+<?php
+	for($i=0;$i<60;$i++)
+		echo '<option '.(isset($return_val['date'])?($return_val['minute']==$i?'selected':''):($i==date('i')?'selected':'')).' value="'.$i.'">'.str_pad($i,2,'0',STR_PAD_LEFT).'</option>';
+?>              
+			</select>
+			</td></tr>
+			</table>
+              </td>
+            </tr>
+            <tr>
+              <td height="25" align="left"><b>(*) Khoản chi</b></td>
+              <td>
+              <input type="hidden" class="catbg" value="<?= isset($return_val['budget_type'])?$return_val['budget_type']:''?>" name="budget_type" id="budget_type">
+              <select onchange="change_budget();" style="width:200px;" class="catbg" name="item_id" id="item_id">
+              <option value="">Chọn khoản chi</option>
+<?php
+	$item_id=get_data("select * from item_type where item_type=1 order by item_name");
+	for($i=0;$i<count($item_id);$i++)
+		echo  '<option '.(isset($return_val['item_id'])?($return_val['item_id']==$item_id[$i]['item_id']?'selected':''):'').' value="'.$item_id[$i]['item_id'].'">'.$item_id[$i]['item_name'].'</option>';
+?>              
+              </select>            
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>(*) Số chứng từ</b></td>
+              <td>
+              <input value="<?= isset($return_val['bin_code'])?$return_val['bin_code']:''?>" style="width:200px;" class="catbg" name="bin_code" type="text" id="bin_code" size="25" />
+              </td>             
+            </tr>
+           <tr>
+              <td height="25" align="left"><b>(*) Người nhận tiền</b></td>
+              <td>
+              <input  value="<?= isset($return_val['cus_id'])?$return_val['cus_id']:''?>"  name="cus_id" type="hidden" id="cus_id" size="25" />
+	          <input readonly value="<?= isset($return_val['cus_name'])?$return_val['cus_name']:''?>" style="width:165px;" class="catbg" name="cus_name" type="text" id="cus_name" size="25" />       
+	  	 	  <input type="button" style="width:30px;" class="button" onclick="browse_cus();" name="browser" id="browser" value="..."> 
+
+          <div id="inv_select" style="display: none">
+                                <div class="change_inv">(Click) Chọn đơn hàng (sau khi chọn khách hàng)</div>
+                                <input type=hidden name="inv_id" id="inv_id" value="">
+              </div>
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>(*) Số tiền chi</b></td>
+              <td>
+				<input onfocus="this.select();" style="width:200px;" onkeyup="format(this);change_amount(this.value);" value="<?= isset($return_val['amount'])?numF($return_val['amount']):''?>" class="catbg" name="amount" type="text" id="amount" size="25" />              
+              </td>             
+            </tr>   
+            <tr>
+              <td height="25" align="left"><b>(*) Quỹ/Tài khoản</b></td>
+              <td>
+              <select style="width:200px;" class="catbg" name="fund_id" id="fund_id">
+              <option value="">Chọn Quỹ/Tài khoản</option>
+<?php
+	$fund_id=get_data("select * from fund order by fund_name");
+	for($i=0;$i<count($fund_id);$i++)
+		echo  '<option '.(isset($return_val['fund_id'])?($return_val['fund_id']==$fund_id[$i]['fund_id']?'selected':''):'').' value="'.$fund_id[$i]['fund_id'].'">'.$fund_id[$i]['fund_name'].'</option>';
+?>              
+              </select>            
+              </td>
+              <td height="25" align="left" style="padding-left:20px;" colspan="2">(<span id="docsoid"><?= isset($return_val['amount'])?doc_so($return_val['amount']):'không'?></span>  đồng)</td>             
+            </tr>                       
+            <tr>
+              <td height="25" align="left"><b>Chi tiết</b></td>
+              <td colspan="3"><textarea style="width:540px;" class="catbg" name="comment" id="comment" rows="3" cols="80"><?= isset($return_val['comment'])?$return_val['comment']:''?></textarea>
+            </tr>                         
+          </table>
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+</td></tr>
+</table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          <input style="font-weight:bold;cursor:pointer;"  class="button" type="submit" name="submit" value="Lưu phiếu chi" />
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?eda_act=<?= md5('finance')?>&eda_code=<?=md5('view_budget_output')?>&eda_id=<?=$action->eda_id?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>          
+   </form>
+<style>
+#searchsupdiv{
+	position:absolute;
+	left:0px;
+	top:20px;
+	width:550px;
+	height:450px;
+	z-index:21;
+}
+#searchsupiframe {
+	position:absolute;
+	left:0px;
+	top:20px;
+	width:546px;
+	height:446px;
+	z-index:21;
+}
+</style>
+<iframe id="searchsupiframe" style="visibility:hidden;"></iframe>
+<div  id="searchsupdiv" style="visibility:hidden;">
+	<table  bgcolor="#ffffff" width="550" border="0" height="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td height="25" valign=top align=center width="100%">
+	  <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+          <tr>
+            <td width="94%" height="25" id="searchsuphead" background="<?=ROOT_URL?>/bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('searchsup',event);" style="color:white;"><b>&nbsp;&nbsp;Danh sách khách hàng</b></td>
+            <td width="3%" height="25" align="right" background="<?=ROOT_URL?>/bms/images/head_bg.gif">
+			<img onmouseover="this.style.cursor='pointer'; this.src='bms/images/minimize2.gif';" onmouseout=" this.src='bms/images/minimize.gif';" src="<?=ROOT_URL?>/bms/images/minimize.gif" width="21" height="21" onclick="hidediv('searchsup');" /></td>
+            <td width="3%" height="25" align="right" background="<?=ROOT_URL?>/bms/images/head_bg.gif" style="padding-right:2px;"><img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>/bms/images/close.gif" width="21" height="21" onclick="this.src='bms/images/close.gif';closediv('searchsup');"></td>
+          </tr>
+        </table>
+        </td></tr>
+    <tr>
+      <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+        <div id="searchsupid">
+<?php
+	include("bms/templates/search_sup.htm");
+?>        
+        </div>
+	  </td>
+    </tr>
+	</table>
+</div>      
+<script language="javascript">
+var budgettype=Array();
+
+<?php
+	for($i=0;$i<count($item_id);$i++)
+	{
+		echo  'budgettype['.$i.']="'.$item_id[$i]['budget_type'].'";';
+	}
+	
+?>     
+function browse_cus()
+{
+	if(document.getElementById('budget_type').value=="CN" ||document.getElementById('budget_type').value=="VAY")
+	{
+		document.getElementById('searchsupdiv').style.top=document.body.scrollTop+5;
+		document.getElementById('searchsupiframe').style.top=document.body.scrollTop+5;
+		document.getElementById('searchsupdiv').style.left=(screen.width-1000)/2+250;
+		document.getElementById('searchsupiframe').style.left=(screen.width-1000)/2+250;
+		showdiv('searchsup');
+		if(document.getElementById('supid').innerHTML=="")
+			load_sup_page(1);
+
+	}
+}
+ var readnum=false;
+    function change_amount(v) {
+        if(readnum) {
+            ajax_abort(readnum);
+        }
+        readnum=load("?eda_type=ajax&eda_code=<?= md5('doc_so') ?>&eda_module="+v,"docsoid","html","GET",null,"no");
+    }
+function load_sup()
+{
+	document.getElementById("cus_id").value=cur_sup_id;
+	document.getElementById("cus_name").value=cur_sup_name;
+	load('?eda_type=ajax&eda_act=<?=md5("finance")?>&eda_code=<?= md5("get_sup_debt")?>&budget_type='+document.getElementById('budget_type').value+'&eda_id='+document.getElementById("cus_id").value,'amount','set_val','GET',null,'no');
+}
+function change_budget()
+{
+	document.getElementById('cus_name').value='';
+  document.getElementById('cus_id').value='';
+  document.getElementById('budget_type').value="";
+  document.getElementById('amount').value="";
+  document.getElementById('docsoid').innerHTML="không";
+	chk_budget();
+}
+function chk_budget()
+{
+  document.getElementById('browser').style.display='none';
+  document.getElementById('cus_name').readOnly=true;
+  document.getElementById('cus_name').style.display='';
+  document.getElementById('cus_name').style.width='200px';
+  document.getElementById('inv_select').style.display='none';
+  if($("#item_id option:selected" ).text()=="Đóng VAT"){
+    document.getElementById('inv_select').style.display='';
+    document.getElementById('cus_name').value='Đóng VAT';
+    document.getElementById('cus_name').style.display='none';
+  }
+  if($("#item_id option:selected" ).text()=="Chi Phụ Phí Đơn Hàng"){
+    document.getElementById('inv_select').style.display='';
+    document.getElementById('cus_name').value='Chi Phụ Phí Đơn Hàng';
+    document.getElementById('cus_name').style.display='none';
+  }
+  if(document.getElementById('item_id').selectedIndex>0)
+  {
+    var bud=budgettype[parseInt(document.getElementById('item_id').selectedIndex)-1];   
+    document.getElementById('budget_type').value=bud;   
+    if(bud=="CN" || bud=='VAY')
+    {
+      document.getElementById('cus_name').style.width='165px';
+      document.getElementById('browser').style.display='';
+    }
+    else
+    {
+      document.getElementById('cus_name').readOnly=false;
+    }
+  }
+} 
+chk_budget();
+
+
+$(document).ready(function(){
+
+
+
+
+
+
+
+
+
+
+
+var bobj;
+$(document).on("click",".change_inv",function(){
+         $.post( "?eda_type=ajax&eda_code=<?= md5('inv_vat_select') ?>",{}, function() {
+            })
+            .done(function(data) {
+                data=JSON.parse(data);
+                taobang(data);
+
+            })
+            .fail(function() {
+            });
+});
+
+
+
+
+
+$(document).on("click",".trg_row",function(e){
+    var data=$(this).data("data");
+    if($("#item_id option:selected" ).text()=="Chi Phụ Phí Đơn Hàng"){
+   $("#amount").val(data.pp_rmv).trigger("input");
+   $(".change_inv").html('Chi phụ phí đơn hàng ['+data.inv_code+'] (Click chọn lại)');
+ }
+ else
+ if($("#item_id option:selected" ).text()=="Đóng VAT"){
+   $("#amount").val(data.vat_price).trigger("input").trigger("keyup");
+   $(".change_inv").html('Thanh toán VAT đơn hàng ['+data.inv_code+'] (Click chọn lại)');
+ }
+   $("#inv_id").val(data.inv_id).trigger("input").trigger("keyup");
+   
+   $(".bangbox").remove();
+});
+
+$(document).on("click",function(e){
+    if($(e.target).hasClass("bangbox_td")){
+         $(".bangbox").remove();
+    }
+   
+});
+
+
+
+
+
+
+
+
+
+
+
+    function taobang(data){
+    $(".bangbox").remove();
+    $("body").append("<table class=bangbox><tr><td align=center valign=middle class=bangbox_td><table id=bang_content><tr><td>loading</td></tr></table></td></tr></table>");
+
+$("#bang_content").html("");
+$("#bang_content").append(
+                    "<thead><tr>"+
+                    "<th>Đơn hàng chưa thanh toán</th>"+
+                    "<th>Ngày tạo</td>"+
+                    "<th>Ngày đến hạn</th>"+
+                    "<th>Tiền VAT</th>"+
+                    "<th>Tiền đơn hàng</th>"+
+                    "<th>Tiền đã thanh toán</th>"+
+                    "<th>Thu phụ phí</th>"+
+                    "<th>Chi phụ phí</th>"+
+                    "<th>Tiền cần thu</th>"+
+                    "<th>Ghi chú</th>"+
+                    "<tr></thead>"+
+                    "</tr>"
+                    );
+if(data.length>0)
+                $(data).each(function(i,item){
+console.log("item",item);
+                   $("#bang_content").append(
+                    "<tr class=trg_row>"+
+                    "<td><a target=_blank href='?eda_act=8325324b47e1e62a1c2998a640cbdc72&eda_code=5831fb9bee1129a0c8b7e12db6526798&eda_id="+item.inv_id+"'>"+item.inv_code+"</a></td>"+
+                    "<td>"+item.created_date+"</td>"+
+                    "<td>"+item.max_time+"</td>"+
+                    "<td>"+formatnumber(item.vat_price)+"</td>"+
+                    "<td>"+formatnumber(item.total)+"</td>"+
+                    "<td>"+formatnumber(item.payment)+"</td>"+
+                    "<td>"+formatnumber(item.pp_add)+"</td>"+
+                    "<td>"+formatnumber(item.pp_rmv)+"</td>"+
+                    "<td>"+formatnumber(item.totalpay)+"</td>"+
+                    "<td>"+item.comment+"</td>"+
+                    "<tr>"+
+                    "</tr>"
+                    );
+                    $("#bang_content .trg_row").last().data("data",item);                  
+                    
+                });
+            else
+                $(".bangbox").remove();
+}
+});
+</script>          
+<style>
+    #phuphibox tr td:nth-child(2){
+        text-align: center;
+    }
+    #phuphibox tr td:nth-child(2) select{
+        width: 90%
+    }
+    input[name="pp_show[]"]{
+        display:none;
+    }
+    .change_inv{
+        margin-top:5px;
+        background: #e3e3e3;
+        border:1px solid #b6b6b6;
+        padding: 3px 5px;
+        display: inline-block;
+        cursor: pointer;
+    }
+    .bangbox{
+        background: rgba(1,1,1,0.5);
+        position: fixed;
+        left: 0px;
+        top:0px;
+        width: 100%;
+        height: 100%;
+    }
+    .bangbox > tbody > tr > td{
+        padding:0px 10%;
+    }
+    #bang_content{
+        width: 100%;
+        border-collapse: collapse;
+        border:1px solid #b6b6b6;
+        background: #fff;
+    }
+    #bang_content thead tr{
+        background: #cae7f9;
+    }
+    .trg_row:hover{
+        cursor: pointer;
+        background: #e6e6e6;
+    }
+    #bang_content,#bang_content th,#bang_content td {
+  border: 1px solid #b6b6b6;
+}
+    .trg_row td{
+        text-align: center;
+    }
+    input[name='inv[]'],input[name='inprice[]']{
+        display: none;
+    }
+</style>     

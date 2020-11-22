@@ -1,0 +1,97 @@
+<?php
+if($action->eda_type!='ajax')
+{
+?>
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/documents.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Khai báo hàng tồn kho đầu kỳ</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=10></td>
+	      </tr>
+	</table>
+<form onkeypress="return tabOnEnter(document.activeElement, event);"  name="frmadmin" method="post" action="?eda_act=<?= md5('general')?>&eda_code=<?= md5('smm_instock')?>" style="margin:0px">
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td width="80" align="center" height="30"><b>Kho hàng</b></td>
+    <td width="130">
+	<select class="catbg" style="width:120px;" name="stock_id" id="stock_id" onchange="load_mat_page(cur_mat_page);">
+	<option value="-1">Hãy chọn kho hàng</option>
+<?php
+	$stock=get_data("select stock_id, stock_name, user_id from stocks order by stock_name");
+	for($i=0;$i<count($stock);$i++)
+		echo '<option '.(isset($_POST['stock_id'])?($stock[$i]['stock_id']==$_POST['stock_id']?'selected':''):'').'  value="'.$stock[$i]['stock_id'].'">'.$stock[$i]['stock_name'].'</option>';
+?>	
+	</select>       
+        </td>  	
+	<td width="80" align="center" height="30"><b>Chủng loại</b></td>
+	<td width="130">
+	<select class="catbg" style="width:120px;" name="cat_id" id="cat_id" onchange="load_mat_page(cur_mat_page);">
+	<option value="">Tất cả chủng loại</option>
+<?php
+	$cat=get_data("select * from categories order by cat_name");
+	for($i=0;$i<count($cat);$i++)
+		echo '<option '.(isset($_POST['cat_id'])?($cat[$i]['cat_id']==$_POST['cat_id']?'selected':''):'').' value="'.$cat[$i]['cat_id'].'">'.$cat[$i]['cat_name'].'</option>';
+?>	
+	</select>
+	</td>		
+	<td width="60" align="center" height="30"><b>Tên SP</b></td>
+	<td width="120"><input  onkeydown="if(event.which) code=event.which; else code=window.event.keyCode; if(code==13) load_mat_page(cur_mat_page);" onfomat="this.select();" style="width:110px;" value="<?=isset($_POST['mat_name'])?$_POST['mat_name']:''?>"  class="catbg" name="mat_name" type="text" id="mat_name" size="25" />
+	</td>
+    <td ><input type="button" value="Tra cứu" onclick="load_mat_page(cur_mat_page);" name="search" class="button"></td>
+      </tr>
+	</table>
+<?php
+	}
+?>		
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+	<tr>
+	<td align="center" style="padding-left:5px;padding-right:5px;">	
+<div id="matid">
+<?php
+if($action->eda_code== md5('view_report'))
+	include("bms/templates/general/search_smm_instock.htm");
+?>	
+</div>
+	</td></tr>
+</table>
+<?php
+if($action->eda_type!='ajax')
+{
+?>	
+<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	 <tr>
+	<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=10></td>
+	</tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;" width="30">
+          <img src="<?=ROOT_URL?>/bms/images/icon/preview.gif" height="24">
+          </td>
+          <td   style="padding-left:5px;" width="160">
+          <a class="cart_payment" href="javascript:void()" onclick="window.open('?eda_code=<?= md5('view_report')?>&eda_type=ajax&eda_module=general/smm_instock&cat_id='+document.getElementById('cat_id').value+'&stock_id='+document.getElementById('stock_id').value+'&mat_name='+document.getElementById('mat_name').value);"><b>Xem dạng in ấn</b></a>
+          </td>  
+		<td><input type="submit" value="Lưu tồn đầu kỳ" name="save" class="button"></td>  
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+</form>		
+<script language="javascript">
+var cur_mat_page=1;
+	function load_mat_page(p)
+	{
+		load('?eda_type=ajax&eda_act=<?= md5("general")?>&eda_code=<?= md5("search_smm_instock")?>&mat_name='+document.getElementById('mat_name').value+'&stock_id='+document.getElementById('stock_id').value+'&cat_id='+document.getElementById('cat_id').value+'&eda_page='+p,'matid','html','GET',null,'Đang thống kê...');
+		cur_mat_page=p;
+	}
+	load_mat_page(cur_mat_page);
+</script>	        
+<?php
+	}
+?>                

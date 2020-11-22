@@ -1,0 +1,89 @@
+<?php
+header("Access-Control-Allow-Origin: *");
+
+$headers = apache_request_headers();
+$param=array();
+parse_str( @explode("?", $_SERVER['REQUEST_URI'])[1],$param);
+$token=safe_str(@$_SERVER['HTTP_TOKEN']);
+if($token=="")$token=safe_str(@$param['token']);
+$signalKey=safe_str(@$param['signalKey']);
+
+$err="";
+
+
+$inputJSON = file_get_contents('php://input');
+
+
+
+
+$code=safe_str(@$param['code']);
+$trueSignalKey=sha1("code={$code}&secretKey=".SECRET_KEY);
+
+//Test data
+// $inputJSON='{
+//   "code": "TA2",
+//   "name": "Thanh An",
+//   "email": "ta_email@vinhkhanhtire.vn",
+//   "address": "157/8 Bùi Quốc Khánh , Chánh Nghĩa, TDM BD",
+//   "phone_contact": "08-38351888",
+//   "name_contact": "QUANG"
+// }';
+
+
+$data = json_decode($inputJSON, TRUE);
+
+if($token!=TOKEN){
+	$reback['result']=false;
+	$reback['message']="Sai token !! [".$token."]";
+	echo json_encode($reback,true);die();
+}
+if($trueSignalKey!=$signalKey){
+	$reback['result']=false;
+	$reback['message']="Sai signalKey !! [".$trueSignalKey."]";
+	echo json_encode($reback,true);die();
+}
+
+
+	$cus_code=safe_str(@$code);
+
+	if($cus_code==""){
+		$err="Không có dữ liệu cus_code";
+		goto error_out;
+	}
+
+
+	
+
+$check_cus=get_data("select * from customers where cus_code ='".$code."'");
+if(count($check_cus)>0){
+
+
+	$db->query("delete from customers where cus_code ='".$code."'");
+	$rows=$db->affected_rows();
+	if(intval(@$rows)<=0)
+	{
+		$reback['result']=false;
+		$reback['message']="Không thể khách hàng [{$code}] vì đã phát sinh dữ liệu !";
+		echo json_encode($reback,true);die();
+	}
+	else
+	{
+		$reback['result']=true;
+		$reback['message']="Xóa khách hàng [{$code}] thành công !";
+		echo json_encode($reback,true);die();
+	}
+	
+}
+else
+{
+	$reback['result']=false;
+	$reback['message']="Không có khách hàng này!";
+	echo json_encode($reback,true);die();
+}
+
+
+error_out:
+$reback['result']=false;
+$reback['message']=$err;
+echo json_encode($reback,true);die();
+?>

@@ -1,0 +1,58 @@
+<form onkeypress="return tabOnEnter(document.activeElement, event);" onsubmit="return false;" name="frmadmin" method="post" action="?eda_act=<?=md5('general')?>&eda_code=<?= md5('msu_edit_sm')?>&eda_id=<?=$action->eda_id?>" style="margin:0px">
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/cal.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Sửa thông tin đơn vị tính</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('msu')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+              <td height="25" width="160" align="left"><b>(*) Tên đơn vị tính</b></td>
+              <td width="180"><input style="width:150px;" class="catbg" name="msu_name" id="msu_name" type="text" value="<?= isset($return_val['msu_name'])?$return_val['msu_name']:''?>" /></td>
+    	      <td height="25" align="left" style="padding-left:20px;"><b>Đơn vị cha</b></td>
+	             <td>
+			<select class="catbg" style="width:200px;" name="msu_parid" id="msu_parid">
+			<option value="">Đơn vị cơ sở</option>
+<?php
+	$msu=get_data("select * from meansure where msu_parid is null order by msu_name");
+	for($i=0;$i<count($msu);$i++)
+	{
+		echo '<option '.($return_val['msu_parid']==$msu[$i]['msu_id']?'selected':'').' value="'.$msu[$i]['msu_id'].'">'.$msu[$i]['msu_name'].'</option>';
+	}	
+?>			
+			</select>
+              </td>            
+             </tr>
+            <tr>
+              <td height="25" align="left"><b>Tỷ lệ so với đơn vị cha</b></td>
+              <td>
+				<input style="width:150px;" class="catbg" name="msu_multiple" id="msu_multiple" type="text" value="<?= isset($return_val['msu_multiple'])?$return_val['msu_multiple']:''?>" />
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"></td>
+              <td>
+              </td>             
+            </tr>         
+          </table>
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+
+</td></tr>
+</table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          <input style="font-weight:bold;cursor:pointer;"  onclick="document.forms[0].submit();" class="button" type="button" name="button" value="Lưu đơn vị tính" />
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('msu')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>          
+   </form>

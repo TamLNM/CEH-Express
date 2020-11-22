@@ -1,0 +1,27 @@
+<?php    
+$imo = get_data("select imo.*, usr.full_name, usr2.full_name trade_user from instock_modify imo, users usr, users usr2 where " . (!empty($return_val['user_id']) ? " imo.user_id=" . $return_val['user_id'] . " and " : "") . " imo.created_date between " . $sdate . " and " . $edate . " and imo.user_id=usr.user_id and imo.trade_user=usr2.user_id order by imo.created_date desc");
+?>
+<table width="98%" align="center"  border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+    <tr>
+        <td width="12%" align="center" bgcolor="#afd7ff"><b>Mã phiếu</b></td>
+        <td width="18%" align="center" bgcolor="#afd7ff"><b>Người thực hiện</b></td>
+        <td width="18%" align="center" bgcolor="#afd7ff"><b>Thời gian thực hiện</b></td>
+        <td width="18%" align="center" bgcolor="#afd7ff" height="25"><b>Người kiểm duyệt</b></td>
+        <td align="center" bgcolor="#afd7ff"><b>Ghi chú</b></td>
+    </tr>
+<?php
+if (count($imo) > 0) {
+    for ($i = 0; $i < count($imo); $i++) {
+        ?>		
+            <tr  <?= $action->eda_type != 'ajax' ? ' style="cursor:pointer;" onmouseover="this.style.backgroundColor=\'yellow\';" onmouseout="this.style.backgroundColor=\'\';" onclick="window.location=\'?eda_act=' . md5('sell') . '&eda_code=' . md5('view_mat_modify') . '&eda_id=' . $imo[$i]['imo_id'] . '\';"' : '' ?>>
+                <td align="center"><?= $imo[$i]['imo_code'] ?></td>
+                <td align="center"><?= $imo[$i]['full_name'] ?></td>
+                <td align="center"><?= date('d/m/Y H:i', $imo[$i]['created_date']) ?></td>
+                <td align="center" height="22"><?= $imo[$i]['trade_user'] ?></td>
+                <td style="padding-left:5px;"><?= $imo[$i]['comment'] ?></td>
+            </tr>
+            <?php
+        }
+    }
+    ?>	    
+</table>

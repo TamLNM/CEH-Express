@@ -1,0 +1,89 @@
+<?php
+	$data = get_data("select * from city a, nation b, district c where a.nation_id = b.nation_id and a.city_id = c.city_id and 1=1 ".(!empty($_GET['city_id'])?" and a.city_id = '%".$_GET['city_id']."%'":"")." order by a.nation_id, a.city_id, district_name ".($action->eda_code!=md5('view_report')?" limit ".((14*($action->eda_page-1)).", 14"):''));
+   	if($action->eda_code != md5('view_report')) {
+        $rowsNumeric = get_data("select count(*) from city a, nation b, district c where a.nation_id = b.nation_id and a.city_id = c.city_id and 1=1 ".(!empty($_GET['city_id'])?" and a.city_id = '%".$_GET['city_id']."%'":""))[0][0];
+    }
+?>
+<table width="99%" id="tbl_district" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="margin-left: 5px; margin-right: 5px; border-collapse:collapse;<?=$action->eda_code!=md5('view_report')?'':'margin-top:10px;'?>">
+        <?php
+            if($action->eda_code==md5('view_report')) {
+                echo '<td width="8%" align="center" bgcolor="#afd7ff" height="25"><b>STT</b></td>';
+            }
+        ?>
+		<td width="30%" align="center" bgcolor="#afd7ff" height="25"><b>Quốc gia</b></td>
+		<td width="30%" align="center" bgcolor="#afd7ff" height="25"><b>Tỉnh/ Thành phố</b></td>
+		<td width="30%" align="center" bgcolor="#afd7ff" height="25"><b>Quận/ Huyện</b></td>
+		<td width="5%" align="center" bgcolor="#afd7ff"><b>Sửa</b></td>
+		<td width="5%" align="center" bgcolor="#afd7ff"><b>Xoá</b></td>		
+	</tr>
+
+<?php
+	if(count($data)>0){
+		for($i=0; $i < count($data); $i++){?>	
+			<tr>
+				<td contenteditable="true" align="center"><?=$data[$i]['nation_name']?></td>
+				<td contenteditable="true" align="center"><?=$data[$i]['city_name']?></td>
+				<td contenteditable="true" align="center"><?=$data[$i]['district_name']?></td>
+
+				<td align="center" height="25"><a href="?eda_act=<?=md5('general')?>&eda_code=<?= md5('edit_district')?>&eda_id=<?= $data[$i]['district_id']?>" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" width="16" border="0"></a></td>
+
+				<td align="center" height="25"><a href="javascript:void()" onclick="if(confirm('Bạn có chắc chắn muốn xoá thông tin Quận/ Huyện này không?')) window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('del_district')?>&eda_id=<?= $data[$i]['district_id']?>';" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="16" border="0"></a></td>
+			</tr>
+		<?php }
+	}
+?>	
+</table>
+
+<script type="text/javascript">
+	$(document).ready(function () {
+	    $(document).on('click', '#search', function(){
+			var nation_id = $('#nation_id').val(),
+				city_id   = $('#city_id').val();
+
+			if (nation_id != null && city_id != null){
+	        	var src = "<tr><?php if($action->eda_code==md5('view_report')) { echo '<td width="8%" align="center" bgcolor="#afd7ff" height="25"><b>STT</b></td>'; } ?> <td width='30%'' align='center' bgcolor='#afd7ff' height='25'><b>Quốc gia</b></td> <td width='30%' align='center' bgcolor='#afd7ff' height='25'><b>Tỉnh/ Thành phố</b></td><td width='30%' align='center' bgcolor='#afd7ff' height='25'><b>Quận/ Huyện</b></td><td width='5%' align='center' bgcolor='#afd7ff'><b>Sửa</b></td> <td width='5%' align='center' bgcolor='#afd7ff'><b>Xoá</b></td></tr>";
+
+	        	$('#tbl_district').html('');
+	        	$('#tbl_district').html(src);
+
+	        	$.ajax({
+		            url: "<?php echo "?eda_act=".md5('general') . '&eda_code=' . md5('load_district_list');?>",
+		            dataType: 'json',
+		            data: { "nation_id": nation_id, "city_id": city_id},
+		            type: 'POST',
+		            success: function (data) {
+		                src = '';
+		                if (data.length > 0){
+		                	console.log(data);
+		                    for (i = 0; i < data.length; i++){
+		                        src += '<tr>';
+		                            src += '<td contenteditable="true" align="center">' + data[i]['nation_name'] + '</td>';
+		                            src += '<td contenteditable="true" align="center">' + data[i]['city_name'] + '</td>';
+		                            src += '<td contenteditable="true" align="center">' + data[i]['district_name'] + '</td>';
+		                            src += '<td align="center" height="25"><a href="?eda_act=' + '<?=md5("general")?>&eda_code=<?= md5("edit_city")?>&eda_id=' + data[i]['district_id'] +  '" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/edit_f2.png" width="16" border="0"></a></td>';
+		                            src += '<td align="center" height="25"><a href="javascript:void()" onclick="';
+		                            src += "if(confirm('Bạn có chắc chắn muốn xoá thông tin Tỉnh/ Thành phố này không?')) window.location='? eda_act=<?=md5('general')?>&eda_code=<?= md5('del_city')?>&eda_id=";
+		                            src += data[i]['district_id']
+		                            src += ';" class="cart_payment"><img  style="cursor:pointer;" onmouseover="obj_filter(this,80);" onmouseout="obj_filter(this,100);" src="<?=ROOT_URL?>/bms/images/icon/cancel_f2.png" width="16" border="0"></a></td>';
+		                        src += '</tr>';
+		                        console.log(src);
+		                    }
+		                    $('#tbl_district').append(src);
+		                }
+		            },
+		            error: function(err){
+		                console.log(err);
+
+		            }
+		        });	
+			}
+			else{
+				if (city_id == null){
+					alert('Vui lòng chọn Tỉnh/ Thành phố để tra cứu!');
+				}
+			}
+		});
+	});	
+</script>
+
+

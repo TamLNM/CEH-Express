@@ -1,0 +1,305 @@
+<?php
+global $head;
+
+if(intval(@$return_val['thang'])==0){
+    $return_val['thang']=intval(date("m"));
+}
+if(intval(@$return_val['nam'])==0){
+    $return_val['nam']=intval(date("Y"));
+}
+if (!isset($return_val['cus_chk'])) {
+    $return_val['cus_chk'] = 0;
+}
+if (empty($return_val['report_type']))
+    $return_val['report_type'] = 5;
+if ($action->eda_type != 'ajax') {
+    ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/js/select2.min.js" defer></script>
+<link href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.10/css/select2.min.css" rel="stylesheet"/>
+    <Script type="text/javascript" src="<?=ROOT_URL?>bms/common/CalendarPopup.js"></Script>
+    <script language="javaScript" id="jscal1x">
+        var cal = new CalendarPopup("calendarpopup");
+        cal.setTodayText("Hôm nay");
+        cal.showNavigationDropdowns();
+        cal.setYearSelectStartOffset(20);
+        cal.setMonthNames("Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12");
+        cal.setDayHeaders("CN","T2","T3","T4","T5","T6","T7");
+    </script>
+    <SCRIPT LANGUAGE="JavaScript">document.write(getCalendarStyles());</SCRIPT>
+    <DIV ID="calendarpopup" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></DIV>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td width="30" align="center">
+                <img style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/documents.png" width="18" height="18"/>        
+            </td>
+            <td  height="25"><b>Thống kê nhập xuất tồn theo tháng</b></td>
+            <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+
+    <table align="center" width="98%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td width="50"><b>Tháng : </b></td>
+            <td width="70">
+                <select class="sl_auto catbg" style="width:120px;" id="thang" from=1 to=12 value="<?=$return_val['thang']?>"></select>
+            </td><td width="20">
+                
+            </td>
+            <td width="50" style="padding-right:5px;" align="right"><b>Năm : </b></td>
+            <td width="70">
+                <select class="sl_auto catbg" style="width:120px;" id="nam" from=2000 to=2050 value="<?=$return_val['nam']?>"></select>
+            </td> <td width="30">
+               
+            </td>   
+            <td width="130">
+                <select multiple class="catbg" style="width:120px;" name="cat_id" id="cat_id">
+                    <option value="">Tất cả chủng loại</option>
+    <?php
+    $cat = get_data("select * from categories order by cat_name");
+    for ($i = 0; $i < count($cat); $i++)
+        echo '<option ' . (@in_array($cat[$i]['cat_id']."", @explode(",", @$return_val['cat_id'])) ? 'selected' : '') . ' value="' . $cat[$i]['cat_id'] . '">' . $cat[$i]['cat_name'] . '</option>';
+    ?>	
+                </select>       
+            </td>
+            <td width="130">
+                <select multiple class="catbg" style="width:120px;" name="stock_id" id="stock_id">
+                    <option value="">Tất cả kho hàng</option>
+    <?php
+    $chk_mainstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='mainstock'");
+    $chk_empstock = get_data("select ugp.ugp_id from user_group_permission ugp, function_menu fmenu where (ugp.user_id='" . $sessions->get_session("user_id") . "' or ugp.group_id='" . $sessions->get_session("group_id") . "') and ugp.fmenu_id=fmenu.fmenu_id and fmenu_act='empstock'");
+    if (count($chk_mainstock) > 0 && count($chk_empstock) > 0) {
+        $stock = get_data("select stock_id, stock_name, user_id from stocks order by stock_name");
+    } else if (count($chk_mainstock) > 0) {
+        $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id is null or user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+    } else {
+        $stock = get_data("select stock_id, stock_name, user_id from stocks where user_id='" . $sessions->get_session('user_id') . "'  order by stock_name");
+    }
+    for ($i = 0; $i < count($stock); $i++)
+        echo '<option ' . (@in_array($stock[$i]['stock_id']."", @explode(",", @$return_val['stock_id'])) ? 'selected' : '') . ' value="' . $stock[$i]['stock_id'] . '">' . $stock[$i]['stock_name'] . '</option>';
+    ?>	
+                </select>       
+            </td>         
+            <td width="130">
+                      
+            </td>  
+              <td width="30" align="left"><b></b></td>
+              <td width="100">
+              </td>
+              <td width="40">
+              </td>              
+            <td  width="50"><input onclick="window.location='?eda_act=<?= md5('sell') ?>&eda_code=<?= md5('rp_nxt') ?>&cat_id='+$('#cat_id').val()+'&nam='+$('#nam').val()+'&thang='+$('#thang').val()+'&stock_id='+$('#stock_id').val();" type="button" value="Xem" class="button"></td>
+            <td  height="30" style="padding-left:5px;" width="30">
+                <?php
+                if (check_func('output_excel')) {
+                    ?>
+                    <img src="<?=ROOT_URL?>bms/images/icon/excel.png" height="24">
+                    <?php
+                }
+                ?>
+            </td>
+            <td   style="padding-left:5px;">
+                <?php
+                if (check_func('output_excel')) {
+                    ?>
+                    <a class="cart_payment" href="javascript:void()"
+                       onclick="window.open('?eda_code=<?= md5('excel_export') ?>&eda_type=ajax&eda_module=output&datefrom='+document.getElementById('datefrom').value+'&dateto='+document.getElementById('dateto').value+'&stock_id='+document.getElementById('stock_id').value+'&cat_id='+document.getElementById('cat_id').value+'&user_id='+document.getElementById('user_id').value+'&cus_id='+document.getElementById('cus_id').value+'&report_type='+get_radio()+'&cus_chk='+(document.getElementById('cus_chk').checked?1:0)+'&draft_chk='+(document.getElementById('draft_chk').checked?1:0));"
+                       target="_blank"><b>Xuất Excel</b></a>
+                    <?php
+                }
+                ?>
+            </td>                          
+        </tr>
+        
+    </table>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>	
+    <?php
+} else {
+    ?>
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+
+    <?php
+}
+
+    include ('bms/templates/sell/rp_nxt_row.htm');
+
+if ($action->eda_type != 'ajax') {
+    ?>	
+    <table width="100%"  border="0" cellpadding="0" cellspacing="0">
+        <tr>
+            <td height=5><img src="<?=ROOT_URL?>bms/images/spacer.gif" height=10></td>
+        </tr>
+    </table>
+    <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+            <td  height="30" style="padding-left:5px;" width="30">
+                <img src="<?=ROOT_URL?>bms/images/icon/preview.gif" height="24">
+            </td>
+            <td width="120"  style="padding-left:5px;">
+                <a class="cart_payment" href="javascript:void()" onclick="window.open('?eda_code=<?= md5('view_report') ?>&eda_type=ajax&eda_module=sell/rp_nxt&thang='+document.getElementById('thang').value+'&nam='+document.getElementById('nam').value+'&stock_id='+$('#stock_id').val()+'&cat_id='+$('#cat_id').val()+'&user_id='+$('#user_id').val())"><b>Xem dạng in ấn</b></a>
+            </td>          
+            <td  height="30" style="padding-left:5px;" width="30">
+                <?php
+                if (check_func('output_excel')) {
+                    ?>
+                    <img src="<?=ROOT_URL?>bms/images/icon/excel.png" height="24">
+                    <?php
+                }
+                ?>
+            </td>
+            <td   style="padding-left:5px;">
+                <?php
+                if (check_func('output_excel')) {
+                    ?>
+                    <a class="cart_payment" href="javascript:void()"
+                       onclick="window.open('?eda_code=<?= md5('excel_export') ?>&eda_type=ajax&eda_module=output&datefrom='+document.getElementById('datefrom').value+'&dateto='+document.getElementById('dateto').value+'&stock_id='+document.getElementById('stock_id').value+'&cat_id='+document.getElementById('cat_id').value+'&user_id='+document.getElementById('user_id').value+'&report_type='+get_radio()+'&cus_chk='+(document.getElementById('cus_chk').checked?1:0)+'&draft_chk='+(document.getElementById('draft_chk').checked?1:0));"
+                       target="_blank"><b>Xuất Excel</b></a>
+                    <?php
+                }
+                ?>
+            </td>              
+            <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+    </table>   
+<style>
+#searchcusdiv{
+	position:absolute;
+	left:0px;
+	top:20px;
+	width:550px;
+	height:450px;
+	z-index:21;
+}
+#searchcusiframe {
+	position:absolute;
+	left:0px;
+	top:20px;
+	width:546px;
+	height:446px;
+	z-index:21;
+}
+</style>
+<iframe id="searchcusiframe" style="visibility:hidden;"></iframe>
+<div  id="searchcusdiv" style="visibility:hidden;">
+	<table  bgcolor="#ffffff" width="550" border="0" height="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td height="25" valign=top align=center width="100%">
+	  <table height="25" width="100%" border="0" cellspacing="0" cellpadding="0" >
+          <tr>
+            <td width="94%" height="25" id="searchcushead" background="<?=ROOT_URL?>/bms/images/head_bg.gif"  onmouseover="this.style.cursor='move';"  onmousedown="divclick('searchcus',event);" style="color:white;"><b>&nbsp;&nbsp;Danh sách khách hàng</b></td>
+            <td width="3%" height="25" align="right" background="<?=ROOT_URL?>/bms/images/head_bg.gif">
+			<img onmouseover="this.style.cursor='pointer'; this.src='bms/images/minimize2.gif';" onmouseout=" this.src='bms/images/minimize.gif';" src="<?=ROOT_URL?>/bms/images/minimize.gif" width="21" height="21" onclick="hidediv('searchcus');" /></td>
+            <td width="3%" height="25" align="right" background="<?=ROOT_URL?>/bms/images/head_bg.gif" style="padding-right:2px;"><img onmouseover="this.style.cursor='pointer'; this.src='bms/images/close2.gif';" onmouseout=" this.src='bms/images/close.gif';" src="<?=ROOT_URL?>/bms/images/close.gif" width="21" height="21" onclick="this.src='bms/images/close.gif';closediv('searchcus');"></td>
+          </tr>
+        </table>
+        </td></tr>
+    <tr>
+      <td style="border: 1px #2BCAFF solid" width="100%" align=center valign=top>          
+        <div id="searchcusid">
+<?php
+	include("bms/templates/search_cus.htm");
+?>        
+        </div>
+	  </td>
+    </tr>
+	</table>
+</div>          
+    <script language="javascript">
+        document.getElementById('searchcusdiv').style.top=document.body.scrollTop+5;
+        document.getElementById('searchcusiframe').style.top=document.body.scrollTop+5;
+        document.getElementById('searchcusdiv').style.left=(screen.width-1000)/2+250;
+        document.getElementById('searchcusiframe').style.left=(screen.width-1000)/2+250;        
+        function get_radio()
+        {
+            return (document.getElementById('report_type1').checked?1:(document.getElementById('report_type2').checked?2:(document.getElementById('report_type3').checked?3:(document.getElementById('report_type4').checked?4:(document.getElementById('report_type5').checked?5:6)))))
+        }
+        function browse_cus()
+        {
+            document.getElementById('searchcusdiv').style.top=document.body.scrollTop+5;
+            document.getElementById('searchcusiframe').style.top=document.body.scrollTop+5;
+            document.getElementById('searchcusdiv').style.left=(screen.width-1000)/2+250;
+            document.getElementById('searchcusiframe').style.left=(screen.width-1000)/2+250;
+            showdiv('searchcus');
+            if(document.getElementById('cusid').innerHTML=="")
+            load_cus_page(1);
+
+        }        
+        function load_cus()
+        {
+            document.getElementById("cus_id").value=cur_cus_id;
+            document.getElementById("cus_name").value=cur_cus_name;
+        }        
+        $(document).ready(function(){
+
+            $("#cat_id").select2({placeholder: "Tất cả loại sản phẩm",closeOnSelect: false});
+            $("#stock_id").select2({placeholder: "Tất cả kho",closeOnSelect: false});
+            
+            $(".sl_auto").each(function(){
+                var fr=parseInt($(this).attr("from"));
+                var to=parseInt($(this).attr("to"));
+                var val=parseInt($(this).attr("value"));
+                var htm="";
+
+                for(var i=fr;i<to;i++){
+                    htm+='<option value="'+i+'">'+i+'</option>';
+                }
+
+                $(this).html(htm);
+                $(this).val(val);
+            });
+        });
+    </script>   
+
+
+
+    <style type="text/css">
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered li{
+            display: contents;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered li.select2-selection__choice:after{
+            content:" , ";
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__rendered{
+            margin-bottom: -10px !important;
+            padding-top: 6px;
+        }
+.tbl_box_ov{
+    width: 998px;
+    overflow-y: hidden;
+}
+.tbl_box_ov .tbl_box{
+    width: 2000px;
+}
+.select2-container--default .select2-selection--multiple{
+    padding-top:3px;
+}
+.select2-search.select2-search--inline .select2-search__field[placeholder='']{
+    display: none !important;
+}
+.select2-search.select2-search--inline .select2-search__field:not([placeholder='']){
+    display: inline-block !important;
+    position: relative;
+    top: -5px;
+}
+.tbl_tablej{
+    width: auto;
+}
+.tbl_tablej thead tr td{
+    white-space: nowrap;
+}
+    </style>
+    <?php
+}
+?>

@@ -1,0 +1,160 @@
+<form onkeypress="return tabOnEnter(document.activeElement, event);" onsubmit="return false;" name="frmadmin" method="post" action="?eda_act=<?=md5('general')?>&eda_code=<?= md5('stock_add_sm')?>" style="margin:0px">
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/stock.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Tạo kho mới</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('stock')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+<tr><td style="padding-left:20px;padding-right:20px;padding-top:10px;padding-bottom:10px;">        
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+      	<tr>
+              <td height="25" width="160" align="left"><b>(*) Mã kho</b></td>
+              <td width="180"><input style="width:150px;" class="catbg" name="stock_code" id="stock_code" type="text" value="<?= isset($return_val['stock_code'])?$return_val['stock_code']:''?>" /></td>
+    	      <td height="25" align="left" style="padding-left:20px;"><b>Loại kho</b></td>
+	             <td>
+				<select style="width:150px;" class="catbg" class="textbox"  name="stock_type" id="stock_type" onchange="change_stock_type();">                          
+				<option <?=(isset($return_val['stock_type'])?($return_val['stock_type']=='ALL'?'selected':''):'')?> value="ALL">Kho chung</option>
+				<option <?=(isset($return_val['stock_type'])?($return_val['stock_type']=='EMP'?'selected':''):'')?> value="EMP">Kho nhân viên</option>
+				</select>
+              </td> 
+             </tr>
+            <tr>
+              <td height="25" width="160" align="left"><b>(*) Tên kho</b></td>
+              <td width="180"><input style="width:150px;" class="catbg" name="stock_name" id="stock_name" type="text" value="<?= isset($return_val['stock_name'])?$return_val['stock_name']:''?>" /></td>
+    	                 
+             </tr>
+            <tr>
+              <td height="25" align="left"><b>Địa điểm</b></td>
+              <td>
+				<input style="width:150px;" class="catbg" name="address" id="address" type="text" value="<?= isset($return_val['address'])?$return_val['address']:''?>" />
+              </td>
+              <td height="25" align="left" style="padding-left:20px;"><b>Của nhân viên</b></td>
+              <td>
+				<select style="width:150px;" class="catbg" class="textbox"  name="user_id" id="user_id" onchange="showlist();">  
+				<option value="">Chọn nhân viên</option>                        
+<?php			
+	$usr=get_data("select user_id, full_name from users order by full_name");
+	for($i=0;$i<count($usr);$i++) {
+		echo '<option '.(isset($return_val['user_id'])?($return_val['user_id']==$usr[$i]['user_id']?'selected':''):'').' value="'.$usr[$i]['user_id'].'">'.$usr[$i]['full_name'].'</option>';
+	}				
+?>				
+				</select>
+              </td>             
+            </tr>   
+
+
+
+
+
+
+
+<tr>
+              <td height="25" width="160" align="left"><b>Tên chi nhánh:</b></td>
+              <td width="180"><input style="width:150px;" class="catbg" name="ten_chi_nhanh" id="ten_chi_nhanh" type="text" value="<?= isset($return_val['ten_chi_nhanh'])?$return_val['ten_chi_nhanh']:''?>" /></td>
+    	      <td height="25" align="left" style="padding-left:20px;"><b>Mã số thuế:</b></td>
+	             <td width="180"><input style="width:150px;" class="catbg" name="mst" id="mst" type="text" value="<?= isset($return_val['mst'])?$return_val['mst']:''?>" /></td>          
+             </tr>   
+
+
+
+
+<tr>
+              <td height="25" width="160" align="left"><b>Số điện thoại:</b></td>
+              <td width="180"><input style="width:150px;" class="catbg" name="sdt" id="sdt" type="text" value="<?= isset($return_val['sdt'])?$return_val['sdt']:''?>" /></td>
+    	      <td height="25" align="left" style="padding-left:20px;"><b>Số fax:</b></td>
+	             <td width="180"><input style="width:150px;" class="catbg" name="fax" id="fax" type="text" value="<?= isset($return_val['fax'])?$return_val['fax']:''?>" /></td>          
+             </tr>
+
+
+
+<tr>
+              <td height="25" width="160" align="left"><b>Số tài khoản:</b></td>
+              <td width="180"><input style="width:150px;" class="catbg" name="stk" id="stk" type="text" value="<?= isset($return_val['stk'])?$return_val['stk']:''?>" /></td>
+    	      <td height="25" align="left" style="padding-left:20px;"><b>Ngân hàng:</b></td>
+	             <td width="180"><input style="width:150px;" class="catbg" name="nganhang" id="nganhang" type="text" value="<?= isset($return_val['nganhang'])?$return_val['nganhang']:''?>" /></td>          
+             </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+                  
+          </table>
+  <?= !empty($err_msg)?'<table width="95%"  border="0" cellpadding="0" cellspacing="0"><tr><td height="25" style="padding-top:10px;"><font color=red><b>'.$err_msg.'</b><br></font></td></tr></table>':''?> 
+
+</td></tr>
+</table>
+<div id="userlist" style="display:none;">
+<table border="0" width="98%" cellspacing="0" cellpadding="0">
+	<tr>
+	<td colspan="4" style="padding-left:5px;" height="30"><b>Chọn nhân viên được quyền truy cập</b></td>
+</tr>
+	
+<?php
+	if(!isset($return_val['user_list'])) {
+		$return_val['user_list']=array();
+	}
+	$user=get_data("select * from users  order by user_name");
+	$l=0;
+	$user_sub=get_data("select * from users order by user_name");
+	$i=0;
+	for($t=0;$t<ceil(count($user_sub)/4);$t++) {
+		echo '<tr>';
+		for($j=0;$j<4;$j++) {
+			echo '<td valign="top">';		
+			if(isset($user_sub[$i])) {
+			echo '<input '.(in_array($user_sub[$i]['user_id'],$return_val['user_list'])?' checked ':'').' name="user_list[]" type="checkbox" id="user_'.$l.'" value="'.$user_sub[$i]['user_id'].'"><a class="cart_payment" href="javascript:void(0);" onclick="document.getElementById(\'user_'.$l.'\').checked=!document.getElementById(\'user_'.$l.'\').checked;">'.$user_sub[$i]['full_name']." (".$user_sub[$i]['user_name'].')</a><br>';
+			$l++;
+			}
+			$i++;
+			echo '</td>';				
+		}
+		echo '</tr>';
+	}
+?>										
+	</table>
+	</div>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;">
+          <input style="font-weight:bold;cursor:pointer;"  onclick="document.forms[0].submit();" class="button" type="button" name="button" value="Lưu kho mới" />
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?eda_act=<?=md5('general')?>&eda_code=<?= md5('stock')?>';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>          
+   </form>
+<script language="javascript">
+	function showlist() {
+		if(document.getElementById('user_id').value=="") {
+			document.getElementById('userlist').style.display='none';
+		} else {
+			document.getElementById('userlist').style.display='';
+		}
+	}
+	function change_stock_type() {
+		if(document.getElementById('stock_type').value=='ALL') {
+			document.getElementById('user_id').value='';
+			document.getElementById('user_id').disabled=true;
+		} else {
+			document.getElementById('user_id').disabled=false;
+		}
+		showlist();
+	}
+	change_stock_type();
+</script>

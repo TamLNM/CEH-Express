@@ -1,0 +1,113 @@
+<?php
+	if($action->eda_type!='ajax')
+	{
+
+if(parsedate(@$return_val["datefrom"])==0){
+	$return_val["datefrom"]= "01/".date('m/Y');
+}
+$sdate=parsedate(@$return_val["datefrom"]);
+if(parsedate(@$return_val["dateto"])==0){
+	$return_val["dateto"]= date('t/m/Y');
+}
+$edate=parsedate(@$return_val["dateto"])+86399;
+    ?>
+    <Script type="text/javascript" src="<?=ROOT_URL?>bms/common/CalendarPopup.js"></Script>
+    <script language="javaScript" id="jscal1x">
+        var cal = new CalendarPopup("calendarpopup");
+        cal.setTodayText("Hôm nay");
+        cal.showNavigationDropdowns();
+        cal.setYearSelectStartOffset(20);
+        cal.setMonthNames("Tháng 1","Tháng 2","Tháng 3","Tháng 4","Tháng 5","Tháng 6","Tháng 7","Tháng 8","Tháng 9","Tháng 10","Tháng 11","Tháng 12");
+        cal.setDayHeaders("CN","T2","T3","T4","T5","T6","T7");
+    </script>
+    <SCRIPT LANGUAGE="JavaScript">document.write(getCalendarStyles());</SCRIPT>
+    <DIV ID="calendarpopup" STYLE="position:absolute;visibility:hidden;background-color:white;layer-background-color:white;"></DIV>
+
+      <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:0px;border-left:0px;border-right:0px;">
+        <tr>
+        <td width="30" align="center">
+          <img style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/piggybank.png" width="18" height="18"/>        
+          </td>
+          <td  height="25"><b>Thống kê tổng hợp công nợ</b></td>
+        <td align="right" style="padding-right:5px;"><img onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>     
+<?php
+	}
+?>	
+	<table align="center" width="98%" border="0" cellpadding="0" cellspacing="0" style="border-collapse:collapse">
+
+	    <tr>
+	    	<td width="30"><b>Từ</b></td>
+            <td width="70">
+                <input readonly style="width:70px;" class="catbg"  onclick="cal.select(document.getElementById('datefrom'),'anchor1','dd/MM/yyyy');if(document.getElementById('datefrom').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;" class="textbox" value="<?= isset($return_val['datefrom']) ? $return_val['datefrom'] : '' ?>" onBlur="check_date(this);" onchange="load_debtsum();" name="datefrom" id="datefrom" type="text" />
+            </td><td width="20">
+                <A href="javascript:void()" onclick="cal.select(document.getElementById('datefrom'),'anchor1','dd/MM/yyyy'); if(document.getElementById('datefrom').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor1" ID="anchor1" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+            </td>
+            <td width="30" style="padding-left:10px"><b>Đến</b></td>
+            <td width="70">
+                <input readonly style="width:70px;" class="catbg"  onclick="cal.select(document.getElementById('dateto'),'anchor1','dd/MM/yyyy');if(document.getElementById('dateto').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;" class="textbox" value="<?= isset($return_val['dateto']) ? $return_val['dateto'] : '' ?>" onBlur="check_date(this);" onchange="load_debtsum();" name="dateto" id="dateto" type="text" />
+            </td><td width="20">
+                <A href="javascript:void()" onclick="cal.select(document.getElementById('dateto'),'anchor1','dd/MM/yyyy'); if(document.getElementById('dateto').value==''){d = new Date(); CP_refreshCalendar(0,1+d.getMonth(),d.getFullYear())}; return false;"><img  NAME="anchor1" ID="anchor1" src="<?=ROOT_URL?>bms/images/icon/calendar.gif" height="18" border="0"></A>
+            </td>
+
+		<td width="40" align="center" height="30"><input onclick="load_debtsum();" <?= (isset($return_val['debt_type'])?($return_val['debt_type']=='cus'?'checked':''):'checked')?> type="radio" value="cus" name="debt_type" id="debt1"></td>
+		<td width="200"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('debt1').checked=true;load_debtsum()"><b>Công nợ khách hàng</b></a></td>
+		<td width="40" align="center"><input onclick="load_debtsum();" <?= (isset($return_val['debt_type'])?($return_val['debt_type']=='sup'?'checked':''):'')?> type="radio" value="sup" name="debt_type" id="debt2"></td>
+		<td width="200"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('debt2').checked=true;load_debtsum()"><b>Công nợ nhà cung cấp</b></a></td>
+		<td width="40" align="center"><input onclick="load_debtsum();" <?= (isset($return_val['debt_type'])?($return_val['debt_type']=='emp'?'checked':''):'')?> type="radio" value="emp" name="debt_type" id="debt3"></td>
+		<td width="200"><a class="cart_payment" href="javascript:void()" onclick="document.getElementById('debt3').checked=true;load_debtsum()"><b>Công nợ nhân viên</b></a></td>
+		</tr>
+	</table>
+	<div id="debtid">
+<?php
+	include("bms/templates/finance/debtsum_cus.htm");
+?>	
+	</div>
+<?php
+	if($action->eda_type!='ajax')
+	{
+?>	
+	<table width="100%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height=5><img src="<?=ROOT_URL?>/bms/images/spacer.gif" height=5></td>
+	      </tr>
+	</table>
+        <table class="catbg" width="100%" border="0" cellpadding="0" cellspacing="0" style="border-top:0px;border-left:0px;border-right:0px;">
+        <tr>
+          <td  height="30" style="padding-left:5px;" width="30">
+          <img src="<?=ROOT_URL?>/bms/images/icon/preview.gif" height="24">
+          </td>
+          <td   style="padding-left:5px;">
+          <a class="cart_payment" href="javascript:void()" onclick="window.open('?eda_code=<?= md5('view_report')?>&eda_type=ajax&eda_module=finance/debtsum_'+get_radio()+'&date='+(document.getElementById('datefrom').value||''));"><b>Xem dạng in ấn</b></a>
+          </td>
+        <td align="right" style="padding-right:5px;"><img  onclick="window.location='?';" style="cursor:pointer;" src="<?=ROOT_URL?>/bms/images/icon/back.gif" height="18"/></td>
+        </tr>
+        </table>          
+<script language="javascript">
+	function load_debtsum()	
+	{
+		eda_request=load('?eda_type=ajax&eda_act=<?=md5("finance")?>&eda_code=<?= md5("load_debtsum")?>&debt_type='+get_radio()+'&datefrom='+(document.getElementById('datefrom').value||'')+'&dateto='+(document.getElementById('dateto').value||''),'debtid','html','GET',null,'in');
+	}
+	function get_radio()
+	{
+		return (document.getElementById('debt1').checked?'cus':(document.getElementById('debt2').checked?'sup':'emp'))
+	}	
+	$(document).ready(function(){
+		$(document).on("click",".cpCurrentMonthDate",function(){
+
+			setTimeout(function(){
+				load_debtsum();
+			},100);
+			
+		});
+	});
+</script>        
+ <?php
+ 	}
+ ?>	

@@ -1,0 +1,84 @@
+	<?php
+if(parsedate(@$return_val["datefrom"])==0){
+	$return_val["datefrom"]= "01/".date('m/Y');
+}
+$sdate=parsedate(@$return_val["datefrom"]);
+if(parsedate(@$return_val["dateto"])==0){
+	$return_val["dateto"]= date('t/m/Y');
+}
+$edate=parsedate(@$return_val["dateto"])+86399;
+
+	?>
+	<table width="98%"  border="0" cellpadding="0" cellspacing="0">
+	      <tr>
+		<td height="30" align="right" style="padding-left:10px;">Ngày lập: <?=date('d/m/Y',$edate)?></td>
+	      </tr>
+	</table>  
+
+	<?php
+
+	?> 
+        <table align="center" width="98%" border="1" cellpadding="0" cellspacing="0" bordercolor="#6a9cd0"  style="border-collapse:collapse">
+	    <tr>
+		<td width="20%" align="center" bgcolor="#afd7ff" height="25"><b>Tên khách hàng</b></td>
+		<td width="15%" align="center" bgcolor="#afd7ff"><b>Nợ đầu kỳ</b></td>
+		<td width="15%" align="center" bgcolor="#afd7ff"><b>Nợ phát sinh</b></td>
+		<td width="10%" align="center" bgcolor="#afd7ff"><b>Tổng tiền trả</b></td>
+		<td width="10%" align="center" bgcolor="#afd7ff"><b>Nợ cuối kỳ</b></td>
+		<td width="10%" align="center" bgcolor="#afd7ff"><b>Giới hạn nợ</b></td>
+		<td width="10%" align="center" bgcolor="#afd7ff"><b>Nợ vượt mức</b></td>
+		</tr>
+<?php
+	$inv=get_data("select cus.cus_id,cus.cus_name,cus.max_debt,(select sum(cn.price) from congno cn where cn.target_id=cus.cus_id and cn.type_of=1 and tg<=$edate) notien, 
+		cus.cus_id,cus.address, cus.tel,IFNULL(sum_inv.amount,0) inv_amount,IFNULL(sum_inv.vat_price,0) vat_price,IFNULL(sum_bin.amount,0) bin_amount,IFNULL(sum_return.amount,0) return_amount, (IFNULL(sum_inv.amount,0)-IFNULL(sum_bin.amount,0)+cus.debt-IFNULL(sum_return.amount,0)) amount from customers cus
+	left join (select inv.cus_id, sum(inv.total) amount, sum(inv.vat_price) vat_price  from out_invoices inv where inv.created_date<=$edate and ifnull(inv.draft,0)=0  group by inv.cus_id) sum_inv  
+	on cus.cus_id=sum_inv.cus_id
+	left join (select bin.cus_id, sum(IFNULL(bin.amount,0)) amount from budget_invoices bin where bin.created_date<=$edate and (bin.bin_type=0) group by bin.cus_id) sum_bin 
+	on cus.cus_id=sum_bin.cus_id 
+        left join (select inv.cus_id, sum(IFNULL(inv.total,0)) amount from mat_return_invoices inv where inv.created_date<=$edate and inv.paid_type=1 group by inv.cus_id) sum_return
+	on cus.cus_id=sum_return.cus_id
+        where IFNULL(sum_inv.amount,0)-IFNULL(sum_bin.amount,0)+cus.debt-IFNULL(sum_return.amount,0)!=0 order by cus_name");
+	$total=0;
+	$total1=0;
+	$total2=0;
+	$total3=0;
+	$total4=0;
+	$total5=0;
+	$total6=0;
+
+	for($i=0;$i<count($inv);$i++)
+	{	
+
+		$dauky=getDebtCusId($inv[$i]['cus_id'],$sdate);
+		$phatsinh=getDebtCusPSId($inv[$i]['cus_id'],$sdate,$edate);
+
+?>	
+	    <tr  style="cursor:pointer;" onmouseover="this.style.backgroundColor='yellow';" onmouseout="this.style.backgroundColor='';" onclick="window.location='?eda_act=57336afd1f4b40dfd9f5731e35302fe5&eda_code=607b9ee21eb164bcac22e7a112a8a92f&cus_id=<?=$inv[$i]['cus_id']?>&cus_name=<?=$inv[$i]['cus_name']?>';">
+		<td style="padding-left:5px;" height="25"><?= $inv[$i]['cus_name']?></td>
+		<td align="right"  style="padding-right:5px;"><?= number_format($dauky['debt_final'],0,","," ")?></td>
+		<td align="right"  style="padding-right:5px;"><?= number_format($phatsinh['debt_final'],0,","," ")?></td>
+		<td align="right"  style="padding-right:5px;"><?= number_format($dauky['paid']+$phatsinh['paid'],0,","," ")?></td>
+		<td align="right"  style="padding-right:5px;"><?= number_format($dauky['total_sales']+$phatsinh['total_sales'],0,","," ")?></td>
+		<td align="right"  style="padding-right:5px;"><?= number_format($inv[$i]['max_debt'],0,","," ")?></td>
+		<td align="right"  style="padding-right:5px;"><?= number_format(floatval($inv[$i]['amount'])-$inv[$i]['max_debt'],0,","," ")?></td>
+		</tr>
+
+<?php
+		$total+=$dauky['debt_final'];
+		$total1+=$phatsinh['debt_final'];
+		$total2+=$dauky['paid']+$phatsinh['paid'];
+		$total3+=$dauky['total_sales']+$phatsinh['total_sales'];
+		$total4+=$inv[$i]['max_debt'];
+		$total5+=floatval($inv[$i]['amount'])-$inv[$i]['max_debt'];
+	}
+?>	
+	    <tr>
+		<td height="25" colspan="1" align="center"><b>Tổng cộng</b></td>
+		<td align="right"  style="padding-right:5px;"><b><?= number_format($total,0,","," ")?></b></td>	
+		<td align="right"  style="padding-right:5px;"><b><?= number_format($total1,0,","," ")?></b></td>	
+		<td align="right"  style="padding-right:5px;"><b><?= number_format($total2,0,","," ")?></b></td>			
+		<td align="right"  style="padding-right:5px;"><b><?= number_format($total3,0,","," ")?></b></td>			
+		<td align="right"  style="padding-right:5px;"><b><?= number_format($total4,0,","," ")?></b></td>			
+		<td align="right"  style="padding-right:5px;"><b><?= number_format($total5,0,","," ")?></b></td>			
+		</tr>
+	</table>
